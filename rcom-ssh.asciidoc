@@ -1,6 +1,6 @@
 = RCOM Server behind SSH
 
-*IT IS NOT ADVISED TO INSTALL RCOM ON A PUBLICLY ACCESSIBLE SERVER BECAUSE THE CURRENT VERSION IS JUST A PROOF OF CONCEPT.* See security issues in the README document!
+*IT IS NOT ADVISED TO INSTALL RCOM ON A PUBLICLY ACCESSIBLE SERVER BECAUSE THE CURRENT VERSION IS JUST A PROOF OF CONCEPT.* See security issues in the link:README.asciidoc[README] document!
 
 It is possible to install the server behind an SSH server. The implementation is similar to gitolite, gitosis, github and likes:
 
