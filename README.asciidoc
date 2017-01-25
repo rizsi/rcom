@@ -47,7 +47,7 @@ To install them all:
 
 DO NOT START THIS VERSION ON A PUBLICLY ACCESSIBLE COMPUTER! THIS PROJECT IS A PROOF OF CONCEPT NOW. See Known Security issues!
 
-To see introduction of SSH enabled RCOM server see rcom-ssh.asciidoc
+To see introduction of SSH enabled RCOM server see link:rcom-ssh.asciidoc[rcom-ssh].
 
 Start server on a computer that is accessible from all clients and do not close this terminal window:
 
