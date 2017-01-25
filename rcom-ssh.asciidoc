@@ -1,0 +1,53 @@
+= RCOM Server behind SSH
+
+*IT IS NOT ADVISED TO INSTALL RCOM ON A PUBLICLY ACCESSIBLE SERVER BECAUSE THE CURRENT VERSION IS JUST A PROOF OF CONCEPT.* See security issues in the README document!
+
+It is possible to install the server behind an SSH server. The implementation is similar to gitolite, gitosis, github and likes:
+
+ * Users are managed by adding their public SSH keys to the configuration.
+ * Server auto-configures SSH to accept these keys and authenticate these users.
+ * All users access the server through the same Linux user
+
+== Set up RCOM ssh server
+
+=== User management
+
+Public keys of users must be stored in a single folder in files called __username__.pub. This is similar to the gitolite-admin/keydir folder. If you already mainain a gitolite server then this keydir folder can be used for the RCOM server to maintain the same users.
+
+User rights: there are no special access rights for the users. All users connect to the single room where they access all shared streams.
+
+=== Setting up key authorized SSH
+
+To auto-manage the ~/.ssh/authorized_keys file you have to start the server with the following arguments specified:
+
+ $ java -jar rcom.jar server --host localhost --port 9643 --authFile /home/rcom/.ssh/authorized_keys --keyDir /home/rcom/gitolite-admin/keydir --connectCommand "java -jar /home/rcom/rcom.jar connect --host localhost --port 9643 --user"
+
+The RCOM server binds to the localhost:9643 port unencrypted. This port is only locally accessible (because we bind to localhost instead of 0.0.0.0).
+
+Besides serving RCOM protocol on 9643 the server will also scan the keyDir folder periodically and update the authFile when it has been changed. (Updating the keyDir folder must be done by the administrator. For example a periodic auto-pull from the gitolite-admin repository is a good solution.)
+
+If SSH is set up correctly then the users can SSH into the server to manually check if connection is accessible. What we need:
+
+ * SSH identity is installed on the client (~/.ssh/id_rsa)
+ * Public key is in the keyDir folder (~/.ssh/id_rsa.pub copied from client to server and renamed to __username__.pub)
+ * Public key is propagated to the /home/rcom/.ssh/authorized_keys file with proper access and command restrictions. (This is done by the RCOM server automatically)
+
+ $ ssh rcom@example.com
+
+Authenticated users will launch this program (because this is stated in the generated authorized_keys file):
+
+ $ java -jar /home/rcom/rcom.jar connect --host localhost --port 9643 --user __username__
+
+This program will connect to the SSH stream to the local port of the server. If we connect to the server then we will see the server sending its version and waiting for client input:
+
+----
+RCOM0.0.0server
+----
+
+(In this example the default TCP host and port is specified. It is optional to set when default is used.)
+
+Now we can use this client arguments to connect the encrypted server:
+ 
+ $ java -jar rcom.jar gui --ssh rcom@example.com
+ 
+If the SSH identity is installed on the client and in the keyDir folder then the client will connect to the server through SSH.

@@ -1,0 +1,224 @@
+= RCOM communication software.
+
+Simple video communication software that builds on exisiting command line tools to generate and decode video.
+
+*This project is a proof of concept, not a real product yet.*
+
+See: https://github.com/rizsi/rcom
+
+== Download
+
+Binary build can be downloaded from: http://rizsi.com/rcom/rcom.jar
+
+== Features
+
+ * Share WebCam
+ * Share audio
+ * Share screen (VNC)
+ * Each client connects to a single server through a single TCP channel.
+ * It is possible to use ssh server for client connections. This way all communications can be made private.
+
+== Dependencies
+
+=== Java 1.8
+
+The binary is compiled to Java 1.8. Maybe it is possible to compile for 1.7.
+
+=== Programs executed by RCOM
+
+These programs must be installed and accessible by RCOM to work:
+
+Client:
+
+ * *v4l2-ctl* - to list available webcams
+ * *ffmpeg* - to stream webcam and to decode video streams
+ * *x11vnc* - to share screen through VNC protocol
+ * *xvnc4viewer* to show shared VNC screen
+
+Server:
+
+ * *x11vnc* - to re-share screen to multiple clients
+
+To install them all:
+
+ $ sudo apt-get install xvnc4viewer x11vnc ffmpeg v4l-utils
+
+== Quickstart
+
+DO NOT START THIS VERSION ON A PUBLICLY ACCESSIBLE COMPUTER! THIS PROJECT IS A PROOF OF CONCEPT NOW. See Known Security issues!
+
+To see introduction of SSH enabled RCOM server see rcom-ssh.asciidoc
+
+Start server on a computer that is accessible from all clients and do not close this terminal window:
+
+ $ java -jar rcom.jar server --host 0.0.0.0
+
+Start client:
+
+ $ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar gui --host rcomserver.example.com
+ 
+When the client is running then in the GUI:
+
+ * tick in "Stream WebCam" then select from the available cameras and formats.
+ * tick in "Stream Audio".
+
+Start other client similarly on a different PC.
+
+=== Audio settings
+
+RCOM client simply opens the first available device throug the Java sound API. If PulseAudio is used then from the system mixer both the input and the output levels can be controlled.
+ 
+== Limitations
+
+Server runs a single room. Each client connects to the global room and all users see all shared streams of all others.
+
+=== Known Security issues
+
+Server opens public VNC ports when VNC is streamed. This is due to a problem in the current x11vnc in Ubuntu.
+
+CoolRMI is used for remoting. This remoting framwork is not secure. See: https://github.com/qgears/opensource-utils/tree/master/coolrmi
+
+VNC transfers control too. The control messages are not yet filtered out from clients. The clients are launched in ViewOnly mode though.
+
+
+=== VNC
+
+VNC opens public ports on the server. For this reason a firewall must be used to not leak information.
+
+Currently only a single VNC session is supported (dynamic port allocation has to be implemented to support more).
+
+VNC transfers control too. The control messages are not yet filtered out from clients. The clients are launched in ViewOnly mode though.
+
+=== Audio
+
+Audio is streamed unencoded.
+
+Without an external noise canceller the audio can not be used. It has been tested with PulseAudio built in noise canceller with good results.
+
+Command to run programs with PULSE audio filter enabled (works on current Pulse Audio versions):
+
+$ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar ...
+
+=== Video
+
+Playback is not synched with real time.
+
+=== Streaming in general
+
+Error handling and traffic jam handling is not implemented yet.
+
+
+
+== Usage:
+
+=== GUI
+
+ $ java -jar rcom.jar gui [...arguments...]
+
+----
+Option                          Description                           
+------                          -----------                           
+--disablePulseEchoCancellation  By default the program sets:          
+                                  PULSE_PROP="filter.want=echo-cancel"
+                                  it can be disabled using this flag. 
+--host                          Raw TCP connect to this server.       
+                                  (default: localhost)                
+--port <Integer>                Raw TCP connect to this server.       
+                                  (default: 9643)                     
+--ssh                           SSH connection string to connect to   
+                                  server. Disables raw TCP connection 
+                                  and overrides host and port if      
+                                  present.                            
+----
+
+=== Server
+
+ $ java -jar rcom.jar server [...arguments...]
+
+----
+Option             Description                            
+------             -----------                            
+--authFile <File>  ~/.ssh/authorized_keys file target to  
+                     generate by the program. (If this,   
+                     keyDir and connectCommand is present 
+                     then this file is periodically       
+                     updated with the authorized users.)  
+--connectCommand   Command to execute to connect ssh      
+                     clients to the server. User name is  
+                     appended to this command and it will 
+                     be the command executed by the ssh   
+                     server for the connected clients.    
+                     (default: java -jar /home/rcom/video.
+                     jar connect --user)                  
+--disableServer    Do not execute the server. Can be used 
+                     to only run the auth file updater    
+                     mechanism.                           
+--host             Host to bind the server port to        
+                     (default: localhost)                 
+--keyDir <File>    Folder where the authorized users .pub 
+                     identifiers are found. (Similar to   
+                     gitolite configuration keydir)       
+--port <Integer>   Port to bind the server port to        
+                     (default: 9643)                      
+----
+
+=== Connect
+
+Connect mode is used by ssh server only to connect stdin and stdout to the server TCP port. This mode also sends the authorized (ssh) user name to the server.
+ 
+ $ java -jar rcom.jar connect [...arguments...]");
+
+----
+Option            Description                           
+------            -----------                           
+--host            Connect to this RCOM server. (default:
+                    localhost)                          
+--port <Integer>  Connect to this RCOM server. (default:
+                    9643)                               
+--user            This is the authenticated user who is 
+                    now connected to the server.        
+----
+
+=== Command line client
+
+For testing purpose only
+
+ $ java -jar rcom.jar client [...arguments...]
+
+----
+Option                          Description                           
+------                          -----------                           
+--audio                         Stream microphone audio source when   
+                                  connected to the server.            
+--disablePulseEchoCancellation  By default the program sets:          
+                                  PULSE_PROP="filter.want=echo-cancel"
+                                  it can be disabled using this flag. 
+--disableStdinMessaging         Do not use stdin as message source.   
+--host                          Raw TCP connect to this server.       
+                                  (default: localhost)                
+--port <Integer>                Raw TCP connect to this server.       
+                                  (default: 9643)                     
+--ssh                           SSH connection string to connect to   
+                                  server. Disables raw TCP connection 
+                                  and overrides host and port if      
+                                  present.                            
+--vnc                           Stream screen as VNC session when     
+                                  connected to the server.            
+--webcam                        Stream webcam video source when       
+                                  connected to the server.            
+----
+
+== Build
+
+RCOM is developed using Eclipse. This project and all dependencies must be imported into Eclipse.
+
+Dependencies are:
+
+ * hu.qgears.commons - https://github.com/qgears/opensource-utils/tree/master/commons/hu.qgears.commons
+ * hu.qgears.coolrmi - https://github.com/qgears/opensource-utils/tree/master/coolrmi
+ * hu.qgears.rtemplate.runtime - https://github.com/qgears/rtemplate
+
+They are maintained in a single repository, the latest master branch version was used during development.
+
+The executable jar can be exported from within Eclipse.
+
