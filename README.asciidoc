@@ -8,7 +8,7 @@ See: https://github.com/rizsi/rcom
 
 == Download
 
-Binary build can be downloaded from: http://rizsi.com/rcom/rcom.jar
+Binary build can be downloaded from: http://rizsi.com/rcom/
 
 == Features
 
@@ -16,7 +16,7 @@ Binary build can be downloaded from: http://rizsi.com/rcom/rcom.jar
  * Share audio
  * Share screen (VNC)
  * Each client connects to a single server through a single TCP channel.
- * It is possible to use ssh server for client connections. This way all communications can be made private.
+ * SSH enabled server: link:rcom-ssh.asciidoc[rcom-ssh]. It is possible to use ssh server for client connections. This way all communications can be made private.
 
 == Dependencies
 
