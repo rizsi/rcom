@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
+import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.IVideocomCallback;
 import com.rizsi.rcom.IVideocomConnection;
 import com.rizsi.rcom.IVideocomServer;
@@ -21,7 +22,6 @@ import com.rizsi.rcom.VideoClientConnectionFactory;
 import com.rizsi.rcom.gui.DelegateVideoStreamContainer;
 import com.rizsi.rcom.gui.GuiCliArgs;
 import com.rizsi.rcom.gui.IVideoStreamContainer;
-import com.rizsi.rcom.webcam.ListCams;
 import com.rizsi.rcom.webcam.WebCamParameter;
 
 import hu.qgears.coolrmi.CoolRMIClient;
@@ -40,8 +40,10 @@ public class Client implements IVideocomCallback {
 	private String userName;
 	private volatile boolean exit;
 	private DelegateVideoStreamContainer selfVideo=new DelegateVideoStreamContainer();
+	private AbstractCliArgs args;
 	public void run(AbstractCliArgs args) throws IOException
 	{
+		this.args=args;
 		isGui=args instanceof GuiCliArgs;
 		if(!args.disablePulseEchoCancellation)
 		{
@@ -66,7 +68,7 @@ public class Client implements IVideocomCallback {
 			{
 				try {
 					// Launch the first camera found
-					setVideoStreamingEnabled(new ListCams().getCameras().values().iterator().next());
+					setVideoStreamingEnabled(args.platform.getCameras(args).values().iterator().next());
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -135,7 +137,7 @@ public class Client implements IVideocomCallback {
 		StreamSink sink=p.createSink(this);
 		registered.put(p.name, sink);
 		try {
-			sink.start(conn,  fact.getMultiplexer());
+			sink.start(args, conn,  fact.getMultiplexer());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -222,5 +224,9 @@ public class Client implements IVideocomCallback {
 
 	public boolean isGUI() {
 		return isGui;
+	}
+
+	public AbstractRcomArgs getArgs() {
+		return args;
 	}
 }

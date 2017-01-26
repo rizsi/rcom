@@ -20,7 +20,8 @@ public class VideoConnection implements IVideocomConnection
 	private String userName;
 	private ExecutorService asyncCallback=Executors.newSingleThreadExecutor();
 	private Map<String, StreamRegistration> registrations=new HashMap<>();
-	public VideoConnection(Room room, CoolRMIRemoter remoter, int id, String userName) {
+	private AbstractRcomArgs args;
+	public VideoConnection(AbstractRcomArgs args, Room room, CoolRMIRemoter remoter, int id, String userName) {
 		this.remoter=remoter;
 		this.c=(DemuxedConnection)remoter.getConnection();
 		this.room=room;
@@ -148,5 +149,8 @@ public class VideoConnection implements IVideocomConnection
 		}
 		room.removeShare(s);
 		room.updateSharesToClients();
+	}
+	public AbstractRcomArgs getArgs() {
+		return args;
 	}
 }

@@ -28,7 +28,8 @@ public class Server {
 		{
 			CoolRMIServer srv=new CoolRMIServer(Launcher.class.getClassLoader(), new VideoServerTCPListenerFactory(a), false);
 			srv.getServiceRegistry().addProxyType(VideoConnection.class, IVideocomConnection.class);
-			srv.getServiceRegistry().addService(new CoolRMIService(IVideocomServer.id, IVideocomServer.class, new VideocomServer()));
+			srv.getServiceRegistry().addService(new CoolRMIService(IVideocomServer.id,
+					IVideocomServer.class, new VideocomServer(a)));
 			srv.start();
 		}
 	}

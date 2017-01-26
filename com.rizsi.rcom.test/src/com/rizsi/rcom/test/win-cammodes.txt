@@ -1,0 +1,26 @@
+ffmpeg version 3.2.2 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 5.4.0 (GCC)
+  configuration: --enable-gpl --enable-version3 --enable-dxva2 --enable-libmfx --enable-nvenc --enable-avisynth --enable-bzlib --enable-fontconfig --enable-frei0r --enable-gnutls --enable-iconv --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libfreetype --enable-libgme --enable-libgsm --enable-libilbc --enable-libmodplug --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenh264 --enable-libopenjpeg --enable-libopus --enable-librtmp --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-libwavpack --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxavs --enable-libxvid --enable-libzimg --enable-lzma --enable-decklink --enable-zlib
+  libavutil      55. 34.100 / 55. 34.100
+  libavcodec     57. 64.101 / 57. 64.101
+  libavformat    57. 56.100 / 57. 56.100
+  libavdevice    57.  1.100 / 57.  1.100
+  libavfilter     6. 65.100 /  6. 65.100
+  libswscale      4.  2.100 /  4.  2.100
+  libswresample   2.  3.100 /  2.  3.100
+  libpostproc    54.  1.100 / 54.  1.100
+[dshow @ 000000000030e940] DirectShow video device options (from video devices)
+[dshow @ 000000000030e940]  Pin "Capture" (alternative pin name "0")
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=640x480 fps=30 max s=640x480 fps=30
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=640x480 fps=30 max s=640x480 fps=30
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=1280x720 fps=30 max s=1280x720 fps=30
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=1280x720 fps=30 max s=1280x720 fps=30
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=352x288 fps=30 max s=352x288 fps=30
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=352x288 fps=30 max s=352x288 fps=30
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=320x240 fps=30 max s=320x240 fps=30
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=320x240 fps=30 max s=320x240 fps=30
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=176x144 fps=30 max s=176x144 fps=30
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=176x144 fps=30 max s=176x144 fps=30
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=160x120 fps=30 max s=160x120 fps=30
+[dshow @ 000000000030e940]   vcodec=mjpeg  min s=160x120 fps=30 max s=160x120 fps=30
+video=VirtualBox Webcam - USB 2.0 UVC HD Webcam: Immediate exit requested

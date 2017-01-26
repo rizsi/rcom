@@ -23,7 +23,7 @@ public class StreamParametersVideo extends StreamParameters {
 	public StreamSink createSink(Client c) {
 		if(c.isGUI())
 		{
-			return new StreamSinkVideoFrames(this);
+			return new StreamSinkVideoFrames(c.getArgs(), this);
 		}else
 		{
 			return new StreamSinkVideo(this);

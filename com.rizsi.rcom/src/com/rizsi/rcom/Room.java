@@ -11,10 +11,17 @@ public class Room {
 	private int nClient;
 	private List<VideoConnection> conns=new ArrayList<>();
 	private Map<String, StreamShare> shares=new HashMap<>();
+	private VideocomServer server;
+	
+	public Room(VideocomServer server) {
+		super();
+		this.server = server;
+	}
+
 	public IVideocomConnection connect(CoolRMIRemoter remoter, String userName) {
 		VideoConnection ret;
 		synchronized (this) {
-			ret=new VideoConnection(this, remoter, nClient++, userName);
+			ret=new VideoConnection(server.getArgs(), this, remoter, nClient++, userName);
 			conns.add(ret);
 		}
 		ret.init();

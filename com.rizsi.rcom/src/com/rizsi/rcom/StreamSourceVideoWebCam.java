@@ -31,8 +31,8 @@ public class StreamSourceVideoWebCam implements AutoCloseable, IVideoStreamConta
 		conn=c.conn;
 		cos=c.fact.getMultiplexer().createStream();
 		c.conn.shareStream(cos.getChannel(), params=new StreamParametersVideo(streamName, c.id, wcp.getW(), wcp.getH(), "mpegts"));
-		stream=new VideoStreamProcessor(params.width, params.height, params.width/2, params.height/2, params.encoding);
-		String command="ffmpeg -f v4l2 -framerate "+params.framerate+" -video_size "+params.width+"x"+params.height+" -i "+wcp.getDevice()+" -f "+params.encoding+" -";
+		stream=new VideoStreamProcessor(c.getArgs(), params.width, params.height, params.width/2, params.height/2, params.encoding);
+		String command=c.getArgs().platform.createWebCamStreamCommand(c.getArgs(), wcp, params);
 		System.out.println("Webcam command: $ "+command);
 		p=Runtime.getRuntime().exec(command);
 		InputStream is=p.getInputStream();

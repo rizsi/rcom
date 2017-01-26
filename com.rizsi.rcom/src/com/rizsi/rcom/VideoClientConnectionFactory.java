@@ -23,7 +23,7 @@ public class VideoClientConnectionFactory implements IClientConnectionFactory
 		ISocket s;
 		if(args.ssh!=null)
 		{
-			Process p=Runtime.getRuntime().exec("ssh "+args.ssh);
+			Process p=Runtime.getRuntime().exec(args.program_ssh+" "+args.ssh);
 			s=new SocketProcess(p);
 			ConnectStreams.startStreamThread(p.getErrorStream(), System.err);
 		}else

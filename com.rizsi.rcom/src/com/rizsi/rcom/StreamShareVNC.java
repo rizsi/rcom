@@ -70,7 +70,7 @@ public class StreamShareVNC extends StreamShare {
 	private OutputStream os;
 	private int port=9998;
 	private SignalFutureWrapper<Integer> processresult;
-	Process p;
+	private Process p;
 	public StreamShareVNC(VideoConnection videoConnection, int channel, StreamParameters params) {
 		super(videoConnection, params);
 		this.channel=channel;
@@ -82,7 +82,7 @@ public class StreamShareVNC extends StreamShare {
 			try
 			{
 				ss.bind(new InetSocketAddress("localhost", localport));
-				String command="x11vnc -reflect localhost:"+n+" -forever -rfbport "+port+" -localhost";
+				String command=videoConnection.getArgs().program_x11vnc+" -reflect localhost:"+n+" -forever -rfbport "+port+" -localhost";
 				p=Runtime.getRuntime().exec(command);
 				processresult=UtilProcess.getProcessReturnValueFuture(p);
 				processresult.addOnReadyHandler(new Slot<SignalFuture<Integer>>() {

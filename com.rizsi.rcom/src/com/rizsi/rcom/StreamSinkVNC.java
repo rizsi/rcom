@@ -32,14 +32,14 @@ public class StreamSinkVNC extends StreamSink implements IChannelReader
 	private OutputStream os;
 	private Process p;
 	@Override
-	public void start(IVideocomConnection conn, ChannelMultiplexer multiplexer) throws Exception {
+	public void start(AbstractRcomArgs args, IVideocomConnection conn, ChannelMultiplexer multiplexer) throws Exception {
 		int n=9;
 		int port=5900+n;
 		Socket s;
 		try(ServerSocket ss=new ServerSocket())
 		{
 			ss.bind(new InetSocketAddress("localhost", port));
-			p=Runtime.getRuntime().exec("xvnc4viewer -ViewOnly localhost:"+n);
+			p=Runtime.getRuntime().exec(args.program_vncviewer+" -ViewOnly localhost:"+n);
 			UtilProcess.streamErrorOfProcess(p.getInputStream(), System.out);
 			UtilProcess.streamErrorOfProcess(p.getErrorStream(), System.err);
 			s=ss.accept();

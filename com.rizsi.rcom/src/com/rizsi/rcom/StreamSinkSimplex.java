@@ -10,7 +10,7 @@ abstract public class StreamSinkSimplex extends StreamSink implements IChannelRe
 	}
 	abstract public void start() throws IOException, Exception;
 	@Override
-	public void start(IVideocomConnection conn, ChannelMultiplexer multiplexer) throws Exception {
+	public void start(AbstractRcomArgs args, IVideocomConnection conn, ChannelMultiplexer multiplexer) throws Exception {
 		start();
 		IStreamData data=conn.registerStream(name, -1);
 		StreamDataSimplex d=(StreamDataSimplex) data;

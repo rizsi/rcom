@@ -1,6 +1,5 @@
 package com.rizsi.rcom;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,14 +13,16 @@ public class StreamSinkVideoFrames extends StreamSinkSimplex implements IVideoSt
 	private OutputStream os;
 	private byte[] buffer=new byte[DemuxedConnection.bufferSize];
 	private VideoStreamProcessor proc;
-	public StreamSinkVideoFrames(StreamParametersVideo p) {
+	private AbstractRcomArgs args;
+	public StreamSinkVideoFrames(AbstractRcomArgs args, StreamParametersVideo p) {
 		super(p.name);
 		this.p=p;
+		this.args=args;
 	}
 	@Override
 	public void start() throws IOException
 	{
-		proc=new VideoStreamProcessor(p.width, p.height, p.width, p.height, p.encoding);
+		proc=new VideoStreamProcessor(args, p.width, p.height, p.width, p.height, p.encoding);
 		os=proc.launch();
 	}
 	@Override

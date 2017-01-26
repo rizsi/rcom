@@ -30,7 +30,7 @@ public class StreamSourceVnc implements IChannelReader, AutoCloseable {
 		params=new StreamParametersVNC(streamName, client.id);
 		StreamDataDuplex data=(StreamDataDuplex)client.conn.shareStream(cos.getChannel(), params);
 		client.fact.getMultiplexer().addListener(data.backChannel, this);
-		Process p=Runtime.getRuntime().exec("x11vnc -connect localhost:"+localport
+		Process p=Runtime.getRuntime().exec(client.getArgs().program_x11vnc+" -connect localhost:"+localport
 				// +" -clip 200x200+50+50"
 				+" -localhost");
 		UtilProcess.streamErrorOfProcess(p.getErrorStream(), System.err);

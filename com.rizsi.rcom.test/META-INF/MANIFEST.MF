@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test
+Bundle-SymbolicName: com.rizsi.rcom.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: RIZSI
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.rizsi.rcom;bundle-version="1.0.0",
+ org.junit;bundle-version="4.12.0"

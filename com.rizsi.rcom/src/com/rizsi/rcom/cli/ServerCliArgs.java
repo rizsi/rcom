@@ -2,12 +2,14 @@ package com.rizsi.rcom.cli;
 
 import java.io.File;
 
+import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.VideoServerTCPListener;
 
 import joptsimple.annot.JOHelp;
 import joptsimple.annot.JOSimpleBoolean;
 
-public class ServerCliArgs {
+public class ServerCliArgs extends AbstractRcomArgs
+{
 	@JOHelp("Host to bind the server port to")
 	public String host="localhost";
 	@JOHelp("Port to bind the server port to")

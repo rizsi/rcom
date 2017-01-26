@@ -4,5 +4,5 @@ abstract public class StreamSink
 {
 	abstract public void dispose();
 
-	abstract public void start(IVideocomConnection conn, ChannelMultiplexer multiplexer) throws Exception;
+	abstract public void start(AbstractRcomArgs args, IVideocomConnection conn, ChannelMultiplexer multiplexer) throws Exception;
 }

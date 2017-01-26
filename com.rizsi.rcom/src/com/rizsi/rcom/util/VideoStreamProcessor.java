@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.NullOutputStream;
 
 import hu.qgears.commons.UtilProcess;
@@ -23,8 +24,10 @@ public class VideoStreamProcessor implements AutoCloseable
 	int writePtr=0;
 	private volatile int nRead;
 	private Process p;
-	public VideoStreamProcessor(int origW, int origH, int w, int h, String encoding)
+	private AbstractRcomArgs args;
+	public VideoStreamProcessor(AbstractRcomArgs args, int origW, int origH, int w, int h, String encoding)
 	{
+		this.args=args;
 		this.origW=origW;
 		this.origH=origH;
 		this.w=w;
@@ -44,7 +47,7 @@ public class VideoStreamProcessor implements AutoCloseable
 		}
 		String vdeo_size=" -video_size "+origW+"x"+origH+" ";
 		String trace="-v trace";
-		String command="ffmpeg -analyzeduration 0 -fpsprobesize 0 -probesize 32000 -f "+enconding+" -i - "+scale+" -f rawvideo -pix_fmt bgr24 -";
+		String command=args.program_ffmpeg+" -analyzeduration 0 -fpsprobesize 0 -probesize 32000 -f "+enconding+" -i - "+scale+" -f rawvideo -pix_fmt bgr24 -";
 		System.out.println("Decoder command: $ "+command);
 		p=Runtime.getRuntime().exec(command);
 		UtilProcess.streamErrorOfProcess(p.getErrorStream(), new NullOutputStream());

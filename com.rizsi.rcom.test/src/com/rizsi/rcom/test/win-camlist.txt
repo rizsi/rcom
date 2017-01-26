@@ -1,0 +1,18 @@
+ffmpeg version 3.2.2 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 5.4.0 (GCC)
+  configuration: --enable-gpl --enable-version3 --enable-dxva2 --enable-libmfx --enable-nvenc --enable-avisynth --enable-bzlib --enable-fontconfig --enable-frei0r --enable-gnutls --enable-iconv --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libfreetype --enable-libgme --enable-libgsm --enable-libilbc --enable-libmodplug --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenh264 --enable-libopenjpeg --enable-libopus --enable-librtmp --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvo-amrwbenc --enable-libvorbis --enable-libvpx --enable-libwavpack --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxavs --enable-libxvid --enable-libzimg --enable-lzma --enable-decklink --enable-zlib
+  libavutil      55. 34.100 / 55. 34.100
+  libavcodec     57. 64.101 / 57. 64.101
+  libavformat    57. 56.100 / 57. 56.100
+  libavdevice    57.  1.100 / 57.  1.100
+  libavfilter     6. 65.100 /  6. 65.100
+  libswscale      4.  2.100 /  4.  2.100
+  libswresample   2.  3.100 /  2.  3.100
+  libpostproc    54.  1.100 / 54.  1.100
+[dshow @ 000000000041e7e0] DirectShow video devices (some may be both video and audio devices)
+[dshow @ 000000000041e7e0]  "VirtualBox Webcam - USB 2.0 UVC HD Webcam"
+[dshow @ 000000000041e7e0]     Alternative name "@device_pnp_\\?\usb#vid_80ee&pid_0030&mi_00#6&d8d4909&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\global"
+[dshow @ 000000000041e7e0] DirectShow audio devices
+[dshow @ 000000000041e7e0]  "Microphone (High Definition Aud"
+[dshow @ 000000000041e7e0]     Alternative name "@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\Microphone (High Definition Aud"
+dummy: Immediate exit requested
