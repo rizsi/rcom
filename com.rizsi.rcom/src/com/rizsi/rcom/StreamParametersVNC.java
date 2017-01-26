@@ -14,11 +14,23 @@ public class StreamParametersVNC extends StreamParameters {
 	}
 	@Override
 	public StreamSink createSink(Client c) {
-		return new StreamSinkVNC(this);
+		if(c.getArgs().enableVNC)
+		{
+			return new StreamSinkVNC(this);
+		}else
+		{
+			return new StreamSinkDummy();
+		}
 	}
 	@Override
 	public StreamShare createShare(VideoConnection videoConnection, int channel) {
-		return new StreamShareVNC(videoConnection, channel, this);
+		if(videoConnection.getArgs().enableVNC)
+		{
+			return new StreamShareVNC(videoConnection, channel, this);
+		}else
+		{
+			return new StreamShareDummy(videoConnection, this);
+		}
 	}
 
 }

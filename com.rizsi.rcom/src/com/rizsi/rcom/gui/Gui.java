@@ -34,7 +34,7 @@ public class Gui extends JFrame {
 		SwingUtilities.invokeAndWait(new Runnable() {
 			@Override
 			public void run() {
-				Gui g = new Gui(c);
+				Gui g = new Gui(c, a);
 				g.setTitle("Videocom");
 				g.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				g.setSize(new Dimension(640, 480));
@@ -45,7 +45,7 @@ public class Gui extends JFrame {
 	}
 
 	private JPanel right;
-	public Gui(Client c2) {
+	public Gui(Client c2, GuiCliArgs a) {
 		this.client=c2;
 		JPanel left = new JPanel();
 		right = new JPanel();
@@ -85,18 +85,22 @@ public class Gui extends JFrame {
 				client.setAudioStreamingEnabled(audio.isSelected());
 			}
 		});
-		JCheckBox vnc = new JCheckBox("Launch VNC");
-		c.add(vnc);
-		vnc.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				client.setVNCShareEnabled(vnc.isSelected());
-			}
-		});
+		if(a.enableVNC)
+		{
+			JCheckBox vnc = new JCheckBox("Launch VNC");
+			c.add(vnc);
+			vnc.addActionListener(new ActionListener() {
+	
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					client.setVNCShareEnabled(vnc.isSelected());
+				}
+			});
+		}
 		right.setLayout(new FlowLayout());
 
 		animated.add(new AnimatedGuiElement(right, client.getSelfVideo()));
+		
 		
 		int delay = 1000/20; // milliseconds
 		ActionListener taskPerformer = new ActionListener() {

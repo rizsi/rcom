@@ -3,6 +3,7 @@ package com.rizsi.rcom;
 import com.rizsi.rcom.platform.EPlatform;
 
 import joptsimple.annot.JOHelp;
+import joptsimple.annot.JOSimpleBoolean;
 
 public class AbstractRcomArgs {
 	@JOHelp("ffmpeg is started using this command (Used by video sharing and showing client). It is possible to set full path if necessary.")
@@ -17,6 +18,9 @@ public class AbstractRcomArgs {
 	public String program_ssh="ssh";
 	@JOHelp("The platform the program is running on. The parameters of the launched executables (ffmpeg webcam grabber, VNC) depend on the platform.")
 	public EPlatform platform;
+	@JOSimpleBoolean
+	@JOHelp("Enable VNC support. VNC suport is disabled by default as it is not safely implemented yet.")
+	public boolean enableVNC;
 	public AbstractRcomArgs() {
 		if(System.getProperty("os.name").contains("Linux"))
 		{

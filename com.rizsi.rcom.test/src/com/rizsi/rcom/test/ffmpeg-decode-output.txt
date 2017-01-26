@@ -1,0 +1,35 @@
+ffmpeg version 2.8.10-0ubuntu0.16.04.1 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 5.4.0 (Ubuntu 5.4.0-6ubuntu1~16.04.4) 20160609
+  configuration: --prefix=/usr --extra-version=0ubuntu0.16.04.1 --build-suffix=-ffmpeg --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --cc=cc --cxx=g++ --enable-gpl --enable-shared --disable-stripping --disable-decoder=libopenjpeg --disable-decoder=libschroedinger --enable-avresample --enable-avisynth --enable-gnutls --enable-ladspa --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libgme --enable-libgsm --enable-libmodplug --enable-libmp3lame --enable-libopenjpeg --enable-libopus --enable-libpulse --enable-librtmp --enable-libschroedinger --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libssh --enable-libtheora --enable-libtwolame --enable-libvorbis --enable-libvpx --enable-libwavpack --enable-libwebp --enable-libx265 --enable-libxvid --enable-libzvbi --enable-openal --enable-opengl --enable-x11grab --enable-libdc1394 --enable-libiec61883 --enable-libzmq --enable-frei0r --enable-libx264 --enable-libopencv
+  libavutil      54. 31.100 / 54. 31.100
+  libavcodec     56. 60.100 / 56. 60.100
+  libavformat    56. 40.101 / 56. 40.101
+  libavdevice    56.  4.100 / 56.  4.100
+  libavfilter     5. 40.101 /  5. 40.101
+  libavresample   2.  1.  0 /  2.  1.  0
+  libswscale      3.  1.101 /  3.  1.101
+  libswresample   1.  2.101 /  1.  2.101
+  libpostproc    53.  3.100 / 53.  3.100
+Input #0, mpegts, from 'pipe:':
+  Duration: N/A, start: 1.700000, bitrate: N/A
+  Program 1 
+    Metadata:
+      service_name    : Service01
+      service_provider: FFmpeg
+    Stream #0:0[0x100]: Video: mpeg2video (4:2:2) ([2][0][0][0] / 0x0002), yuv422p(tv), 160x120 [SAR 1:1 DAR 4:3], max. 104857 kb/s, 30 fps, 30 tbr, 90k tbn, 60 tbc
+Output #0, rawvideo, to 'pipe:':
+  Metadata:
+    encoder         : Lavf56.40.101
+    Stream #0:0: Video: rawvideo (BGR[24] / 0x18524742), bgr24, 160x120 [SAR 1:1 DAR 4:3], q=2-31, 200 kb/s, 30 fps, 30 tbn, 30 tbc
+    Metadata:
+      encoder         : Lavc56.60.100 rawvideo
+Stream mapping:
+  Stream #0:0 -> #0:0 (mpeg2video (native) -> rawvideo (native))
+frame=   34 fps=0.0 q=-0.0 size=    1912kB time=00:00:01.13 bitrate=13824.0kbits/s dup=20 drop=0    
+frame=   50 fps= 47 q=-0.0 size=    2812kB time=00:00:01.66 bitrate=13824.0kbits/s dup=28 drop=0    
+frame=   66 fps= 41 q=-0.0 size=    3712kB time=00:00:02.20 bitrate=13824.0kbits/s dup=36 drop=0    
+frame=   82 fps= 38 q=-0.0 size=    4612kB time=00:00:02.73 bitrate=13824.0kbits/s dup=44 drop=0    
+frame=   98 fps= 37 q=-0.0 size=    5512kB time=00:00:03.26 bitrate=13824.0kbits/s dup=52 drop=0    
+frame=  114 fps= 36 q=-0.0 size=    6412kB time=00:00:03.80 bitrate=13824.0kbits/s dup=60 drop=0    
+frame=  130 fps= 35 q=-0.0 size=    7312kB time=00:00:04.33 bitrate=13824.0kbits/s dup=68 drop=0    
+frame=  146 fps= 34 q=-0.0 size=    8212kB time=00:00:04.86 bitrate=13824.0kbits/s dup=76 drop=0    
