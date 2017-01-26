@@ -34,6 +34,7 @@ Client:
  * *ffmpeg* - to stream webcam and to decode video streams
  * *x11vnc* - to share screen through VNC protocol
  * *xvnc4viewer* to show shared VNC screen
+ * *ssh* to connect the server through secured channel
 
 Server:
 
