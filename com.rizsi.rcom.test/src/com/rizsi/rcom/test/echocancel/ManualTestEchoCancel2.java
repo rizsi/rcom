@@ -62,6 +62,9 @@ public class ManualTestEchoCancel2 {
 		p.setSample(alapzaj);
 		try(Scanner br=new Scanner(System.in))
 		{
+			System.out.println("Press ENTER to start training noise");
+			br.nextLine();
+			p.setSample(alapzaj);
 			System.out.println("Press ENTER to leave");
 			br.nextLine();
 			r.stop();
