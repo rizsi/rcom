@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 public class Room {
 	private int nClient;
@@ -18,7 +18,7 @@ public class Room {
 		this.server = server;
 	}
 
-	public IVideocomConnection connect(CoolRMIRemoter remoter, String userName) {
+	public IVideocomConnection connect(GenericCoolRMIRemoter remoter, String userName) {
 		VideoConnection ret;
 		synchronized (this) {
 			ret=new VideoConnection(server.getArgs(), this, remoter, nClient++, userName);

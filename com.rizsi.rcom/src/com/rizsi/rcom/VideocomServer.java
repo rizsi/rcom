@@ -3,6 +3,7 @@ package com.rizsi.rcom;
 import com.rizsi.rcom.cli.ServerCliArgs;
 
 import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 public class VideocomServer implements IVideocomServer
 {
@@ -25,8 +26,8 @@ public class VideocomServer implements IVideocomServer
 
 	@Override
 	public IVideocomConnection connect(String userName) {
-		CoolRMIRemoter remoter=CoolRMIRemoter.getCurrentRemoter();
-		DemuxedConnection conn=(DemuxedConnection)remoter.getConnection();
+		GenericCoolRMIRemoter remoter=CoolRMIRemoter.getCurrentRemoter();
+		DemuxedConnection conn=(DemuxedConnection)((CoolRMIRemoter)remoter).getConnection();
 		System.out.println("Connect: "+conn.userName+" "+userName);
 		return r.connect(remoter, userName);
 	}

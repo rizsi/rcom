@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import hu.qgears.commons.signal.SignalFuture;
 import hu.qgears.commons.signal.Slot;
 import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 
 public class VideoConnection implements IVideocomConnection
 {
@@ -16,14 +17,14 @@ public class VideoConnection implements IVideocomConnection
 	private Room room;
 	private int id;
 	private IVideocomCallback callback;
-	private CoolRMIRemoter remoter;
+	private GenericCoolRMIRemoter remoter;
 	private String userName;
 	private ExecutorService asyncCallback=Executors.newSingleThreadExecutor();
 	private Map<String, StreamRegistration> registrations=new HashMap<>();
 	private AbstractRcomArgs args;
-	public VideoConnection(AbstractRcomArgs args, Room room, CoolRMIRemoter remoter, int id, String userName) {
+	public VideoConnection(AbstractRcomArgs args, Room room, GenericCoolRMIRemoter remoter, int id, String userName) {
 		this.remoter=remoter;
-		this.c=(DemuxedConnection)remoter.getConnection();
+		this.c=(DemuxedConnection)((CoolRMIRemoter)remoter).getConnection();
 		this.room=room;
 		this.id=id;
 		this.userName=userName;
