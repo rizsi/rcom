@@ -8,6 +8,15 @@ import java.nio.channels.SelectionKey;
 
 import com.rizsi.rcom.test.nio.MultiplexerReceiver;
 
+/**
+ * Multiplexer receiver that buffers the incoming data and it is possible to read the
+ * incoming data from a stream.
+ * 
+ * This implementation can block the main NIO thread in case the receiving buffer is full!
+ * 
+ * @author rizsi
+ *
+ */
 public class InputStreamReceiver extends MultiplexerReceiver
 {
 	private ByteBuffer bb;

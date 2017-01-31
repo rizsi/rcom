@@ -23,8 +23,6 @@ abstract public class AbstractSocketAcceptor extends ChannelProcessor{
 	abstract protected void socketChannelAccepted(SocketChannel sc) throws IOException;
 	@Override
 	public void keyInvalid(SelectionKey key) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

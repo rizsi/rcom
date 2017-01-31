@@ -1,5 +1,6 @@
 package com.rizsi.rcom.test.nio.example;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
@@ -15,6 +16,7 @@ import com.rizsi.rcom.test.nio.MultiplexerSender;
 public class RoundBuffer {
 	private ByteBuffer buffer;
 	private long nRead;
+	private long closedAt=-1;
 	private List<Send> senders=new ArrayList<>();
 	private class Receive extends MultiplexerReceiver{
 		@Override
@@ -43,6 +45,12 @@ public class RoundBuffer {
 				}
 			}
 			return n;
+		}
+		@Override
+		public void close(Exception e) {
+			synchronized (buffer) {
+				closedAt=nRead;
+			}
 		}
 	}
 	
@@ -90,6 +98,10 @@ public class RoundBuffer {
 			{
 				// We have reached the end of the send buffer. Next time start with the beginning.
 				sendBuffer.clear();
+			}
+			if(closedAt>-1 && nSent>=closedAt)
+			{
+				close(new EOFException());
 			}
 			return n;
 		}

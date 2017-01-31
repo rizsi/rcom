@@ -12,15 +12,32 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import hu.qgears.commons.signal.SignalFutureWrapper;
 
+/**
+ * Thread that processes NIO events in a select loop.
+ * Also has the capability to execute runnables from a queue.
+ * This mechanism can be used to interact with the procesing thread.
+ * 
+ * @author rizsi
+ *
+ */
 public class NioThread extends Thread {
 	private Selector s;
 	private ConcurrentLinkedQueue<Runnable> tasks=new ConcurrentLinkedQueue<>();
-	protected void addTask(Runnable task)
+	/**
+	 * Add a task to the task execution queue.
+	 * @param task
+	 */
+	public void addTask(Runnable task)
 	{
 		tasks.add(task);
 		s.wakeup();
 	}
-	protected <T> SignalFutureWrapper<T> addTask(Callable<T> task)
+	/**
+	 * Add a task to the task execution queue and return a future object that represents the result of the callable.
+	 * @param task
+	 * @return
+	 */
+	public <T> SignalFutureWrapper<T> addTask(Callable<T> task)
 	{
 		SignalFutureWrapper<T> ret=new SignalFutureWrapper<>();
 		tasks.add(new Runnable() {
@@ -39,6 +56,10 @@ public class NioThread extends Thread {
 		return ret;
 	}
 
+	/**
+	 * Create a new NIO processing thread with a {@link Selector}.
+	 * @throws IOException
+	 */
 	public NioThread() throws IOException {
 		s = SelectorProvider.provider().openSelector();
 	}
@@ -144,6 +165,17 @@ public class NioThread extends Thread {
 			}
 		}
 	}
+	/**
+	 * Register the channel processor and channel so that it is handled by the NIO event processor thread.
+	 * 
+	 * Must be called from this thread. 
+	 * 
+	 * @param c
+	 * @param interestOps
+	 * @param channelProcessor
+	 * @return
+	 * @throws ClosedChannelException
+	 */
 	public SelectionKey register(SelectableChannel c, int interestOps, ChannelProcessor channelProcessor) throws ClosedChannelException {
 		// TODO thread check should be an option to optimize speed
 		if(Thread.currentThread()!=this)
@@ -151,9 +183,5 @@ public class NioThread extends Thread {
 			throw new RuntimeException("Illegal thread access");
 		}
 		return c.register(s, interestOps, channelProcessor);
-	}
-	public void wakeup() {
-		// TODO Do we need it?
-		s.wakeup();
 	}
 }

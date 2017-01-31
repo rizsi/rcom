@@ -4,19 +4,18 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.WritableByteChannel;
 
+/**
+ * A sending endpoint of the channel multiplexer.
+ * 
+ * Subclasses must implement the abstract methods and call the dataAvailable() method when
+ * getAvailable bytes change from 0 to positive value.
+ * 
+ * @author rizsi
+ *
+ */
 abstract public class MultiplexerSender {
 	private final ChannelProcessorMultiplexer multiplexer;
-	
-	private boolean canWrite;
 	private int id;
-	private boolean hasData;
-	protected void setHasData(boolean hasData) {
-		this.hasData = hasData;
-	}
-	protected boolean getHasData(boolean hasData) {
-		return this.hasData;
-	}
-	
 	public MultiplexerSender(ChannelProcessorMultiplexer multiplexer) {
 		super();
 		this.multiplexer = multiplexer;
@@ -31,10 +30,6 @@ abstract public class MultiplexerSender {
 	public void dataAvailable()
 	{
 		multiplexer.dataAvailable(this);
-	}
-	boolean canWrite()
-	{
-		return canWrite;
 	}
 	/**
 	 * 

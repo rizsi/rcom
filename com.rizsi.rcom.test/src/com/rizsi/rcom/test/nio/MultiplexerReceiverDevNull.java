@@ -7,7 +7,12 @@ import java.nio.channels.SelectionKey;
 
 import hu.qgears.commons.UtilFile;
 
-public class MultiplexerInputDevNull extends MultiplexerReceiver
+/**
+ * Receiver that sends the received data into the "/dev/null" device.
+ * @author rizsi
+ *
+ */
+public class MultiplexerReceiverDevNull extends MultiplexerReceiver
 {
 	private static ByteBuffer devNull=ByteBuffer.allocateDirect(UtilFile.defaultBufferSize.get());
 	private ByteBuffer bb=devNull.duplicate();

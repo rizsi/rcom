@@ -60,7 +60,6 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 		}
 		
 	}
-	SocketMultiplexerListener socketMultiplexerListener;
 	class Recv extends MultiplexerReceiver
 	{
 		public Recv() {
@@ -83,7 +82,7 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 		@Override
 		public void close(Exception e) {
 			super.close(e);
-			socketMultiplexerListener.pipeBroken(e);
+			pipeBroken(e);
 		}
 		
 	}
@@ -156,12 +155,10 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 				VideoServerTCPListener.serverID.getBytes(StandardCharsets.UTF_8));
 		s=new Send(m);
 		s.register();
-		socketMultiplexerListener=new SocketMultiplexerListener();
 		Recv r=new Recv();
 		r.register(m, 0);
 		multiplexer=new Mpx();
 		m.start();
-		// TODO close thread when client is disconnected!
 		new Thread("CoolRMI client thread")
 		{
 			public void run() {
@@ -171,7 +168,7 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 						byte[] msg=toProcess.take();
 						if(!exit)
 						{
-							socketMultiplexerListener.messageReceived(msg);
+							messageReceived(msg);
 						}
 					}
 				} catch (InterruptedException e) {
