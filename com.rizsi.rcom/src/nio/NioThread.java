@@ -6,7 +6,9 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.SelectorProvider;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -22,6 +24,7 @@ import hu.qgears.commons.signal.SignalFutureWrapper;
  */
 public class NioThread extends Thread {
 	private Selector s;
+	private volatile boolean exit;
 	private ConcurrentLinkedQueue<Runnable> tasks=new ConcurrentLinkedQueue<>();
 	/**
 	 * Add a task to the task execution queue.
@@ -67,7 +70,7 @@ public class NioThread extends Thread {
 	@Override
 	public void run() {
 		try {
-			while (true) {
+			while (!exit) {
 				int n = s.select();
 				if (n > 0) {
 					Iterator<SelectionKey> iter = s.selectedKeys().iterator();
@@ -157,11 +160,30 @@ public class NioThread extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
+			List<ChannelProcessor> toClose=new ArrayList<ChannelProcessor>();
+			for(SelectionKey k: s.keys())
+			{
+				Object o=k.attachment();
+				if(o instanceof ChannelProcessor)
+				{
+					toClose.add((ChannelProcessor) o);
+				}
+			}
 			try {
 				s.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+			for(ChannelProcessor k: toClose)
+			{
+				try {
+					k.close(null);
+				} catch (Exception e) {
+					System.err.println("Error closing key: "+k);
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -183,5 +205,9 @@ public class NioThread extends Thread {
 			throw new RuntimeException("Illegal thread access");
 		}
 		return c.register(s, interestOps, channelProcessor);
+	}
+	public void close() {
+		exit=true;
+		s.wakeup();
 	}
 }

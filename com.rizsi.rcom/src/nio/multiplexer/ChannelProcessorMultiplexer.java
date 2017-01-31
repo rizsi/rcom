@@ -333,8 +333,11 @@ public class ChannelProcessorMultiplexer extends ChannelProcessor
 		{
 			r.close(e);
 		}
-		System.err.println("Channel closed:");
-		e.printStackTrace();
+		if(e!=null)
+		{
+			System.err.println("Channel closed:");
+			e.printStackTrace();
+		}
 	}
 
 }

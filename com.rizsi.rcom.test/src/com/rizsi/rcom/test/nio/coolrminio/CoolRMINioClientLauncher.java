@@ -22,5 +22,7 @@ public class CoolRMINioClientLauncher {
 		System.out.println(""+r.getValue("Kitten"));
 		System.out.println(""+r.getValue("Kitten"));
 		System.out.println(""+r.getValue("Kitten"));
+		cli.close();
+		nt.close();
 	}
 }
