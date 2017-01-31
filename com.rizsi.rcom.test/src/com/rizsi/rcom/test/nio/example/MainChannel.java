@@ -6,9 +6,9 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.WritableByteChannel;
 
-import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
-import com.rizsi.rcom.test.nio.MultiplexerReceiver;
-import com.rizsi.rcom.test.nio.MultiplexerSender;
+import nio.multiplexer.ChannelProcessorMultiplexer;
+import nio.multiplexer.MultiplexerReceiver;
+import nio.multiplexer.MultiplexerSender;
 
 public class MainChannel {
 	class Send extends MultiplexerSender

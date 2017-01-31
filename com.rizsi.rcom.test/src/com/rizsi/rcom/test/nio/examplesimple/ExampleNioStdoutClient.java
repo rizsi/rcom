@@ -5,8 +5,9 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 
 import com.rizsi.rcom.VideoServerTCPListener;
-import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
-import com.rizsi.rcom.test.nio.NioThread;
+
+import nio.NioThread;
+import nio.multiplexer.ChannelProcessorMultiplexer;
 
 public class ExampleNioStdoutClient {
 	public static void main(String[] args) throws Exception {

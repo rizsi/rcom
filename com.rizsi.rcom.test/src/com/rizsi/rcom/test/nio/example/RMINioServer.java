@@ -3,10 +3,9 @@ package com.rizsi.rcom.test.nio.example;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 
-import com.rizsi.rcom.test.nio.NioThread;
-
 import hu.qgears.coolrmi.CoolRMIServer;
 import hu.qgears.coolrmi.CoolRMIService;
+import nio.NioThread;
 
 public class RMINioServer {
 	public static void main(String[] args) throws Exception {

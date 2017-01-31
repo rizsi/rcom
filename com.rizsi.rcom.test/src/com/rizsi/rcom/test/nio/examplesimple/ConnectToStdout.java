@@ -2,12 +2,11 @@ package com.rizsi.rcom.test.nio.examplesimple;
 
 import java.io.IOException;
 
-import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
-import com.rizsi.rcom.test.nio.example.InputStreamReceiver;
-import com.rizsi.rcom.test.nio.example.OutputStreamSender;
-
 import hu.qgears.commons.ConnectStreams;
 import hu.qgears.commons.UtilFile;
+import nio.multiplexer.ChannelProcessorMultiplexer;
+import nio.multiplexer.InputStreamReceiver;
+import nio.multiplexer.OutputStreamSender;
 
 public class ConnectToStdout {
 

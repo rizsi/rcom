@@ -5,9 +5,10 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 
 import com.rizsi.rcom.VideoServerTCPListener;
-import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
-import com.rizsi.rcom.test.nio.NioThread;
 import com.rizsi.rcom.test.nio.example.MainChannel;
+
+import nio.NioThread;
+import nio.multiplexer.ChannelProcessorMultiplexer;
 
 public class ExampleNioClient {
 	public static void main(String[] args) throws Exception {

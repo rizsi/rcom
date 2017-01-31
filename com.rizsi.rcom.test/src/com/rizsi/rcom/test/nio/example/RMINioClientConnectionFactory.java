@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import hu.qgears.coolrmi.streams.IClientConnectionFactory;
 import hu.qgears.coolrmi.streams.IConnection;
+import nio.multiplexer.DuplexNioConnection;
 
 public class RMINioClientConnectionFactory implements IClientConnectionFactory
 {

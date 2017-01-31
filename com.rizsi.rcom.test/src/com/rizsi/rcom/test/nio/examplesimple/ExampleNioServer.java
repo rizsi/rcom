@@ -3,7 +3,7 @@ package com.rizsi.rcom.test.nio.examplesimple;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 
-import com.rizsi.rcom.test.nio.NioThread;
+import nio.NioThread;
 
 public class ExampleNioServer {
 	public static void main(String[] args) throws Exception {

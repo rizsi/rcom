@@ -1,10 +1,8 @@
-package com.rizsi.rcom.test.nio.example;
+package nio.multiplexer;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
 
 import hu.qgears.commons.UtilFile;
 import hu.qgears.coolrmi.streams.IConnection;

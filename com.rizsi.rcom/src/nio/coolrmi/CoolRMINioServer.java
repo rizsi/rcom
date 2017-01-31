@@ -1,14 +1,13 @@
-package com.rizsi.rcom.test.nio.coolrminio;
+package nio.coolrmi;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import com.rizsi.rcom.test.nio.AbstractSocketAcceptor;
-import com.rizsi.rcom.test.nio.NioThread;
-
 import hu.qgears.coolrmi.remoter.CoolRMIServiceRegistry;
+import nio.AbstractSocketAcceptor;
+import nio.NioThread;
 
 public class CoolRMINioServer {
 	private CoolRMIServiceRegistry reg;

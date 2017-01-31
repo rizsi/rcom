@@ -1,4 +1,4 @@
-package com.rizsi.rcom.test.nio.coolrminio;
+package nio.coolrmi;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,15 +12,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
-import com.rizsi.rcom.test.nio.MultiplexerReceiver;
-import com.rizsi.rcom.test.nio.MultiplexerSender;
-import com.rizsi.rcom.test.nio.NioThread;
-
 import hu.qgears.commons.UtilFile;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIMessage;
 import hu.qgears.coolrmi.multiplexer.ISocketMultiplexer;
 import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
+import nio.NioThread;
+import nio.multiplexer.ChannelProcessorMultiplexer;
+import nio.multiplexer.MultiplexerReceiver;
+import nio.multiplexer.MultiplexerSender;
 
 public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 	private int maxMessageSize=UtilFile.defaultBufferSize.get()*512;

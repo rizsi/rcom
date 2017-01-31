@@ -1,4 +1,4 @@
-package com.rizsi.rcom.test.nio;
+package nio.multiplexer;
 
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;

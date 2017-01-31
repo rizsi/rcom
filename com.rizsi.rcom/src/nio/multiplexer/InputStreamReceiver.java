@@ -1,12 +1,10 @@
-package com.rizsi.rcom.test.nio.example;
+package nio.multiplexer;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectionKey;
-
-import com.rizsi.rcom.test.nio.MultiplexerReceiver;
 
 /**
  * Multiplexer receiver that buffers the incoming data and it is possible to read the

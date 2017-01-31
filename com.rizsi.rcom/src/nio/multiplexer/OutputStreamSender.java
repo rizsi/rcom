@@ -1,13 +1,10 @@
-package com.rizsi.rcom.test.nio.example;
+package nio.multiplexer;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.WritableByteChannel;
-
-import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
-import com.rizsi.rcom.test.nio.MultiplexerSender;
 
 /**
  * Provide an output stream that gathers data into a buffer and 

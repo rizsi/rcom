@@ -1,4 +1,4 @@
-package com.rizsi.rcom.test.nio.example;
+package nio.multiplexer;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -8,10 +8,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
-import com.rizsi.rcom.test.nio.MultiplexerReceiver;
-import com.rizsi.rcom.test.nio.MultiplexerSender;
 
 public class RoundBuffer {
 	private ByteBuffer buffer;

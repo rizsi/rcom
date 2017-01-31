@@ -15,4 +15,7 @@ Export-Package: com.rizsi.rcom,
  com.rizsi.rcom.ssh,
  com.rizsi.rcom.util,
  com.rizsi.rcom.vnc,
- com.rizsi.rcom.webcam
+ com.rizsi.rcom.webcam,
+ nio,
+ nio.coolrmi,
+ nio.multiplexer

@@ -5,10 +5,11 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 
 import com.rizsi.rcom.VideoServerTCPListener;
-import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
-import com.rizsi.rcom.test.nio.NioThread;
 
 import hu.qgears.coolrmi.CoolRMIClient;
+import nio.NioThread;
+import nio.multiplexer.ChannelProcessorMultiplexer;
+import nio.multiplexer.DuplexNioConnection;
 
 public class RMINioClient {
 	public static void main(String[] args) throws Exception {

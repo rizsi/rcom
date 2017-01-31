@@ -1,9 +1,9 @@
-package com.rizsi.rcom.test.nio.coolrminio;
+package nio.coolrmi;
 
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 
-import com.rizsi.rcom.test.nio.NioThread;
+import nio.NioThread;
 
 public class CoolRMINioClient extends CoolRMINioRemoter
 {

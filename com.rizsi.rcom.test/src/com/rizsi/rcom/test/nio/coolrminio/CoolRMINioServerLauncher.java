@@ -2,12 +2,13 @@ package com.rizsi.rcom.test.nio.coolrminio;
 
 import java.net.InetSocketAddress;
 
-import com.rizsi.rcom.test.nio.NioThread;
 import com.rizsi.rcom.test.nio.example.Iremote;
 import com.rizsi.rcom.test.nio.example.Remote;
 
 import hu.qgears.coolrmi.CoolRMIService;
 import hu.qgears.coolrmi.remoter.CoolRMIServiceRegistry;
+import nio.NioThread;
+import nio.coolrmi.CoolRMINioServer;
 
 public class CoolRMINioServerLauncher {
 	public static void main(String[] args) throws Exception {
