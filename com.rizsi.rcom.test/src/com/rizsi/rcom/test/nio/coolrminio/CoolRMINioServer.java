@@ -23,7 +23,7 @@ public class CoolRMINioServer {
 		@Override
 		protected void socketChannelAccepted(SocketChannel sc) throws IOException {
 			sc.configureBlocking(false);
-			CoolRMINioRemoter srv=new CoolRMINioRemoter(getClass().getClassLoader(), false);
+			CoolRMINioRemoter srv=new CoolRMINioRemoter(getClass().getClassLoader(), false, true);
 			srv.setServiceRegistry(reg);
 			try {
 				srv.connect(t, sc);

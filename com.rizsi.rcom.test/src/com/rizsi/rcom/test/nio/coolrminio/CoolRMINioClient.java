@@ -8,7 +8,7 @@ import com.rizsi.rcom.test.nio.NioThread;
 public class CoolRMINioClient extends CoolRMINioRemoter
 {
 	public CoolRMINioClient(ClassLoader classLoader, boolean guaranteeOrdering) {
-		super(classLoader, guaranteeOrdering);
+		super(classLoader, guaranteeOrdering, false);
 	}
 
 	public void connect(NioThread nt, SocketAddress address) throws Exception

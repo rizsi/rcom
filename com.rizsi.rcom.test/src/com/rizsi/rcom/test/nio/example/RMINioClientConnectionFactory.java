@@ -7,8 +7,8 @@ import hu.qgears.coolrmi.streams.IConnection;
 
 public class RMINioClientConnectionFactory implements IClientConnectionFactory
 {
-	RMINioConnection conn;
-	public RMINioClientConnectionFactory(RMINioConnection conn) {
+	DuplexNioConnection conn;
+	public RMINioClientConnectionFactory(DuplexNioConnection conn) {
 		this.conn=conn;
 	}
 

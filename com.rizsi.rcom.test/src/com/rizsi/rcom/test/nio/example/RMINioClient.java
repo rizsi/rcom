@@ -25,7 +25,7 @@ public class RMINioClient {
 		ChannelProcessorMultiplexer m=new ChannelProcessorMultiplexer(nt, sc, true,
 				VideoServerTCPListener.clientID.getBytes(StandardCharsets.UTF_8),
 				VideoServerTCPListener.serverID.getBytes(StandardCharsets.UTF_8));
-		RMINioConnection conn=new RMINioConnection(m);
+		DuplexNioConnection conn=new DuplexNioConnection(m);
 		m.start();
 		CoolRMIClient client=new CoolRMIClient(getClass().getClassLoader(), new RMINioClientConnectionFactory(conn), false);
 		Iremote r= (Iremote)client.getService(Iremote.class, Iremote.class.getName());

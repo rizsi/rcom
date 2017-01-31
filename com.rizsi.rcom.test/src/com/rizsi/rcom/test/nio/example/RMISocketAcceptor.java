@@ -25,7 +25,7 @@ public class RMISocketAcceptor extends AbstractSocketAcceptor{
 				VideoServerTCPListener.serverID.getBytes(StandardCharsets.UTF_8),
 				VideoServerTCPListener.clientID.getBytes(StandardCharsets.UTF_8)
 				);
-		RMINioConnection conn=new RMINioConnection(m);
+		DuplexNioConnection conn=new DuplexNioConnection(m);
 		niormi.connections.add(conn);
 		try {
 			m.start();

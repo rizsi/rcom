@@ -9,6 +9,15 @@ import java.nio.channels.WritableByteChannel;
 import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
 import com.rizsi.rcom.test.nio.MultiplexerSender;
 
+/**
+ * Provide an output stream that gathers data into a buffer and 
+ * sends all data through the multiplexer.
+ * 
+ * Writing to the stream is blocked in case the buffer is full.
+ * 
+ * @author rizsi
+ *
+ */
 public class OutputStreamSender extends MultiplexerSender
 {
 	class SendOutputStream extends OutputStream

@@ -10,7 +10,9 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,12 @@ import java.util.concurrent.ExecutionException;
 
 import hu.qgears.commons.UtilFile;
 
+/**
+ * A multiplexer implementation that allows several data streams to be sent over a single
+ * TCP conenction.
+ * @author rizsi
+ *
+ */
 public class ChannelProcessorMultiplexer extends ChannelProcessor
 {
 	public static final ByteOrder order=ByteOrder.LITTLE_ENDIAN;
@@ -45,6 +53,14 @@ public class ChannelProcessorMultiplexer extends ChannelProcessor
 	private byte[] thisId;
 	private byte[] remoteId;
 	private MultiplexerSender currentSender;
+	/**
+	 * 
+	 * @param t
+	 * @param c
+	 * @param client
+	 * @param thisId Identifier of this multiplexer endpoint. This is sent to the client on connection.
+	 * @param remoteId Required identifier of the other endpoint. This is checked to be equal to the value received from the client.
+	 */
 	public ChannelProcessorMultiplexer(NioThread t, SelectableChannel c, boolean client, byte[] thisId, byte[] remoteId) {
 		super(t, c, client);
 		this.thisId=thisId;
@@ -69,8 +85,6 @@ public class ChannelProcessorMultiplexer extends ChannelProcessor
 
 	@Override
 	public void keyInvalid(SelectionKey key) {
-		// TODO Auto-generated method stub
-		
 	}
 	@Override
 	public void write(SelectionKey key) throws IOException {
@@ -196,7 +210,13 @@ public class ChannelProcessorMultiplexer extends ChannelProcessor
 			}
 			if(!recvBuffer.hasRemaining())
 			{
-				// TODO check header received!
+				byte[] data=new byte[remoteId.length];
+				recvBuffer.flip();
+				recvBuffer.get(data);
+				if(!Arrays.equals(data, remoteId))
+				{
+					throw new IOException("Invalid client identifier: "+new String(data, StandardCharsets.UTF_8));
+				}
 				recvBuffer.position(0).limit(0);
 				recvState=STATE_READY;
 			}

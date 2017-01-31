@@ -6,6 +6,11 @@ import hu.qgears.commons.UtilTimer;
 import hu.qgears.commons.signal.SignalFutureWrapper;
 import hu.qgears.coolrmi.messages.CoolRMICall;
 
+/**
+ * Example CoolMRI remoting server.
+ * @author rizsi
+ *
+ */
 public class Remote implements Iremote
 {
 	@Override

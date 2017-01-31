@@ -7,6 +7,12 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Base class that can be used as a handler of a server socket in a {@link NioThread}
+ * based NIO server to handle incoming connection.
+ * @author rizsi
+ *
+ */
 abstract public class AbstractSocketAcceptor extends ChannelProcessor{
 	private ServerSocketChannel c;
 
@@ -19,7 +25,16 @@ abstract public class AbstractSocketAcceptor extends ChannelProcessor{
 		SocketChannel sc=c.accept();
 		socketChannelAccepted(sc);
 	}
-
+	/**
+	 * Handle the incoming connection.
+	 * Must not block the calling thread as it is the {@link NioThread}.
+	 * 
+	 * A typical implementation will call sc.configureBlocking(false) and then
+	 * initialize and register a {@link ChannelProcessor} object for the connection.
+	 * 
+	 * @param sc
+	 * @throws IOException
+	 */
 	abstract protected void socketChannelAccepted(SocketChannel sc) throws IOException;
 	@Override
 	public void keyInvalid(SelectionKey key) {

@@ -9,11 +9,16 @@ import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
 import hu.qgears.commons.UtilFile;
 import hu.qgears.coolrmi.streams.IConnection;
 
-public class RMINioConnection implements IConnection
+/**
+ * Create a duplex input/output stream connection through a NIO channel.
+ * @author rizsi
+ *
+ */
+public class DuplexNioConnection implements IConnection
 {
 	InputStreamReceiver is;
 	OutputStreamSender os;
-	public RMINioConnection(ChannelProcessorMultiplexer m) throws IOException {
+	public DuplexNioConnection(ChannelProcessorMultiplexer m) throws IOException {
 		is=new InputStreamReceiver(UtilFile.defaultBufferSize.get()*8);
 		os=new OutputStreamSender(m, UtilFile.defaultBufferSize.get()*8);
 		is.register(m, 0);

@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.rizsi.rcom.VideoServerTCPListener;
 import com.rizsi.rcom.test.nio.ChannelProcessorMultiplexer;
 import com.rizsi.rcom.test.nio.MultiplexerReceiver;
 import com.rizsi.rcom.test.nio.MultiplexerSender;
@@ -26,11 +25,14 @@ import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 	private int maxMessageSize=UtilFile.defaultBufferSize.get()*512;
 	private ByteBuffer recvBuffer=ByteBuffer.allocateDirect(maxMessageSize);
+	public static final byte[] serverId="COOLRMI SERVER V0.0.0".getBytes(StandardCharsets.UTF_8);
+	public static final byte[] clientId="COOLRMI CLIENT V0.0.0".getBytes(StandardCharsets.UTF_8);
+
 	private boolean exit;
 	ConcurrentLinkedQueue<Msg> toSend=new ConcurrentLinkedQueue<>();
 	private Send s;
 	private LinkedBlockingQueue<byte[]> toProcess=new LinkedBlockingQueue<>();
-	
+	private boolean server;
 	class Msg
 	{
 		byte[] bs;
@@ -138,8 +140,9 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 		
 	}
 
-	public CoolRMINioRemoter(ClassLoader classLoader, boolean guaranteeOrdering) {
+	public CoolRMINioRemoter(ClassLoader classLoader, boolean guaranteeOrdering, boolean server) {
 		super(classLoader, guaranteeOrdering);
+		this.server=server;
 	}
 
 	@Override
@@ -151,8 +154,7 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 
 	public void connect(NioThread t, SocketChannel sc) throws ClosedChannelException, InterruptedException, ExecutionException {
 		ChannelProcessorMultiplexer m=new ChannelProcessorMultiplexer(t, sc, true,
-				VideoServerTCPListener.clientID.getBytes(StandardCharsets.UTF_8),
-				VideoServerTCPListener.serverID.getBytes(StandardCharsets.UTF_8));
+				server?serverId:clientId, server?clientId:serverId);
 		s=new Send(m);
 		s.register();
 		Recv r=new Recv();
