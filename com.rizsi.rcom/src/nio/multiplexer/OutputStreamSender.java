@@ -3,7 +3,6 @@ package nio.multiplexer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.WritableByteChannel;
 
 /**
@@ -98,7 +97,7 @@ public class OutputStreamSender extends MultiplexerSender
 	ByteBuffer readBuffer;
 	long nWritten;
 	long nRead;
-	public OutputStreamSender(ChannelProcessorMultiplexer multiplexer, int bufferSize) {
+	public OutputStreamSender(IMultiplexer multiplexer, int bufferSize) {
 		super(multiplexer);
 		writeBuffer=ByteBuffer.allocateDirect(bufferSize).order(ChannelProcessorMultiplexer.order);
 		readBuffer=writeBuffer.asReadOnlyBuffer().order(ChannelProcessorMultiplexer.order);
@@ -106,7 +105,7 @@ public class OutputStreamSender extends MultiplexerSender
 		register();
 	}
 	@Override
-	public int send(SelectionKey key, WritableByteChannel channel, int sendCurrentLength) throws IOException {
+	public int send(WritableByteChannel channel, int sendCurrentLength) throws IOException {
 		synchronized (writeBuffer) {
 			int navail=(int)(nWritten-nRead);
 			int l=Math.min(navail, readBuffer.capacity()-readBuffer.position());

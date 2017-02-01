@@ -3,7 +3,6 @@ package com.rizsi.rcom.test.nio.example;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.WritableByteChannel;
 
 import nio.multiplexer.ChannelProcessorMultiplexer;
@@ -21,7 +20,7 @@ public class MainChannel {
 		}
 
 		@Override
-		public int send(SelectionKey key, WritableByteChannel channel, int sendCurrentLength) throws IOException {
+		public int send(WritableByteChannel channel, int sendCurrentLength) throws IOException {
 			int ret=channel.write(bb);
 			return ret;
 		}
@@ -34,7 +33,7 @@ public class MainChannel {
 	class Receive extends MultiplexerReceiver
 	{
 		@Override
-		public int read(SelectionKey key, ReadableByteChannel bc, int remainingBytes) throws IOException {
+		public int read(ReadableByteChannel bc, int remainingBytes) throws IOException {
 			byte[] data=new byte[remainingBytes];
 			ByteBuffer dst=ByteBuffer.wrap(data);
 			int n=bc.read(dst);

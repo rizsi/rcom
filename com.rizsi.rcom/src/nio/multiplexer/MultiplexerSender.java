@@ -1,7 +1,6 @@
 package nio.multiplexer;
 
 import java.io.IOException;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.WritableByteChannel;
 
 /**
@@ -14,9 +13,9 @@ import java.nio.channels.WritableByteChannel;
  *
  */
 abstract public class MultiplexerSender {
-	private final ChannelProcessorMultiplexer multiplexer;
+	private final IMultiplexer multiplexer;
 	private int id;
-	public MultiplexerSender(ChannelProcessorMultiplexer multiplexer) {
+	public MultiplexerSender(IMultiplexer multiplexer) {
 		super();
 		this.multiplexer = multiplexer;
 	}
@@ -38,7 +37,7 @@ abstract public class MultiplexerSender {
 	 * @param sendCurrentLength
 	 * @return number of bytes written to the target Must be positive. 0 means error and this sender is going to be closed.
 	 */
-	abstract public int send(SelectionKey key, WritableByteChannel channel, int sendCurrentLength) throws IOException;
+	abstract public int send(WritableByteChannel channel, int sendCurrentLength) throws IOException;
 	public int getId() {
 		return id;
 	}

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SelectionKey;
 
 /**
  * Multiplexer receiver that buffers the incoming data and it is possible to read the
@@ -91,7 +90,7 @@ public class InputStreamReceiver extends MultiplexerReceiver
 		}
 	}
 	@Override
-	public int read(SelectionKey key, ReadableByteChannel bc, int remainingBytes) throws IOException {
+	public int read(ReadableByteChannel bc, int remainingBytes) throws IOException {
 		int n;
 		try {
 			synchronized (bb) {

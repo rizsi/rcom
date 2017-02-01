@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +18,7 @@ import hu.qgears.coolrmi.multiplexer.ISocketMultiplexer;
 import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 import nio.NioThread;
 import nio.multiplexer.ChannelProcessorMultiplexer;
+import nio.multiplexer.IMultiplexer;
 import nio.multiplexer.MultiplexerReceiver;
 import nio.multiplexer.MultiplexerSender;
 
@@ -30,7 +30,7 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 
 	private boolean exit;
 	private ConcurrentLinkedQueue<Msg> toSend=new ConcurrentLinkedQueue<>();
-	private ChannelProcessorMultiplexer nioMultiplexer;
+	private IMultiplexer nioMultiplexer;
 	private Send s;
 	private LinkedBlockingQueue<byte[]> toProcess=new LinkedBlockingQueue<>();
 	private boolean server;
@@ -70,7 +70,7 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 		}
 
 		@Override
-		public int read(SelectionKey key, ReadableByteChannel bc, int remainingBytes) throws IOException {
+		public int read(ReadableByteChannel bc, int remainingBytes) throws IOException {
 			recvBuffer.limit(recvBuffer.position()+remainingBytes);
 			int n=bc.read(recvBuffer);
 			if(n==remainingBytes)
@@ -92,7 +92,7 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 	}
 	class Send extends MultiplexerSender
 	{
-		public Send(ChannelProcessorMultiplexer multiplexer) {
+		public Send(IMultiplexer multiplexer) {
 			super(multiplexer);
 		}
 
@@ -105,7 +105,7 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 			}
 		}
 		@Override
-		public int send(SelectionKey key, WritableByteChannel channel, int sendCurrentLength) throws IOException {
+		public int send(WritableByteChannel channel, int sendCurrentLength) throws IOException {
 			updatecurrent();
 			if(current==null)
 			{
@@ -171,7 +171,34 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 		Recv r=new Recv();
 		r.register(nioMultiplexer, 0);
 		multiplexer=new Mpx();
-		nioMultiplexer.start();
+		new Thread("CoolRMI client thread")
+		{
+			public void run() {
+				try {
+					while(!exit)
+					{
+						byte[] msg=toProcess.take();
+						if(!exit)
+						{
+							messageReceived(msg);
+						}
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			};
+		}
+		.start();
+		((ChannelProcessorMultiplexer)nioMultiplexer).start();
+	}
+	public void connect(ChannelProcessorMultiplexer nioMultiplexer) throws ClosedChannelException, InterruptedException, ExecutionException {
+		this.nioMultiplexer=nioMultiplexer;
+		s=new Send(nioMultiplexer);
+		s.register();
+		Recv r=new Recv();
+		r.register(nioMultiplexer, 0);
+		multiplexer=new Mpx();
 		new Thread("CoolRMI client thread")
 		{
 			public void run() {
@@ -203,7 +230,7 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 			runnable.run();
 		}
 	}
-	public ChannelProcessorMultiplexer getNioMultiplexer() {
+	public IMultiplexer getNioMultiplexer() {
 		return nioMultiplexer;
 	}
 	/**

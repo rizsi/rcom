@@ -4,7 +4,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ public class RoundBuffer {
 	private List<Send> senders=new ArrayList<>();
 	private class Receive extends MultiplexerReceiver{
 		@Override
-		public int read(SelectionKey key, ReadableByteChannel bc, int remainingBytes) throws IOException {
+		public int read(ReadableByteChannel bc, int remainingBytes) throws IOException {
 			int n=Math.min(remainingBytes, buffer.capacity()-buffer.position());
 			List<Send> toactivate=null;
 			synchronized (buffer) {
@@ -55,7 +54,7 @@ public class RoundBuffer {
 		private long nSent;
 		private ByteBuffer sendBuffer;
 		private boolean overflow;
-		public Send(ChannelProcessorMultiplexer multiplexer) {
+		public Send(IMultiplexer multiplexer) {
 			super(multiplexer);
 			synchronized (buffer) {
 				sendBuffer=buffer.asReadOnlyBuffer().order(buffer.order());
@@ -68,7 +67,7 @@ public class RoundBuffer {
 		}
 
 		@Override
-		public int send(SelectionKey key, WritableByteChannel channel, int sendCurrentLength) throws IOException {
+		public int send(WritableByteChannel channel, int sendCurrentLength) throws IOException {
 			// The minimum of buffer, required package size and data available
 			int n;
 			synchronized (buffer) {
@@ -121,7 +120,7 @@ public class RoundBuffer {
 	{
 		buffer=ByteBuffer.allocateDirect(capacity).order(ChannelProcessorMultiplexer.order);
 	}
-	public MultiplexerSender createSender(ChannelProcessorMultiplexer multiplexer)
+	public MultiplexerSender createSender(IMultiplexer multiplexer)
 	{
 		Send s=new Send(multiplexer);
 		synchronized (buffer) {
@@ -130,7 +129,7 @@ public class RoundBuffer {
 		}
 		return s;
 	}
-	public Receive connectReceiver(ChannelProcessorMultiplexer multiplexer, int channelId)
+	public Receive connectReceiver(IMultiplexer multiplexer, int channelId)
 	{
 		Receive r=new Receive();
 		multiplexer.register(r, channelId);

@@ -10,7 +10,7 @@ import java.net.Socket;
 import com.rizsi.rcom.util.UtilStream;
 
 import hu.qgears.commons.UtilProcess;
-import nio.multiplexer.ChannelProcessorMultiplexer;
+import nio.multiplexer.IMultiplexer;
 
 public class StreamSinkVNC extends StreamSink implements IChannelReader
 {
@@ -33,7 +33,7 @@ public class StreamSinkVNC extends StreamSink implements IChannelReader
 	private OutputStream os;
 	private Process p;
 	@Override
-	public void start(AbstractRcomArgs args, IVideocomConnection conn, ChannelProcessorMultiplexer multiplexer)
+	public void start(AbstractRcomArgs args, IVideocomConnection conn, IMultiplexer multiplexer)
 			throws Exception {
 		int n=9;
 		int port=5900+n;

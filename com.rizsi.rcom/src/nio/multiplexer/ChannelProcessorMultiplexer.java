@@ -29,7 +29,7 @@ import nio.NioThread;
  * @author rizsi
  *
  */
-public class ChannelProcessorMultiplexer extends ChannelProcessor
+public class ChannelProcessorMultiplexer extends ChannelProcessor implements IMultiplexer
 {
 	public static final ByteOrder order=ByteOrder.LITTLE_ENDIAN;
 	/**
@@ -150,7 +150,7 @@ public class ChannelProcessorMultiplexer extends ChannelProcessor
 			int n;
 			if(currentSender!=null)
 			{
-				n=currentSender.send(key, c, sendCurrentLength);
+				n=currentSender.send(c, sendCurrentLength);
 				if(n==0)
 				{
 					currentSender.close(null);
@@ -262,7 +262,7 @@ public class ChannelProcessorMultiplexer extends ChannelProcessor
 				recvCurrentLength-=n;
 			}else
 			{
-				int n=currentInput.read(key, bc, recvCurrentLength);
+				int n=currentInput.read(bc, recvCurrentLength);
 				if(n<0)
 				{
 					throw new EOFException();

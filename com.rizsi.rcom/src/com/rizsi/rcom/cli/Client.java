@@ -27,7 +27,7 @@ import com.rizsi.rcom.webcam.WebCamParameter;
 
 import nio.NioThread;
 import nio.coolrmi.CoolRMINioClient;
-import nio.multiplexer.ChannelProcessorMultiplexer;
+import nio.multiplexer.IMultiplexer;
 
 public class Client implements IVideocomCallback {
 	public void main(String[] args) throws Exception {
@@ -43,7 +43,7 @@ public class Client implements IVideocomCallback {
 	private volatile boolean exit;
 	private DelegateVideoStreamContainer selfVideo=new DelegateVideoStreamContainer();
 	private AbstractCliArgs args;
-	private ChannelProcessorMultiplexer multiplexer;
+	private IMultiplexer multiplexer;
 	public void run(AbstractCliArgs args) throws Exception
 	{
 		args.apply();
@@ -237,7 +237,7 @@ public class Client implements IVideocomCallback {
 	public AbstractRcomArgs getArgs() {
 		return args;
 	}
-	public ChannelProcessorMultiplexer getMultiplexer() {
+	public IMultiplexer getMultiplexer() {
 		return multiplexer;
 	}
 

@@ -2,7 +2,7 @@ package com.rizsi.rcom;
 
 import java.io.IOException;
 
-import nio.multiplexer.ChannelProcessorMultiplexer;
+import nio.multiplexer.IMultiplexer;
 import nio.multiplexer.InputStreamReceiver;
 
 abstract public class StreamSinkSimplex extends StreamSink
@@ -14,7 +14,7 @@ abstract public class StreamSinkSimplex extends StreamSink
 	}
 	abstract public void start() throws IOException, Exception;
 	@Override
-	public void start(AbstractRcomArgs args, IVideocomConnection conn, ChannelProcessorMultiplexer multiplexer) throws Exception {
+	public void start(AbstractRcomArgs args, IVideocomConnection conn, IMultiplexer multiplexer) throws Exception {
 		receiver=new InputStreamReceiver(VideoConnection.bufferSize);
 		start();
 		IStreamData data=conn.registerStream(name, -1);

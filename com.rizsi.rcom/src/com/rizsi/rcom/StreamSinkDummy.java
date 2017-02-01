@@ -1,6 +1,6 @@
 package com.rizsi.rcom;
 
-import nio.multiplexer.ChannelProcessorMultiplexer;
+import nio.multiplexer.IMultiplexer;
 
 public class StreamSinkDummy extends StreamSink {
 
@@ -11,7 +11,7 @@ public class StreamSinkDummy extends StreamSink {
 	}
 
 	@Override
-	public void start(AbstractRcomArgs args, IVideocomConnection conn, ChannelProcessorMultiplexer multiplexer)
+	public void start(AbstractRcomArgs args, IVideocomConnection conn, IMultiplexer multiplexer)
 			throws Exception {
 		// TODO Auto-generated method stub
 		

@@ -8,13 +8,13 @@ import hu.qgears.commons.UtilEventListener;
 import hu.qgears.coolrmi.messages.CoolRMICall;
 import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 import nio.coolrmi.CoolRMINioRemoter;
-import nio.multiplexer.ChannelProcessorMultiplexer;
+import nio.multiplexer.IMultiplexer;
 
 public class VideoConnection implements IVideocomConnection
 {
 	public static final int BUFFER_SIZE_DEFAULT = 1048576;
 	public static int bufferSize=BUFFER_SIZE_DEFAULT;
-	private ChannelProcessorMultiplexer c;
+	private IMultiplexer c;
 	private Room room;
 	private int id;
 	private IVideocomCallback callback;
@@ -126,7 +126,7 @@ public class VideoConnection implements IVideocomConnection
 			}
 		}
 	}
-	public ChannelProcessorMultiplexer getConnection() {
+	public IMultiplexer getConnection() {
 		return c;
 	}
 	@Override
