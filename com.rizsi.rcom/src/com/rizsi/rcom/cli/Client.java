@@ -1,6 +1,6 @@
 package com.rizsi.rcom.cli;
 
-import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 import com.rizsi.rcom.AbstractRcomArgs;
+import com.rizsi.rcom.ChannelMultiplexer.ChannelOutputStream;
 import com.rizsi.rcom.IVideocomCallback;
 import com.rizsi.rcom.IVideocomConnection;
 import com.rizsi.rcom.IVideocomServer;
@@ -18,13 +20,14 @@ import com.rizsi.rcom.StreamSink;
 import com.rizsi.rcom.StreamSourceAudio;
 import com.rizsi.rcom.StreamSourceVideoWebCam;
 import com.rizsi.rcom.StreamSourceVnc;
-import com.rizsi.rcom.VideoClientConnectionFactory;
 import com.rizsi.rcom.gui.DelegateVideoStreamContainer;
 import com.rizsi.rcom.gui.GuiCliArgs;
 import com.rizsi.rcom.gui.IVideoStreamContainer;
 import com.rizsi.rcom.webcam.WebCamParameter;
 
-import hu.qgears.coolrmi.CoolRMIClient;
+import nio.NioThread;
+import nio.coolrmi.CoolRMINioClient;
+import nio.multiplexer.ChannelProcessorMultiplexer;
 
 public class Client implements IVideocomCallback {
 	public void main(String[] args) throws Exception {
@@ -36,13 +39,14 @@ public class Client implements IVideocomCallback {
 	public IVideocomConnection conn;
 	public int id;
 	private Map<String, StreamSink> registered=new HashMap<>();
-	public VideoClientConnectionFactory fact;
 	private String userName;
 	private volatile boolean exit;
 	private DelegateVideoStreamContainer selfVideo=new DelegateVideoStreamContainer();
 	private AbstractCliArgs args;
-	public void run(AbstractCliArgs args) throws IOException
+	private ChannelProcessorMultiplexer multiplexer;
+	public void run(AbstractCliArgs args) throws Exception
 	{
+		args.apply();
 		this.args=args;
 		isGui=args instanceof GuiCliArgs;
 		if(!args.disablePulseEchoCancellation)
@@ -51,16 +55,20 @@ public class Client implements IVideocomCallback {
 			System.setProperty("PULSE_PROP", "filter.want=echo-cancel");
 		}
 		System.out.println("Inited");
-		fact=new VideoClientConnectionFactory(args);
-		CoolRMIClient cli=new CoolRMIClient(Launcher.class.getClassLoader(), fact, false);
+		NioThread nt=new NioThread();
+		nt.start();
+		CoolRMINioClient cli=new CoolRMINioClient(Launcher.class.getClassLoader(), false);
+		cli.setExecutorService(Executors.newSingleThreadExecutor());
 		cli.getServiceRegistry().addProxyType(Client.class, IVideocomCallback.class);
+		cli.connect(nt, new InetSocketAddress(args.host, args.port));
+		multiplexer=cli.getNioMultiplexer();
 		System.out.println("connected");
 		IVideocomServer srv=(IVideocomServer) cli.getService(IVideocomServer.class, IVideocomServer.id);
 		userName=""+System.nanoTime();
 		conn=srv.connect(userName);
 		id=conn.getId();
 		conn.registerCallback(this);
-		boolean streamstdin=false;
+		boolean streamstdin=true;
 		if(args instanceof ClientCliArgs)
 		{
 			ClientCliArgs cargs=(ClientCliArgs) args;
@@ -137,7 +145,7 @@ public class Client implements IVideocomCallback {
 		StreamSink sink=p.createSink(this);
 		registered.put(p.name, sink);
 		try {
-			sink.start(args, conn,  fact.getMultiplexer());
+			sink.start(args, conn,  multiplexer);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -228,5 +236,18 @@ public class Client implements IVideocomCallback {
 
 	public AbstractRcomArgs getArgs() {
 		return args;
+	}
+	public ChannelProcessorMultiplexer getMultiplexer() {
+		return multiplexer;
+	}
+
+	public void addListener(int backChannel, StreamSourceVnc streamSourceVnc) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public ChannelOutputStream createStream() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

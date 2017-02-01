@@ -1,19 +1,9 @@
 package com.rizsi.rcom;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 public class StreamShareDummy extends StreamShare {
 
 	public StreamShareDummy(VideoConnection videoConnection, StreamParameters params) {
 		super(videoConnection, params);
-	}
-	byte buffer[]=new byte[1024];
-	OutputStream os=new NullOutputStream();
-	@Override
-	public void readFully(InputStream is, int len) throws IOException {
-		IChannelReader.pipeToFully(is, len, buffer, os);
 	}
 
 	@Override

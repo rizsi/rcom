@@ -10,6 +10,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import hu.qgears.commons.UtilFile;
@@ -28,10 +29,12 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 	public static final byte[] clientId="COOLRMI CLIENT V0.0.0".getBytes(StandardCharsets.UTF_8);
 
 	private boolean exit;
-	ConcurrentLinkedQueue<Msg> toSend=new ConcurrentLinkedQueue<>();
+	private ConcurrentLinkedQueue<Msg> toSend=new ConcurrentLinkedQueue<>();
+	private ChannelProcessorMultiplexer nioMultiplexer;
 	private Send s;
 	private LinkedBlockingQueue<byte[]> toProcess=new LinkedBlockingQueue<>();
 	private boolean server;
+	private ExecutorService executorService;
 	class Msg
 	{
 		byte[] bs;
@@ -151,15 +154,24 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 		toProcess.add(new byte[]{});
 	}
 
-	public void connect(NioThread t, SocketChannel sc) throws ClosedChannelException, InterruptedException, ExecutionException {
-		ChannelProcessorMultiplexer m=new ChannelProcessorMultiplexer(t, sc, true,
+	/**
+	 * 
+	 * @param t
+	 * @param sc
+	 * @param client when true then the channel must first be connected (wait for connect event) otherwise not. If we wait for connect event although it is already conencted then the NIO server goes to busy loop!
+	 * @throws ClosedChannelException
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
+	public void connect(NioThread t, SocketChannel sc, boolean client) throws ClosedChannelException, InterruptedException, ExecutionException {
+		nioMultiplexer=new ChannelProcessorMultiplexer(t, sc, client,
 				server?serverId:clientId, server?clientId:serverId);
-		s=new Send(m);
+		s=new Send(nioMultiplexer);
 		s.register();
 		Recv r=new Recv();
-		r.register(m, 0);
+		r.register(nioMultiplexer, 0);
 		multiplexer=new Mpx();
-		m.start();
+		nioMultiplexer.start();
 		new Thread("CoolRMI client thread")
 		{
 			public void run() {
@@ -183,7 +195,26 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 
 	@Override
 	public void execute(Runnable runnable) {
-		runnable.run();
+		if(executorService!=null)
+		{
+			executorService.execute(runnable);
+		}else
+		{
+			runnable.run();
+		}
 	}
-
+	public ChannelProcessorMultiplexer getNioMultiplexer() {
+		return nioMultiplexer;
+	}
+	/**
+	 * Set executor service to be used to execute remote calls.
+	 * If none is set then the single-threaded model is used.
+	 * 
+	 * Must be set before starting.
+	 * 
+	 * @param executorService
+	 */
+	public void setExecutorService(ExecutorService executorService) {
+		this.executorService = executorService;
+	}
 }

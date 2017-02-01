@@ -1,17 +1,17 @@
 package com.rizsi.rcom;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.rizsi.rcom.gui.IVideoStreamContainer;
 import com.rizsi.rcom.util.VideoStreamProcessor;
 
+import hu.qgears.commons.ConnectStreams;
+
 public class StreamSinkVideoFrames extends StreamSinkSimplex implements IVideoStreamContainer
 {
 	final public StreamParametersVideo p;
 	private OutputStream os;
-	private byte[] buffer=new byte[DemuxedConnection.bufferSize];
 	private VideoStreamProcessor proc;
 	private AbstractRcomArgs args;
 	public StreamSinkVideoFrames(AbstractRcomArgs args, StreamParametersVideo p) {
@@ -24,10 +24,7 @@ public class StreamSinkVideoFrames extends StreamSinkSimplex implements IVideoSt
 	{
 		proc=new VideoStreamProcessor(args, p.width, p.height, p.width, p.height, p.encoding);
 		os=proc.launch();
-	}
-	@Override
-	public void readFully(InputStream is, int len) throws IOException {
-		IChannelReader.pipeToFully(is, len, buffer, os);
+		ConnectStreams.startStreamThread(receiver.in, os);
 	}
 	@Override
 	public void dispose() {

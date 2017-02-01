@@ -40,9 +40,9 @@ public class NioThread extends Thread {
 	 * @param task
 	 * @return
 	 */
-	public <T> SignalFutureWrapper<T> addTask(Callable<T> task)
+	public <T> SignalFutureWrapper<T> addTask(final Callable<T> task)
 	{
-		SignalFutureWrapper<T> ret=new SignalFutureWrapper<>();
+		final SignalFutureWrapper<T> ret=new SignalFutureWrapper<>();
 		tasks.add(new Runnable() {
 			
 			@Override
@@ -71,8 +71,9 @@ public class NioThread extends Thread {
 	public void run() {
 		try {
 			while (!exit) {
-				int n = s.select();
-				if (n > 0) {
+				int n=s.select();
+				if (n > 0)
+				{
 					Iterator<SelectionKey> iter = s.selectedKeys().iterator();
 					while (iter.hasNext()) {
 						SelectionKey key = (SelectionKey) iter.next();
@@ -96,6 +97,11 @@ public class NioThread extends Thread {
 								ChannelProcessor p=(ChannelProcessor)key.attachment();
 								p.accept(key);
 							}
+							if((ops&SelectionKey.OP_CONNECT)!=0)
+							{
+								ChannelProcessor p=(ChannelProcessor)key.attachment();
+								p.connect(key);
+							}
 							if((ops&SelectionKey.OP_WRITE)!=0)
 							{
 								ChannelProcessor p=(ChannelProcessor)key.attachment();
@@ -105,11 +111,6 @@ public class NioThread extends Thread {
 							{
 								ChannelProcessor p=(ChannelProcessor)key.attachment();
 								p.read(key);
-							}
-							if((ops&SelectionKey.OP_CONNECT)!=0)
-							{
-								ChannelProcessor p=(ChannelProcessor)key.attachment();
-								p.connect(key);
 							}
 						}catch(IOException e)
 						{

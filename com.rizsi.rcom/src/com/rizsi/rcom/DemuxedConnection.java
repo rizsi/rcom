@@ -11,6 +11,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
+import com.rizsi.rcom.util.UtilStream;
+
 import hu.qgears.commons.signal.SignalFutureWrapper;
 import hu.qgears.coolrmi.streams.IConnection;
 
@@ -33,7 +35,7 @@ public class DemuxedConnection implements IConnection, IChannelReader
 		this.s=s;
 		pipeInWriter.connect(pipeIn);
 		OutputStream o=s.getOutputStream();
-		InputStream is=s.getInputStream();
+		final InputStream is=s.getInputStream();
 		if(server)
 		{
 			o.write(serverId.getBytes(StandardCharsets.UTF_8));
@@ -125,7 +127,7 @@ public class DemuxedConnection implements IConnection, IChannelReader
 
 	@Override
 	public void readFully(InputStream is, int len) throws IOException {
-		IChannelReader.pipeToFully(is, len, buffer, pipeInWriter);
+		UtilStream.pipeToFully(is, len, buffer, pipeInWriter);
 	}
 
 	public ChannelMultiplexer getMultiplexer() {

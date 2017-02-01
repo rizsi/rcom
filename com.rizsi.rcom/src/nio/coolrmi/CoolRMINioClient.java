@@ -16,6 +16,6 @@ public class CoolRMINioClient extends CoolRMINioRemoter
 		SocketChannel sc=SocketChannel.open();
 		sc.configureBlocking(false);
 		sc.connect(address);
-		connect(nt, sc);
+		connect(nt, sc, true);
 	}
 }

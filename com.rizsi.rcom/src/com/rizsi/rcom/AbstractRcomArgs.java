@@ -21,6 +21,8 @@ public class AbstractRcomArgs {
 	@JOSimpleBoolean
 	@JOHelp("Enable VNC support. VNC suport is disabled by default as it is not safely implemented yet.")
 	public boolean enableVNC;
+	@JOHelp("Size of streaming buffers for audio and video.")
+	public int bufferSize=VideoConnection.BUFFER_SIZE_DEFAULT;
 	public AbstractRcomArgs() {
 		if(System.getProperty("os.name").contains("Linux"))
 		{
@@ -29,5 +31,8 @@ public class AbstractRcomArgs {
 		{
 			platform=EPlatform.windows;
 		}
+	}
+	public void apply() {
+		VideoConnection.bufferSize=bufferSize;
 	}
 }

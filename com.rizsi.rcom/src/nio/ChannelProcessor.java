@@ -46,7 +46,7 @@ abstract public class ChannelProcessor
 			key=t.register(c, interestOps, ChannelProcessor.this);
 		}else
 		{
-			int interestOpsFinal=interestOps;
+			final int interestOpsFinal=interestOps;
 			t.addTask(new Runnable() {
 				
 				@Override
@@ -67,7 +67,7 @@ abstract public class ChannelProcessor
 	 * Must only be called after registration is done (register() method).
 	 * @param hasDataToWrite
 	 */
-	public void setHasDataToWrite(boolean hasDataToWrite)
+	public void setHasDataToWrite(final boolean hasDataToWrite)
 	{
 		if(Thread.currentThread()==t)
 		{

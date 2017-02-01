@@ -8,7 +8,6 @@ import hu.qgears.commons.UtilFile;
 
 public class Launcher {
 	public static void main(String[] args) throws Exception {
-		
 		UtilFile.defaultBufferSize.set(DemuxedConnection.bufferSize);
 		if(args.length>0)
 		{

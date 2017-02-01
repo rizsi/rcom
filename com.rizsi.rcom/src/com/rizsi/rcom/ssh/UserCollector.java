@@ -10,17 +10,25 @@ public class UserCollector extends Thread
 	private File users;
 	private File auth;
 	private String command;
-	public UserCollector(File users, File auth, String command) {
+	private String beforeKeyDirUpdateCommand;
+	private long keyDirUpdateTimeoutMillis;
+	public UserCollector(File users, File auth, String command, String beforeKeyDirUpdateCommand, long keyDirUpdateTimeoutMillis) {
 		super("Update authorized_keys");
 		this.users=users;
 		this.auth=auth;
 		this.command=command;
+		this.beforeKeyDirUpdateCommand=beforeKeyDirUpdateCommand;
+		this.keyDirUpdateTimeoutMillis=keyDirUpdateTimeoutMillis;
 	}
 	@Override
 	public void run() {
 		while(true)
 		{
 			try {
+				if(beforeKeyDirUpdateCommand!=null)
+				{
+					Runtime.getRuntime().exec(beforeKeyDirUpdateCommand);
+				}
 				String s=new UserCollectorTemplate().generate(users, command);
 				String prev=null;
 				try {
@@ -37,7 +45,7 @@ public class UserCollector extends Thread
 				e1.printStackTrace();
 			}
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(keyDirUpdateTimeoutMillis);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

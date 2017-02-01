@@ -21,6 +21,7 @@ public class InputStreamReceiver extends MultiplexerReceiver
 	private ByteBuffer reader;
 	private long nWrite;
 	private long nRead;
+	private long closedAt=-1;
 	public InputStream in;
 	class Is extends InputStream
 	{
@@ -31,6 +32,10 @@ public class InputStreamReceiver extends MultiplexerReceiver
 					int cap=(int)(nWrite-nRead);
 					while(cap==0)
 					{
+						if(nRead==closedAt)
+						{
+							return -1;
+						}
 						bb.wait();
 						cap=(int)(nWrite-nRead);
 					}
@@ -42,6 +47,43 @@ public class InputStreamReceiver extends MultiplexerReceiver
 						reader.clear();
 					}
 					return 0xff&ret;
+				}
+			} catch (InterruptedException e) {
+				throw new IOException(e);
+			}
+		}
+		@Override
+		public int read(byte[] b) throws IOException {
+			return read(b, 0, b.length);
+		}
+		@Override
+		public int read(byte[] b, int off, int len) throws IOException {
+			try {
+				synchronized (bb) {
+					int cap=(int)(nWrite-nRead);
+					while(cap==0)
+					{
+						if(nRead==closedAt)
+						{
+							return -1;
+						}
+						bb.wait();
+						cap=(int)(nWrite-nRead);
+					}
+					int l=Math.min(cap, len);
+					l=Math.min(l, reader.capacity()-reader.position());
+					if(l<0)
+					{
+						throw new IOException("Internal error");
+					}
+					reader.limit(reader.position()+l);
+					reader.get(b, off, l);
+					nRead+=l;
+					if(reader.position()==reader.capacity())
+					{
+						reader.clear();
+					}
+					return l;
 				}
 			} catch (InterruptedException e) {
 				throw new IOException(e);
@@ -91,6 +133,14 @@ public class InputStreamReceiver extends MultiplexerReceiver
 		bb=ByteBuffer.allocateDirect(pipeSize);
 		reader=bb.asReadOnlyBuffer();
 		in=new Is();
+	}
+	@Override
+	public void close(Exception e) {
+		super.close(e);
+		synchronized (bb) {
+			closedAt=nWrite;
+			bb.notifyAll();
+		}
 	}
 
 }

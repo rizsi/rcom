@@ -7,9 +7,10 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.rizsi.rcom.ChannelMultiplexer.ChannelOutputStream;
+import com.rizsi.rcom.util.UtilStream;
 
 import hu.qgears.commons.UtilProcess;
+import nio.multiplexer.ChannelProcessorMultiplexer;
 
 public class StreamSinkVNC extends StreamSink implements IChannelReader
 {
@@ -32,7 +33,8 @@ public class StreamSinkVNC extends StreamSink implements IChannelReader
 	private OutputStream os;
 	private Process p;
 	@Override
-	public void start(AbstractRcomArgs args, IVideocomConnection conn, ChannelMultiplexer multiplexer) throws Exception {
+	public void start(AbstractRcomArgs args, IVideocomConnection conn, ChannelProcessorMultiplexer multiplexer)
+			throws Exception {
 		int n=9;
 		int port=5900+n;
 		Socket s;
@@ -46,16 +48,17 @@ public class StreamSinkVNC extends StreamSink implements IChannelReader
 		}
 		is=s.getInputStream();
 		os=s.getOutputStream();
-		ChannelOutputStream cos=multiplexer.createStream();
-		StreamDataDuplex stream=(StreamDataDuplex)conn.registerStream(streamParametersVNC.name, cos.getChannel());
-		multiplexer.addListener(stream.backChannel, this);
-		conn.launchStream(streamParametersVNC.name);
-		UtilProcess.streamErrorOfProcess(is, cos);
+		throw new RuntimeException("VNC is not implemented on NIO server yet.");
+//		ChannelOutputStream cos=multiplexer.createStream();
+//		StreamDataDuplex stream=(StreamDataDuplex)conn.registerStream(streamParametersVNC.name, cos.getChannel());
+//		multiplexer.addListener(stream.backChannel, this);
+//		conn.launchStream(streamParametersVNC.name);
+//		UtilProcess.streamErrorOfProcess(is, cos);
 	}
 
 	@Override
 	public void readFully(InputStream is, int len) throws IOException {
-		IChannelReader.pipeToFully(is, len, buffer, os);
+		UtilStream.pipeToFully(is, len, buffer, os);
 	}
 
 }

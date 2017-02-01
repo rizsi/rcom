@@ -23,6 +23,7 @@ public class Connect {
 	byte[] b=new byte[1024];
 	ByteBuffer bb=ByteBuffer.wrap(b).order(ByteOrder.BIG_ENDIAN);
 	private void run(ConnectArgs a) throws IOException {
+		a.apply();
 		try(Socket s=new Socket(a.host, a.port))
 		{
 			OutputStream os=s.getOutputStream();

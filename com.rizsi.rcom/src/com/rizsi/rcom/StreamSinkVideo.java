@@ -1,9 +1,9 @@
 package com.rizsi.rcom;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
+import hu.qgears.commons.ConnectStreams;
 import hu.qgears.commons.UtilProcess;
 
 /**
@@ -26,10 +26,7 @@ public class StreamSinkVideo extends StreamSinkSimplex
 		os=player.getOutputStream();
 		UtilProcess.streamErrorOfProcess(player.getInputStream(), new NullOutputStream());
 		UtilProcess.streamErrorOfProcess(player.getErrorStream(), new NullOutputStream());
-	}
-	@Override
-	public void readFully(InputStream is, int len) throws IOException {
-		IChannelReader.pipeToFully(is, len, buffer, os);
+		ConnectStreams.startStreamThread(receiver.in, os);
 	}
 	@Override
 	public void dispose() {
@@ -38,6 +35,7 @@ public class StreamSinkVideo extends StreamSinkSimplex
 			player.destroy();
 			player=null;
 		}
+		super.dispose();
 	}
 
 }

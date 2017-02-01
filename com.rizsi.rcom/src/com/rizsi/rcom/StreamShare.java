@@ -1,6 +1,6 @@
 package com.rizsi.rcom;
 
-abstract public class StreamShare implements IChannelReader {
+abstract public class StreamShare {
 	public final StreamParameters params;
 	public final VideoConnection conn;
 	public StreamShare(VideoConnection videoConnection, StreamParameters params) {

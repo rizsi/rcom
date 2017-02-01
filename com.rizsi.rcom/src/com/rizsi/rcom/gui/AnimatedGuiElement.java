@@ -22,7 +22,7 @@ public class AnimatedGuiElement {
 		VideoStreamProcessor stream=source.getVideoStream();
 		if(stream!=null)
 		{
-			BufferedImage im=source.getVideoStream().getLatestImage();
+			BufferedImage im=source.getVideoStream().getCurrentImage();
 			if(im!=null)
 			{
 				selfVideo.setIcon(new ImageIcon(im));

@@ -22,15 +22,15 @@ public class RoundBuffer {
 			synchronized (buffer) {
 				buffer.limit(buffer.position()+n);
 				n=bc.read(buffer);
-				if(buffer.position()==buffer.capacity())
-				{
-					// Buffer is filled. We restart on the other end.
-					buffer.position(0);
-				}
 				if(n>0)
 				{
 					nRead+=n;
 					toactivate=RoundBuffer.this.senders;
+				}
+				if(buffer.position()==buffer.capacity())
+				{
+					// Buffer is filled. We restart on the other end.
+					buffer.position(0);
 				}
 			}
 			if(toactivate!=null)
@@ -130,9 +130,14 @@ public class RoundBuffer {
 		}
 		return s;
 	}
-	public Receive connectReceiver(ChannelProcessorMultiplexer multiplexer)
+	public Receive connectReceiver(ChannelProcessorMultiplexer multiplexer, int channelId)
 	{
 		Receive r=new Receive();
+		multiplexer.register(r, channelId);
 		return r;
+	}
+	public void close() {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -1,36 +1,28 @@
 package com.rizsi.rcom;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.rizsi.rcom.ChannelMultiplexer.ChannelOutputStream;
+import nio.multiplexer.MultiplexerSender;
 
 public class StreamShareSimplex extends StreamShare {
 	class Reg implements StreamRegistration
 	{
-		ChannelOutputStream cos;
+		MultiplexerSender cos;
 		
-		public Reg(ChannelOutputStream cos) {
+		public Reg(MultiplexerSender cos) {
 			super();
 			this.cos = cos;
 		}
 
 		@Override
 		public void close() {
-			try {
-				cos.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			cos.close(null);
 		}
 
 		@Override
 		public IStreamData getData() {
-			return new StreamDataSimplex(cos.getChannel());
+			return new StreamDataSimplex(cos.getId());
 		}
 
 		@Override
@@ -38,56 +30,14 @@ public class StreamShareSimplex extends StreamShare {
 			// Simplex streams are launched at once without waiting for the client to actually listen to the channel.
 		}
 	}
+	private RoundBufferStreaming buffer;
 	private List<Reg> clients=new ArrayList<>();
-	private byte[] buffer=new byte[DemuxedConnection.bufferSize];
 	private int channel;
 	public StreamShareSimplex(VideoConnection videoConnection, int channel, StreamParameters params) {
 		super(videoConnection, params);
 		this.channel=channel;
-	}
-
-	@Override
-	public void readFully(InputStream is, int len) throws IOException {
-		while(len>0)
-		{
-			int n=Math.min(len, buffer.length);
-			int nbytes=is.read(buffer, 0, n);
-			if(nbytes<0)
-			{
-				throw new EOFException();
-			}
-			len-=nbytes;
-			writeAll(buffer, 0, nbytes);
-		}
-		flushAll();
-	}
-
-	private void flushAll() {
-		for(int i=0;i<clients.size();++i)
-		{
-			ChannelOutputStream cos=clients.get(i).cos;
-			try {
-				cos.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-				clients.remove(i);
-				i--;
-			}
-		}
-	}
-
-	private void writeAll(byte[] buffer, int offset, int nbytes) {
-		for(int i=0;i<clients.size();++i)
-		{
-			ChannelOutputStream cos=clients.get(i).cos;
-			try {
-				cos.write(buffer, offset, nbytes);
-			} catch (IOException e) {
-				e.printStackTrace();
-				clients.remove(i);
-				i--;
-			}
-		}
+		buffer=new RoundBufferStreaming(VideoConnection.bufferSize);
+		buffer.connectReceiver(videoConnection.getConnection(), channel);
 	}
 
 	public void dispose() {
@@ -104,8 +54,8 @@ public class StreamShareSimplex extends StreamShare {
 		{
 			throw new IllegalArgumentException();
 		}
-		ChannelOutputStream cos=videoConnection.getConnection().getMultiplexer().createStream();
-		Reg ret=new Reg(cos);
+		MultiplexerSender sender=buffer.createSender(videoConnection.getConnection());
+		Reg ret=new Reg(sender);
 		clients.add(ret);
 		return ret;
 	}

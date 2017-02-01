@@ -74,6 +74,24 @@ public class OutputStreamSender extends MultiplexerSender
 		@Override
 		public void flush() throws IOException {
 		}
+		public void checkTurnaround(int n) {
+			boolean needNotify=false;
+			if(nWritten==nRead)
+			{
+				// We have to mark we have available data
+				needNotify=true;
+			}
+			nWritten+=n;
+			if(writeBuffer.position()==writeBuffer.capacity())
+			{
+				writeBuffer.clear();
+				writeBuffer.limit(0);
+			}
+			if(needNotify)
+			{
+				dataAvailable();
+			}
+		}
 	}
 	public final OutputStream os;
 	ByteBuffer writeBuffer;
@@ -87,31 +105,12 @@ public class OutputStreamSender extends MultiplexerSender
 		os=new SendOutputStream();
 		register();
 	}
-
-	public void checkTurnaround(int n) {
-		boolean needNotify=false;
-		if(nWritten==nRead)
-		{
-			// We have to mark we have available data
-			needNotify=true;
-		}
-		nWritten+=n;
-		if(writeBuffer.position()==writeBuffer.capacity())
-		{
-			writeBuffer.clear();
-			writeBuffer.limit(0);
-		}
-		if(needNotify)
-		{
-			dataAvailable();
-		}
-	}
-
 	@Override
 	public int send(SelectionKey key, WritableByteChannel channel, int sendCurrentLength) throws IOException {
 		synchronized (writeBuffer) {
 			int navail=(int)(nWritten-nRead);
 			int l=Math.min(navail, readBuffer.capacity()-readBuffer.position());
+			l=Math.min(sendCurrentLength, l);
 			readBuffer.limit(readBuffer.position()+l);
 			int n=channel.write(readBuffer);
 			if(n>0)
@@ -122,6 +121,10 @@ public class OutputStreamSender extends MultiplexerSender
 					// If buffer was full before but no longer then notify possibly waiting writers.
 					writeBuffer.notifyAll();
 				}
+			}
+			if(readBuffer.position()==readBuffer.capacity())
+			{
+				readBuffer.position(0);
 			}
 			return n;
 		}

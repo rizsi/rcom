@@ -3,38 +3,35 @@ package com.rizsi.rcom;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import hu.qgears.commons.signal.SignalFuture;
-import hu.qgears.commons.signal.Slot;
-import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
+import hu.qgears.commons.UtilEventListener;
+import hu.qgears.coolrmi.messages.CoolRMICall;
 import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
+import nio.coolrmi.CoolRMINioRemoter;
+import nio.multiplexer.ChannelProcessorMultiplexer;
 
 public class VideoConnection implements IVideocomConnection
 {
-	private DemuxedConnection c;
+	public static final int BUFFER_SIZE_DEFAULT = 1048576;
+	public static int bufferSize=BUFFER_SIZE_DEFAULT;
+	private ChannelProcessorMultiplexer c;
 	private Room room;
 	private int id;
 	private IVideocomCallback callback;
-	private GenericCoolRMIRemoter remoter;
 	private String userName;
-	private ExecutorService asyncCallback=Executors.newSingleThreadExecutor();
 	private Map<String, StreamRegistration> registrations=new HashMap<>();
 	private AbstractRcomArgs args;
 	public VideoConnection(AbstractRcomArgs args, Room room, GenericCoolRMIRemoter remoter, int id, String userName) {
-		this.remoter=remoter;
-		this.c=(DemuxedConnection)((CoolRMIRemoter)remoter).getConnection();
+		this.c=((CoolRMINioRemoter)remoter).getNioMultiplexer();
 		this.room=room;
 		this.id=id;
 		this.userName=userName;
 	}
 	public void init()
 	{
-		c.connectionclosed.addOnReadyHandler(new Slot<SignalFuture<DemuxedConnection>>() {
-			
+		c.closedEvent.addListener(new UtilEventListener<Exception>() {
 			@Override
-			public void signal(SignalFuture<DemuxedConnection> value) {
+			public void eventHappened(Exception msg) {
 				dispose();
 			}
 		});
@@ -47,7 +44,6 @@ public class VideoConnection implements IVideocomConnection
 			throw new IllegalArgumentException();
 		}
 		StreamShare share=params.createShare(this, channel);
-		c.getMultiplexer().addListener(channel, share);
 		room.addShare(share);
 		return share.getStreamData();
 	}
@@ -60,35 +56,27 @@ public class VideoConnection implements IVideocomConnection
 	@Override
 	public void registerCallback(IVideocomCallback callback) {
 		this.callback=callback;
+		CoolRMICall.getCurrentCall().asyncCall(null);
 		callback.currentShares(room.getSharesList());
 	}
 
 	public void callbackMessage(String message) {
 		if(callback!=null)
 		{
-			asyncCallback.submit(new Runnable() {
-				@Override
-				public void run() {
-					callback.message(message);
-				}
-			});
+			CoolRMICall.getCurrentCall().asyncCall(null);
+			callback.message(message);
 		}
 	}
 
 	public void callbackCurrentShares(List<StreamParameters> values) {
 		if(callback!=null)
 		{
-			asyncCallback.submit(new Runnable() {
-				@Override
-				public void run() {
-					callback.currentShares(values);
-				}
-			});
+			CoolRMICall.getCurrentCall().asyncCall(null);
+			callback.currentShares(values);
 		}		
 	}
 	public void dispose()
 	{
-		asyncCallback.shutdown();
 		room.remove(this);
 	}
 	@Override
@@ -138,7 +126,7 @@ public class VideoConnection implements IVideocomConnection
 			}
 		}
 	}
-	public DemuxedConnection getConnection() {
+	public ChannelProcessorMultiplexer getConnection() {
 		return c;
 	}
 	@Override

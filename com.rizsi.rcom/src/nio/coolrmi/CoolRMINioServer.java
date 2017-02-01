@@ -11,10 +11,9 @@ import nio.NioThread;
 
 public class CoolRMINioServer {
 	private CoolRMIServiceRegistry reg;
-	private SA sa;
+	private ClassLoader classLoader;
 	public class SA extends AbstractSocketAcceptor
 	{
-
 		public SA(NioThread t, ServerSocketChannel c) {
 			super(t, c);
 		}
@@ -22,10 +21,10 @@ public class CoolRMINioServer {
 		@Override
 		protected void socketChannelAccepted(SocketChannel sc) throws IOException {
 			sc.configureBlocking(false);
-			CoolRMINioRemoter srv=new CoolRMINioRemoter(getClass().getClassLoader(), false, true);
+			CoolRMINioRemoter srv=new CoolRMINioRemoter(classLoader, false, true);
 			srv.setServiceRegistry(reg);
 			try {
-				srv.connect(t, sc);
+				srv.connect(t, sc, false);
 			} catch (Exception e) {
 				throw new IOException(e);
 			}
@@ -40,13 +39,20 @@ public class CoolRMINioServer {
 			// TODO Auto-generated method stub
 		}
 	}
-	public void start(NioThread nt, SocketAddress address, CoolRMIServiceRegistry reg) throws Exception
+	
+	public CoolRMINioServer(ClassLoader classLoader, CoolRMIServiceRegistry reg) {
+		super();
+		this.classLoader = classLoader;
+		this.reg = reg;
+	}
+
+	public SA listen(NioThread nt, SocketAddress address) throws Exception
 	{
-		this.reg=reg;
 		ServerSocketChannel ssc=ServerSocketChannel.open();
 		ssc.configureBlocking(false);
 		ssc.bind(address);
-		sa=new SA(nt, ssc);
+		SA sa=new SA(nt, ssc);
 		sa.start();
+		return sa;
 	}
 }

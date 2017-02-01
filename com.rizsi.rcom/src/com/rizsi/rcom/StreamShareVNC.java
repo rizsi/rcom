@@ -10,11 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.rizsi.rcom.ChannelMultiplexer.ChannelOutputStream;
+import com.rizsi.rcom.util.UtilStream;
 
 import hu.qgears.commons.UtilProcess;
 import hu.qgears.commons.signal.SignalFuture;
 import hu.qgears.commons.signal.SignalFutureWrapper;
 import hu.qgears.commons.signal.Slot;
+import nio.multiplexer.InputStreamReceiver;
+import nio.multiplexer.OutputStreamSender;
 
 public class StreamShareVNC extends StreamShare {
 	class Reg implements StreamRegistration, IChannelReader
@@ -49,12 +52,14 @@ public class StreamShareVNC extends StreamShare {
 			this.cos=cos;
 			os=s.getOutputStream();
 			is=s.getInputStream();
-			videoConnection.getConnection().getMultiplexer().addListener(clientChannel, this);
+			// TODO connect received stream to the VNC process!
+			throw new RuntimeException("VNC is not implemented in non-blocking version");
+//			videoConnection.getConnection().getMultiplexer().addListener(clientChannel, this);
 		}
 
 		@Override
 		public void readFully(InputStream is, int len) throws IOException {
-			IChannelReader.pipeToFully(is, len, buffer2, os);
+			UtilStream.pipeToFully(is, len, buffer2, os);
 		}
 
 		@Override
@@ -65,7 +70,7 @@ public class StreamShareVNC extends StreamShare {
 	private List<Reg> clients=new ArrayList<>();
 	private byte[] buffer=new byte[DemuxedConnection.bufferSize];
 	private int channel;
-	private ChannelOutputStream back;
+	private OutputStreamSender back;
 	private Socket s;
 	private OutputStream os;
 	private int port=9998;
@@ -74,7 +79,7 @@ public class StreamShareVNC extends StreamShare {
 	public StreamShareVNC(VideoConnection videoConnection, int channel, StreamParameters params) {
 		super(videoConnection, params);
 		this.channel=channel;
-		back=videoConnection.getConnection().getMultiplexer().createStream();
+		back=new OutputStreamSender(videoConnection.getConnection(), VideoConnection.bufferSize);
 		int n=5;
 		int localport=5900+n;
 		try {
@@ -94,7 +99,7 @@ public class StreamShareVNC extends StreamShare {
 				});
 				s=ss.accept();
 				System.out.println("X11vnc connected to local VNC server endpoint as reflect client.");
-				UtilProcess.streamErrorOfProcess(s.getInputStream(), back);
+				UtilProcess.streamErrorOfProcess(s.getInputStream(), back.os);
 				os=s.getOutputStream();
 				UtilProcess.streamErrorOfProcess(p.getErrorStream(), System.err);
 				UtilProcess.streamErrorOfProcess(p.getInputStream(), System.out);
@@ -103,6 +108,8 @@ public class StreamShareVNC extends StreamShare {
 			{
 				ss.close();
 			}
+			// TODO connect received stream to the VNC process!
+			throw new RuntimeException("VNC is not implemented in non-blocking version");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -137,11 +144,6 @@ public class StreamShareVNC extends StreamShare {
 		}
 	}
 
-	@Override
-	public void readFully(InputStream is, int len) throws IOException {
-		IChannelReader.pipeToFully(is, len, buffer, os);
-	}
-
 	public void dispose() {
 		for(Reg r: clients)
 		{
@@ -159,8 +161,10 @@ public class StreamShareVNC extends StreamShare {
 		try {
 			waitUntilServerportisAccessible(port);
 			Socket s=new Socket("localhost", port);
-			ChannelOutputStream cos=videoConnection.getConnection().getMultiplexer().createStream();
-			ret.setChannels(videoConnection, s, clientChannel, cos);
+			// TODO connect received stream to the VNC process!
+			throw new RuntimeException("VNC is not implemented in non-blocking version");
+			//			ChannelOutputStream cos=videoConnection.getConnection().getMultiplexer().createStream();
+			//			ret.setChannels(videoConnection, s, clientChannel, cos);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -171,7 +175,9 @@ public class StreamShareVNC extends StreamShare {
 
 	@Override
 	public IStreamData getStreamData() {
-		return new StreamDataDuplex(channel, back.getChannel());
+		// TODO connect received stream to the VNC process!
+		throw new RuntimeException("VNC is not implemented in non-blocking version");
+		//return new StreamDataDuplex(channel, back.getChannel());
 	}
 
 }

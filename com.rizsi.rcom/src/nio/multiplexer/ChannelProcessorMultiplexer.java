@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import hu.qgears.commons.UtilEvent;
 import hu.qgears.commons.UtilFile;
 import nio.ChannelProcessor;
 import nio.NioThread;
@@ -43,6 +44,7 @@ public class ChannelProcessorMultiplexer extends ChannelProcessor
 	 * The channel is rceiving a message data.
 	 */
 	private static final int STATE_MESSAGE=2;
+	public final UtilEvent<Exception> closedEvent=new UtilEvent<>();
 	int recvState=STATE_INIT;
 	int sendState=STATE_INIT;
 	private Map<Integer, MultiplexerReceiver> inputs=new HashMap<>();
@@ -338,6 +340,7 @@ public class ChannelProcessorMultiplexer extends ChannelProcessor
 			System.err.println("Channel closed:");
 			e.printStackTrace();
 		}
+		closedEvent.eventHappened(e);
 	}
 
 }

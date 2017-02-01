@@ -21,7 +21,7 @@ public class ChannelMultiplexer {
 	private byte[] readHeaderBytes=new byte[8];
 	private ByteBuffer readHeader=ByteBuffer.wrap(readHeaderBytes).order(ByteOrder.LITTLE_ENDIAN);
 	private int nChannel=0;
-	private Map<Integer, IChannelReader> readers=Collections.synchronizedMap(new HashMap<>());
+	private Map<Integer, IChannelReader> readers=Collections.synchronizedMap(new HashMap<Integer, IChannelReader>());
 	public class ChannelOutputStream extends OutputStream
 	{
 		private int channel;

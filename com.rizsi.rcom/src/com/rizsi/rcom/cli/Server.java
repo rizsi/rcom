@@ -1,16 +1,17 @@
 package com.rizsi.rcom.cli;
 
-import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import com.rizsi.rcom.IVideocomConnection;
 import com.rizsi.rcom.IVideocomServer;
 import com.rizsi.rcom.VideoConnection;
-import com.rizsi.rcom.VideoServerTCPListenerFactory;
 import com.rizsi.rcom.VideocomServer;
 import com.rizsi.rcom.ssh.UserCollector;
 
-import hu.qgears.coolrmi.CoolRMIServer;
 import hu.qgears.coolrmi.CoolRMIService;
+import hu.qgears.coolrmi.remoter.CoolRMIServiceRegistry;
+import nio.NioThread;
+import nio.coolrmi.CoolRMINioServer;
 
 public class Server {
 	public void main(String[] args) throws Exception {
@@ -19,18 +20,22 @@ public class Server {
 		new Server().run(a);
 	}
 
-	private void run(ServerCliArgs a) throws IOException {
+	private void run(ServerCliArgs a) throws Exception {
+		a.apply();
 		if(a.authFile!=null&&a.connectCommand!=null&&a.keyDir!=null)
 		{
-			new UserCollector(a.keyDir, a.authFile, a.connectCommand).start();
+			new UserCollector(a.keyDir, a.authFile, a.connectCommand, a.beforeKeyDirUpdateCommand, a.keyDirUpdateTimeoutMillis).start();
 		}
 		if(!a.disableServer)
 		{
-			CoolRMIServer srv=new CoolRMIServer(Launcher.class.getClassLoader(), new VideoServerTCPListenerFactory(a), false);
-			srv.getServiceRegistry().addProxyType(VideoConnection.class, IVideocomConnection.class);
-			srv.getServiceRegistry().addService(new CoolRMIService(IVideocomServer.id,
+			NioThread nt=new NioThread();
+			CoolRMIServiceRegistry reg=new CoolRMIServiceRegistry();
+			reg.addProxyType(VideoConnection.class, IVideocomConnection.class);
+			reg.addService(new CoolRMIService(IVideocomServer.id,
 					IVideocomServer.class, new VideocomServer(a)));
-			srv.start();
+			CoolRMINioServer srv=new CoolRMINioServer(getClass().getClassLoader(), reg);
+			srv.listen(nt, new InetSocketAddress(a.host, a.port));
+			nt.start();
 		}
 	}
 }

@@ -27,10 +27,10 @@ public class Gui extends JFrame {
 	Client client;
 	private List<AnimatedGuiElement> animated=new ArrayList<AnimatedGuiElement>();
 	public static void commandline(String[] args) throws Exception {
-		GuiCliArgs a=new GuiCliArgs();
+		final GuiCliArgs a=new GuiCliArgs();
 		UtilCli.parse(a, args, true);
 
-		Client c = new Client();
+		final Client c = new Client();
 		SwingUtilities.invokeAndWait(new Runnable() {
 			@Override
 			public void run() {
@@ -45,13 +45,13 @@ public class Gui extends JFrame {
 	}
 
 	private JPanel right;
-	public Gui(Client c2, GuiCliArgs a) {
+	public Gui(final Client c2, GuiCliArgs a) {
 		this.client=c2;
 		JPanel left = new JPanel();
 		right = new JPanel();
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, left, right);
 		getContentPane().add(splitPane);
-		JCheckBox video = new JCheckBox("Stream webcam");
+		final JCheckBox video = new JCheckBox("Stream webcam");
 		Container c = left;
 		c.setLayout(new GridLayout(0, 1));
 		c.add(video);
@@ -77,7 +77,7 @@ public class Gui extends JFrame {
 				client.setVideoStreamingEnabled(p);
 			}
 		});
-		JCheckBox audio = new JCheckBox("Stream audio");
+		final JCheckBox audio = new JCheckBox("Stream audio");
 		c.add(audio);
 		audio.addActionListener(new ActionListener() {
 			@Override
@@ -87,7 +87,7 @@ public class Gui extends JFrame {
 		});
 		if(a.enableVNC)
 		{
-			JCheckBox vnc = new JCheckBox("Launch VNC");
+			final JCheckBox vnc = new JCheckBox("Launch VNC");
 			c.add(vnc);
 			vnc.addActionListener(new ActionListener() {
 	

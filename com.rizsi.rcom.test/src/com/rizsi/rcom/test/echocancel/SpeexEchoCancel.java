@@ -10,6 +10,7 @@ import java.io.PipedOutputStream;
 import com.rizsi.rcom.IChannelReader;
 import com.rizsi.rcom.NullOutputStream;
 import com.rizsi.rcom.util.TeeOutputStream;
+import com.rizsi.rcom.util.UtilStream;
 
 import hu.qgears.commons.ConnectStreams;
 
@@ -69,28 +70,28 @@ public class SpeexEchoCancel extends Thread
 				for(int i=0;i<nLate;++i)
 				{
 //					IChannelReader.pipeToFully(nullin, bufferSize, input, speexInputMic);
-					IChannelReader.pipeToFully(play, bufferSize, echo, nullout);
+					UtilStream.pipeToFully(play, bufferSize, echo, nullout);
 //					IChannelReader.pipeToFully(speexOutput, bufferSize, proc, processed);
 				}
 			}else
 			{
 				for(int i=0;i<-nLate;++i)
 				{
-					IChannelReader.pipeToFully(rec, bufferSize, input, nullout);
+					UtilStream.pipeToFully(rec, bufferSize, input, nullout);
 //					IChannelReader.pipeToFully(nullin, bufferSize, echo, speexInputMonitor);
 //					IChannelReader.pipeToFully(speexOutput, bufferSize, proc, processed);
 				}
 			}
 			for(int i=0;i<nDump;++i)
 			{
-				IChannelReader.pipeToFully(rec, bufferSize, input, nullout);
-				IChannelReader.pipeToFully(play, bufferSize, echo, nullout);
+				UtilStream.pipeToFully(rec, bufferSize, input, nullout);
+				UtilStream.pipeToFully(play, bufferSize, echo, nullout);
 			}
 			while(true)
 			{
-				IChannelReader.pipeToFully(rec, bufferSize, input, speexInputMic);
-				IChannelReader.pipeToFully(play, bufferSize, echo, speexInputMonitor);
-				IChannelReader.pipeToFully(speexOutput, bufferSize, proc, processed);
+				UtilStream.pipeToFully(rec, bufferSize, input, speexInputMic);
+				UtilStream.pipeToFully(play, bufferSize, echo, speexInputMonitor);
+				UtilStream.pipeToFully(speexOutput, bufferSize, proc, processed);
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

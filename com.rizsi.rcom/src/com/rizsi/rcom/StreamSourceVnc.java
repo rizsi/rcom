@@ -9,6 +9,7 @@ import java.net.Socket;
 
 import com.rizsi.rcom.ChannelMultiplexer.ChannelOutputStream;
 import com.rizsi.rcom.cli.Client;
+import com.rizsi.rcom.util.UtilStream;
 import com.rizsi.rcom.vnc.LogFilterOutpurStream;
 
 import hu.qgears.commons.UtilProcess;
@@ -22,14 +23,14 @@ public class StreamSourceVnc implements IChannelReader, AutoCloseable {
 	IVideocomConnection conn;
 	public void start(Client client, String streamName) throws IOException {
 		conn=client.conn;
-		cos = client.fact.getMultiplexer().createStream();
+		cos = client.createStream();
 		ServerSocket ss=new ServerSocket();
 		ss.bind(new InetSocketAddress("localhost", 0));
 		int localport=ss.getLocalPort();
 		System.out.println("Local port: "+localport);
 		params=new StreamParametersVNC(streamName, client.id);
 		StreamDataDuplex data=(StreamDataDuplex)client.conn.shareStream(cos.getChannel(), params);
-		client.fact.getMultiplexer().addListener(data.backChannel, this);
+		client.addListener(data.backChannel, this);
 		Process p=Runtime.getRuntime().exec(client.getArgs().program_x11vnc+" -connect localhost:"+localport
 				// +" -clip 200x200+50+50"
 				+" -localhost");
@@ -44,7 +45,7 @@ public class StreamSourceVnc implements IChannelReader, AutoCloseable {
 
 	@Override
 	public void readFully(InputStream is, int len) throws IOException {
-		IChannelReader.pipeToFully(is, len, buffer, os);
+		UtilStream.pipeToFully(is, len, buffer, os);
 	}
 	@Override
 	public void close() {
