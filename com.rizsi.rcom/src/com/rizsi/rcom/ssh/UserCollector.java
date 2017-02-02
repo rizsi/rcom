@@ -2,55 +2,99 @@ package com.rizsi.rcom.ssh;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.rizsi.rcom.cli.ServerCliArgs;
 
 import hu.qgears.commons.UtilFile;
+import hu.qgears.commons.UtilProcess;
+import nio.multiplexer.AbstractMultiplexer;
 
 public class UserCollector extends Thread
 {
-	private File users;
-	private File auth;
-	private String command;
-	private String beforeKeyDirUpdateCommand;
-	private long keyDirUpdateTimeoutMillis;
-	public UserCollector(File users, File auth, String command, String beforeKeyDirUpdateCommand, long keyDirUpdateTimeoutMillis) {
+	private ServerCliArgs args;
+	public UserCollector(ServerCliArgs args) {
 		super("Update authorized_keys");
-		this.users=users;
-		this.auth=auth;
-		this.command=command;
-		this.beforeKeyDirUpdateCommand=beforeKeyDirUpdateCommand;
-		this.keyDirUpdateTimeoutMillis=keyDirUpdateTimeoutMillis;
+		this.args=args;
 	}
 	@Override
 	public void run() {
 		while(true)
 		{
 			try {
-				if(beforeKeyDirUpdateCommand!=null)
+				if(args.beforeKeyDirUpdateCommand!=null)
 				{
-					Runtime.getRuntime().exec(beforeKeyDirUpdateCommand);
+					try {
+						UtilProcess.getProcessReturnValueFuture(Runtime.getRuntime().exec(args.beforeKeyDirUpdateCommand)).get();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-				String s=new UserCollectorTemplate().generate(users, command);
+				List<UserKey> keys=new ArrayList<UserKey>();
+				for(File f: UtilFile.listFiles(args.keyDir))
+				{
+					try {
+						String fileName=f.getName();
+						if(fileName.endsWith(".pub"))
+						{
+							String userName=fileName.substring(0, fileName.length()-4);
+							if(validateUserName(userName))
+							{
+								UserKey key=new UserKey(userName, UtilFile.loadAsString(f));
+								keys.add(key);
+							}
+						}
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				String s=new UserCollectorTemplate().generate(keys, args.host, args.port);
 				String prev=null;
 				try {
-					UtilFile.loadAsString(auth);
+					UtilFile.loadAsString(args.authFile);
 				} catch (Exception e) {
 				}
 				if(!s.equals(prev))
 				{
-					auth.getParentFile().mkdirs();
-					UtilFile.saveAsFile(auth, s);
+					args.authFile.getParentFile().mkdirs();
+					UtilFile.saveAsFile(args.authFile, s);
 				}
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			try {
-				Thread.sleep(keyDirUpdateTimeoutMillis);
+				Thread.sleep(args.keyDirUpdateTimeoutMillis);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+	}
+	private boolean validateUserName(String userName) {
 		
+		for(char ch:userName.toCharArray())
+		{
+			if(ch>126)
+			{
+				// lower ASCII only and DEL is prohibited
+				return false;
+			}
+			if(ch<='@')
+			{
+				// characters below are possible escaping characters also disallowed
+				return false;
+			}
+		}
+		byte[] bytes=userName.getBytes(StandardCharsets.UTF_8);
+		if(bytes.length>AbstractMultiplexer.userNameLength)
+		{
+			return false;
+		}
+		return true;
 	}
 }

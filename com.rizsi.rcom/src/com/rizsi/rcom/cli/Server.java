@@ -22,9 +22,9 @@ public class Server {
 
 	private void run(ServerCliArgs a) throws Exception {
 		a.apply();
-		if(a.authFile!=null&&a.connectCommand!=null&&a.keyDir!=null)
+		if(a.authFile!=null&&a.keyDir!=null)
 		{
-			new UserCollector(a.keyDir, a.authFile, a.connectCommand, a.beforeKeyDirUpdateCommand, a.keyDirUpdateTimeoutMillis).start();
+			new UserCollector(a).start();
 		}
 		if(!a.disableServer)
 		{

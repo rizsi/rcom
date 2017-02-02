@@ -13,7 +13,6 @@ public class StreamSinkVideo extends StreamSinkSimplex
 {
 	StreamParametersVideo p;
 	private OutputStream os;
-	private byte[] buffer=new byte[DemuxedConnection.bufferSize];
 	private Process player;
 	public StreamSinkVideo(StreamParametersVideo p) {
 		super(p.name);

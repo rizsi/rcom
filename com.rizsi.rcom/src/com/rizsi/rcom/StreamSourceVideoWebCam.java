@@ -6,6 +6,7 @@ import java.io.OutputStream;
 
 import com.rizsi.rcom.cli.Client;
 import com.rizsi.rcom.gui.IVideoStreamContainer;
+import com.rizsi.rcom.util.ChainList;
 import com.rizsi.rcom.util.TeeOutputStream;
 import com.rizsi.rcom.util.VideoStreamProcessor;
 import com.rizsi.rcom.webcam.WebCamParameter;
@@ -32,9 +33,9 @@ public class StreamSourceVideoWebCam implements AutoCloseable, IVideoStreamConta
 		oss=new OutputStreamSender(c.getMultiplexer(), VideoConnection.bufferSize);
 		c.conn.shareStream(oss.getId(), params=new StreamParametersVideo(streamName, c.id, wcp.getW(), wcp.getH(), "mpegts"));
 		stream=new VideoStreamProcessor(c.getArgs(), params.width, params.height, params.width/2, params.height/2, params.encoding);
-		String command=c.getArgs().platform.createWebCamStreamCommand(c.getArgs(), wcp, params);
-		System.out.println("Webcam command: $ "+command);
-		p=Runtime.getRuntime().exec(command);
+		ChainList<String> command=c.getArgs().platform.createWebCamStreamCommand(c.getArgs(), wcp, params);
+		System.out.println("Webcam command: $ "+command.concat(" "));
+		p=new ProcessBuilder(command).start();
 		InputStream is=p.getInputStream();
 		InputStream err=p.getErrorStream();
 		UtilProcess.streamErrorOfProcess(err, new NullOutputStream());

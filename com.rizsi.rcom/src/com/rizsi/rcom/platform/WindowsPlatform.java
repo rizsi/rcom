@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
 import com.rizsi.rcom.AbstractRcomArgs;
+import com.rizsi.rcom.util.ChainList;
 import com.rizsi.rcom.webcam.WebCamParameter;
 
 import hu.qgears.commons.UtilProcess;
@@ -18,10 +19,12 @@ public class WindowsPlatform {
 	public static Map<String, WebCamParameter> getCameras(AbstractRcomArgs args) throws Exception
 	{
 		Map<String, WebCamParameter> ret = new TreeMap<>();
-		List<String> camIds=parseCamIds(streamError(Runtime.getRuntime().exec(args.program_ffmpeg+" -list_devices true -f dshow -i dummy")));
+		ChainList<String> command=new ChainList<>(args.program_ffmpeg, "-list_devices", "true", "-f", "dshow", "-i", "dummy");
+		List<String> camIds=parseCamIds(streamError(new ProcessBuilder(command).start()));
 		for(String dev: camIds)
 		{
-			String data=streamError(Runtime.getRuntime().exec(args.program_ffmpeg+" -f dshow -list_options true -i video=\""+dev+"\""));
+			ChainList<String> sizesCommand=new ChainList<String>(args.program_ffmpeg, "-f", "dshow", "-list_options", "true", "-i", "video=\""+dev+"\"");
+			String data=streamError(new ProcessBuilder(sizesCommand).start());
 			parseCamModes(data, dev, ret);
 		}
 		return ret;

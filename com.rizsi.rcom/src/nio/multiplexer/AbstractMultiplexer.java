@@ -34,11 +34,17 @@ abstract public class AbstractMultiplexer implements IMultiplexer
 	 */
 	private static final int STATE_READY=1;
 	/**
-	 * The channel is rceiving a message data.
+	 * The channel is receiving a message data.
 	 */
 	private static final int STATE_MESSAGE=2;
+	/**
+	 * The channel is receiving user name.
+	 */
 	private static final int STATE_USERNAME=3;
-	public static final int userNameLength=1024;
+	/**
+	 * Lenght of the authenticated user name in bytes.
+	 */
+	public static final int userNameLength=64;
 	int recvState=STATE_INIT;
 	int sendState=STATE_INIT;
 	private Map<Integer, MultiplexerReceiver> inputs=new HashMap<>();
@@ -205,7 +211,7 @@ abstract public class AbstractMultiplexer implements IMultiplexer
 				case 'u':
 					if(userName!=null)
 					{
-						throw new IOException("USername already set up");
+						throw new IOException("Username already set up");
 					}
 					recvState=STATE_USERNAME;
 					break;

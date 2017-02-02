@@ -1,63 +1,112 @@
 package com.rizsi.rcom.ssh;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
-import hu.qgears.commons.UtilFile;
 import hu.qgears.commons.UtilString;
 import hu.qgears.rtemplate.runtime.DummyCodeGeneratorContext;
 import hu.qgears.rtemplate.runtime.RAbstractTemplatePart;
+import nio.coolrmi.CoolRMINioRemoter;
+import nio.multiplexer.AbstractMultiplexer;
 
 public class UserCollectorTemplate extends RAbstractTemplatePart {
-	public UserCollectorTemplate() {
-		super(new DummyCodeGeneratorContext());
-	}
-	public String generate(File folder, String command) throws IOException
+	private CharBuffer cb=CharBuffer.allocate(1);
+	private byte[] bs=new byte[1];
+	private class EchoEscaper
 	{
-		write("# RCom start\n");
-		for(File f: UtilFile.listFiles(folder))
+		private StringBuilder str=new StringBuilder();
+		public void append(String s)
 		{
-			try {
-				String fileName=f.getName();
-				if(fileName.endsWith(".pub"))
-				{
-					String userName=fileName.substring(0, fileName.length()-4);
-					if(validateUserName(userName))
-					{
-						String key=UtilFile.loadAsString(f);
-						String line=UtilString.split(key, "\r\n").get(0).trim();
-						write("command=\"");
-						writeObject(command);
-						write(" ");
-						writeObject(userName);
-						write("\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ");
-						writeObject(line);
-						write("\n");
-					}
-				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			for(char c: s.toCharArray())
+			{
+				append(c);
 			}
 		}
-		write("# RCom end\n");
-		finishDeferredParts();
-		return getTemplateState().getOut().toString();
-	}
-	private boolean validateUserName(String userName) {
-		for(char ch:userName.toCharArray())
+		public void append(char c)
+		{
+				if(validChar(c))
+				{
+					str.append(c);
+				}else
+				{
+					cb.clear();
+					cb.put(c);
+					cb.flip();
+					ByteBuffer out=StandardCharsets.UTF_8.encode(cb);
+					while(out.hasRemaining())
+					{
+						str.append("\\\\x");
+						bs[0]=out.get();
+						str.append(UtilString.toHex(bs));
+					}
+				}
+		}
+		public boolean validChar(char ch)
 		{
 			if(ch>126)
 			{
 				// lower ASCII only and DEL is prohibited
 				return false;
 			}
+			if(ch==' ')
+			{
+				return false;
+			}
+			if(ch=='-')
+			{
+				return true;
+			}
+			if(ch=='.')
+			{
+				return true;
+			}
+			if(ch<='9' && ch>='0')
+			{
+				return true;
+			}
 			if(ch<='@')
 			{
 				// characters below are possible escaping characters also disallowed
 				return false;
 			}
+			return true;
 		}
-		return true;
+	}
+	public UserCollectorTemplate() {
+		super(new DummyCodeGeneratorContext());
+	}
+	public String generate(List<UserKey> keys, String host, int port) throws IOException
+	{
+		write("# RCom start\n");
+		for(UserKey key: keys)
+		{
+			String line=UtilString.split(key.key, "\r\n").get(0).trim();
+			EchoEscaper ee=new EchoEscaper();
+			ee.append(new String(CoolRMINioRemoter.clientId, StandardCharsets.UTF_8));
+			ee.append('u');
+			ee.append((char)0);
+			ee.append((char)0);
+			ee.append((char)0);
+			ee.append(key.userName);
+			for(int i=key.userName.getBytes(StandardCharsets.UTF_8).length; i<AbstractMultiplexer.userNameLength; ++i)
+			{
+				ee.append((char)0);
+			}
+			write("command=\"{ echo -en ");
+			writeObject(ee.str.toString());
+			write(";cat; }|socat - TCP4:");
+			writeObject(host);
+			write(":");
+			writeObject(port);
+			write("\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ");
+			writeObject(line);
+			write("\n");
+		}
+		write("# RCom end\n");
+		finishDeferredParts();
+		return getTemplateState().getOut().toString();
 	}
 }

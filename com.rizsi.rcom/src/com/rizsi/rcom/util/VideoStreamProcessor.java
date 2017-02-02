@@ -11,6 +11,7 @@ import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.NullOutputStream;
 
 import hu.qgears.commons.UtilProcess;
+import hu.qgears.commons.UtilString;
 
 /**
  * Read an mpeg stream run it through ffmpeg and receive a stream of images.
@@ -60,9 +61,9 @@ public class VideoStreamProcessor implements AutoCloseable
 		}
 		String vdeo_size=" -video_size "+origW+"x"+origH+" ";
 		String trace="-v trace";
-		String command=args.program_ffmpeg+" -analyzeduration 0 -fpsprobesize 0 -probesize 32000 -f "+enconding+" -i - "+scale+" -f rawvideo -pix_fmt bgr24 -";
-		System.out.println("Decoder command: $ "+command);
-		p=Runtime.getRuntime().exec(command);
+		ChainList<String> command=new ChainList<>(args.program_ffmpeg).addcall(UtilString.split("-analyzeduration 0 -fpsprobesize 0 -probesize 32000 -f "+enconding+" -i - "+scale+" -f rawvideo -pix_fmt bgr24 -", " "));
+		System.out.println("Decoder command: $ "+command.concat(" "));
+		p=new ProcessBuilder(command).start();
 		UtilProcess.streamErrorOfProcess(p.getErrorStream(), new NullOutputStream());
 		new Thread("Read frames")
 		{

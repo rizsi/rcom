@@ -10,9 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.rizsi.rcom.ChannelMultiplexer.ChannelOutputStream;
+import com.rizsi.rcom.util.ChainList;
 import com.rizsi.rcom.util.UtilStream;
 
 import hu.qgears.commons.UtilProcess;
+import hu.qgears.commons.UtilString;
 import hu.qgears.commons.signal.SignalFuture;
 import hu.qgears.commons.signal.SignalFutureWrapper;
 import hu.qgears.commons.signal.Slot;
@@ -87,8 +89,9 @@ public class StreamShareVNC extends StreamShare {
 			try
 			{
 				ss.bind(new InetSocketAddress("localhost", localport));
-				String command=videoConnection.getArgs().program_x11vnc+" -reflect localhost:"+n+" -forever -rfbport "+port+" -localhost";
-				p=Runtime.getRuntime().exec(command);
+				ChainList<String> command=new ChainList<>(videoConnection.getArgs().program_x11vnc).addcall(
+						UtilString.split("-reflect localhost:"+n+" -forever -rfbport "+port+" -localhost", " "));
+				p=new ProcessBuilder(command).start();
 				processresult=UtilProcess.getProcessReturnValueFuture(p);
 				processresult.addOnReadyHandler(new Slot<SignalFuture<Integer>>() {
 					

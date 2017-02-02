@@ -7,6 +7,11 @@ import com.rizsi.rcom.cli.ClientCliArgs;
 
 import hu.qgears.commons.ConnectStreams;
 
+/**
+ * Mini manual test program for WebCam streaming.
+ * @author rizsi
+ *
+ */
 public class StreamWebCam {
 	public static void main(String[] args) throws Exception {
 		ClientCliArgs a=new ClientCliArgs();

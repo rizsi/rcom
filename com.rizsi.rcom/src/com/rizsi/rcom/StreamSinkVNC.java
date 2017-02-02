@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import com.rizsi.rcom.util.ChainList;
 import com.rizsi.rcom.util.UtilStream;
 
 import hu.qgears.commons.UtilProcess;
@@ -41,7 +42,8 @@ public class StreamSinkVNC extends StreamSink implements IChannelReader
 		try(ServerSocket ss=new ServerSocket())
 		{
 			ss.bind(new InetSocketAddress("localhost", port));
-			p=Runtime.getRuntime().exec(args.program_vncviewer+" -ViewOnly localhost:"+n);
+			ChainList<String> command=new ChainList<>(args.program_vncviewer, "-ViewOnly", "localhost:"+n);
+			p=new ProcessBuilder(command).start();
 			UtilProcess.streamErrorOfProcess(p.getInputStream(), System.out);
 			UtilProcess.streamErrorOfProcess(p.getErrorStream(), System.err);
 			s=ss.accept();
