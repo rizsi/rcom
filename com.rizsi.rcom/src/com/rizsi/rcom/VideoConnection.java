@@ -26,10 +26,11 @@ public class VideoConnection implements IVideocomConnection
 		this.room=room;
 		this.id=id;
 		this.userName=userName;
+		System.out.println("Video connection user name: "+userName);
 	}
 	public void init()
 	{
-		c.closedEvent.addListener(new UtilEventListener<Exception>() {
+		c.getClosedEvent().addListener(new UtilEventListener<Exception>() {
 			@Override
 			public void eventHappened(Exception msg) {
 				dispose();
@@ -71,6 +72,7 @@ public class VideoConnection implements IVideocomConnection
 	public void callbackCurrentShares(List<StreamParameters> values) {
 		if(callback!=null)
 		{
+			System.out.println("Current shares: "+values+" "+getUserName());
 			CoolRMICall.getCurrentCall().asyncCall(null);
 			callback.currentShares(values);
 		}		
@@ -141,5 +143,8 @@ public class VideoConnection implements IVideocomConnection
 	}
 	public AbstractRcomArgs getArgs() {
 		return args;
+	}
+	public String getUserName() {
+		return userName;
 	}
 }

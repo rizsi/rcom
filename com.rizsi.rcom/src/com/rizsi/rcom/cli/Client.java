@@ -1,6 +1,11 @@
 package com.rizsi.rcom.cli;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.lang.ProcessBuilder.Redirect;
 import java.net.InetSocketAddress;
+import java.nio.channels.Pipe.SinkChannel;
+import java.nio.channels.Pipe.SourceChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,8 +30,11 @@ import com.rizsi.rcom.gui.GuiCliArgs;
 import com.rizsi.rcom.gui.IVideoStreamContainer;
 import com.rizsi.rcom.webcam.WebCamParameter;
 
+import nio.ConnectNio;
 import nio.NioThread;
 import nio.coolrmi.CoolRMINioClient;
+import nio.coolrmi.CoolRMINioRemoter;
+import nio.multiplexer.DualChannelProcessorMultiplexer;
 import nio.multiplexer.IMultiplexer;
 
 public class Client implements IVideocomCallback {
@@ -55,12 +63,10 @@ public class Client implements IVideocomCallback {
 			System.setProperty("PULSE_PROP", "filter.want=echo-cancel");
 		}
 		System.out.println("Inited");
-		NioThread nt=new NioThread();
-		nt.start();
 		CoolRMINioClient cli=new CoolRMINioClient(Launcher.class.getClassLoader(), false);
 		cli.setExecutorService(Executors.newSingleThreadExecutor());
 		cli.getServiceRegistry().addProxyType(Client.class, IVideocomCallback.class);
-		cli.connect(nt, new InetSocketAddress(args.host, args.port));
+		connect(cli);
 		multiplexer=cli.getNioMultiplexer();
 		System.out.println("connected");
 		IVideocomServer srv=(IVideocomServer) cli.getService(IVideocomServer.class, IVideocomServer.id);
@@ -111,12 +117,42 @@ public class Client implements IVideocomCallback {
 		cli.close();
 	}
 
+	private void connect(CoolRMINioClient cli) throws Exception {
+		NioThread nt=new NioThread();
+		if(args.ssh!=null)
+		{
+			ProcessBuilder pb=new ProcessBuilder(args.program_ssh, args.ssh);
+			pb.redirectError(Redirect.INHERIT);
+			final Process p=pb.start();
+			SourceChannel in=ConnectNio.inputStreamToPipe(p.getInputStream());
+			in.configureBlocking(false);
+			SinkChannel out=ConnectNio.outputStreamToPipe(p.getOutputStream(), new Closeable() {
+				
+				@Override
+				public void close() throws IOException {
+					p.destroy();
+				}
+			});
+			out.configureBlocking(false);
+			DualChannelProcessorMultiplexer multiplexer=new DualChannelProcessorMultiplexer(nt, in, out, false, 
+					CoolRMINioRemoter.clientId, CoolRMINioRemoter.serverId);
+			cli.connect(multiplexer);
+			multiplexer.start();
+		}else
+		{
+			cli.connect(nt, new InetSocketAddress(args.host, args.port));
+		}
+		nt.start();
+		
+	}
+
 	@Override
 	public void message(String message) {
 		System.out.println("Message: "+message);
 	}
 	@Override
 	public void currentShares(List<StreamParameters> arrayList) {
+		System.out.println("Current shares: "+arrayList);
 		Set<String> keys=new HashSet<>();
 		for(StreamParameters p: arrayList)
 		{

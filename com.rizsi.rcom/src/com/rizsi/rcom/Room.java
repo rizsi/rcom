@@ -50,6 +50,7 @@ public class Room {
 	
 	void updateSharesToClients()
 	{
+		System.out.println("Current shares list: "+getSharesList());
 		synchronized (this) {
 			for(VideoConnection c: conns)
 			{
@@ -70,6 +71,7 @@ public class Room {
 	}
 
 	public void remove(VideoConnection videoConnection) {
+		System.out.println("Connection removed: "+videoConnection.getUserName());
 		List<StreamShare> toDispose=new ArrayList<>();
 		synchronized (this) {
 			conns.remove(videoConnection);
@@ -102,6 +104,7 @@ public class Room {
 		synchronized (this) {
 			shares.remove(s.params.name);
 		}
+		System.out.println("Share removed: "+s.params.name);
 		s.dispose();
 	}
 }

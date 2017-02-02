@@ -37,7 +37,6 @@ public class StreamSourceVideoWebCam implements AutoCloseable, IVideoStreamConta
 		p=Runtime.getRuntime().exec(command);
 		InputStream is=p.getInputStream();
 		InputStream err=p.getErrorStream();
-//		UtilProcess.streamErrorOfProcess(err, System.err);
 		UtilProcess.streamErrorOfProcess(err, new NullOutputStream());
 		UtilProcess.streamErrorOfProcess(is, new TeeOutputStream(new OutputStream[]{oss.os, stream.launch()}));
 	}
@@ -47,7 +46,12 @@ public class StreamSourceVideoWebCam implements AutoCloseable, IVideoStreamConta
 	{
 		if(params!=null)
 		{
-			conn.unshare(params);
+			try {
+				conn.unshare(params);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			params=null;
 		}
 		if(p!=null)

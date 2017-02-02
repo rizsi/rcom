@@ -192,7 +192,7 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 		.start();
 		((ChannelProcessorMultiplexer)nioMultiplexer).start();
 	}
-	public void connect(ChannelProcessorMultiplexer nioMultiplexer) throws ClosedChannelException, InterruptedException, ExecutionException {
+	public void connect(IMultiplexer nioMultiplexer) throws ClosedChannelException, InterruptedException, ExecutionException {
 		this.nioMultiplexer=nioMultiplexer;
 		s=new Send(nioMultiplexer);
 		s.register();

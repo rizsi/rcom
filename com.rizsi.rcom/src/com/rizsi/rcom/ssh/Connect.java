@@ -7,11 +7,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
-import com.rizsi.rcom.VideoServerTCPListener;
 import com.rizsi.rcom.cli.UtilCli;
 
 import hu.qgears.commons.ConnectStreams;
 import hu.qgears.commons.UtilFile;
+import nio.coolrmi.CoolRMINioRemoter;
+import nio.multiplexer.AbstractMultiplexer;
 
 public class Connect {
 	public void main(String[] args) throws Exception {
@@ -27,12 +28,17 @@ public class Connect {
 		try(Socket s=new Socket(a.host, a.port))
 		{
 			OutputStream os=s.getOutputStream();
-			os.write(VideoServerTCPListener.clientID.getBytes(StandardCharsets.UTF_8));
+			os.write(CoolRMINioRemoter.clientId);
 			os.write('u');
+			os.write(0);
+			os.write(0);
+			os.write(0);
 			byte[] user=a.user.getBytes(StandardCharsets.UTF_8);
-			bb.putInt(user.length);
-			os.write(b, 0, 4);
 			os.write(user);
+			for(int i=user.length;i<AbstractMultiplexer.userNameLength;++i)
+			{
+				os.write(0);
+			}
 			ConnectStreams.startStreamThread(s.getInputStream(), System.out, true, UtilFile.defaultBufferSize.get());
 			ConnectStreams.doStream(System.in, os, true, UtilFile.defaultBufferSize.get());
 		}

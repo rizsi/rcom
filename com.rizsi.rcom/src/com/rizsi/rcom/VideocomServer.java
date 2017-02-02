@@ -5,7 +5,7 @@ import com.rizsi.rcom.cli.ServerCliArgs;
 import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
 import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
 import nio.coolrmi.CoolRMINioRemoter;
-import nio.multiplexer.ChannelProcessorMultiplexer;
+import nio.multiplexer.IMultiplexer;
 
 public class VideocomServer implements IVideocomServer
 {
@@ -29,9 +29,9 @@ public class VideocomServer implements IVideocomServer
 	@Override
 	public IVideocomConnection connect(String userName) {
 		GenericCoolRMIRemoter remoter=CoolRMIRemoter.getCurrentRemoter();
-		ChannelProcessorMultiplexer conn=(ChannelProcessorMultiplexer)((CoolRMINioRemoter)remoter).getNioMultiplexer();
-//		System.out.println("Connect: "+conn.userName+" "+userName);
-		return r.connect(remoter, userName);
+		IMultiplexer conn=((CoolRMINioRemoter)remoter).getNioMultiplexer();
+		System.out.println("Connect: "+conn.getUserName()+" "+userName);
+		return r.connect(remoter, conn.getUserName()+"-"+userName);
 	}
 	
 	public ServerCliArgs getArgs() {
