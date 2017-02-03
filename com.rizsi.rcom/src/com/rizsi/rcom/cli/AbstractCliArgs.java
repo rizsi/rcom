@@ -1,20 +1,15 @@
 package com.rizsi.rcom.cli;
 
 import com.rizsi.rcom.AbstractRcomArgs;
-import com.rizsi.rcom.VideoServerTCPListener;
 
 import joptsimple.annot.JOHelp;
-import joptsimple.annot.JOSimpleBoolean;
 
 public class AbstractCliArgs extends AbstractRcomArgs
 {
-	@JOHelp("SSH connection string to connect to server. Disables raw TCP connection and overrides host and port if present.")
-	public String ssh;
-	@JOHelp("Raw TCP connect to this server.")
-	public String host="localhost";
-	@JOHelp("Raw TCP connect to this server.")
-	public int port=VideoServerTCPListener.port;
-	@JOSimpleBoolean
-	@JOHelp("By default the program sets: PULSE_PROP=\"filter.want=echo-cancel\" it can be disabled using this flag.")
-	public boolean disablePulseEchoCancellation;
+	@JOHelp("Connection string to the server. If it contains a '@' character then it is an ssh user@server address. Otherwise it has to contain a ':' and must be host:port format TCP address.")
+	public String connectionString;
+	@JOHelp("Room to connect to. If not set the client does not connect automatically to a room.")
+	public String room;
+	@JOHelp("The requested username. A timestamp will replace it if none is given.")
+	public String userName;
 }

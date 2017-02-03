@@ -25,11 +25,13 @@ import com.rizsi.rcom.StreamSink;
 import com.rizsi.rcom.StreamSourceAudio;
 import com.rizsi.rcom.StreamSourceVideoWebCam;
 import com.rizsi.rcom.StreamSourceVnc;
+import com.rizsi.rcom.VideoConnection;
 import com.rizsi.rcom.gui.DelegateVideoStreamContainer;
 import com.rizsi.rcom.gui.GuiCliArgs;
 import com.rizsi.rcom.gui.IVideoStreamContainer;
 import com.rizsi.rcom.webcam.WebCamParameter;
 
+import hu.qgears.commons.UtilEventListener;
 import nio.ConnectNio;
 import nio.NioThread;
 import nio.coolrmi.CoolRMINioClient;
@@ -38,10 +40,51 @@ import nio.multiplexer.DualChannelProcessorMultiplexer;
 import nio.multiplexer.IMultiplexer;
 
 public class Client implements IVideocomCallback {
+	public interface IListener
+	{
+
+		void connected(Client client);
+
+		void closed(Client client);
+		
+		void roomEntered(Client client, String room);
+
+		void usersUpdated(List<String> users);
+
+		void updateShares(List<StreamParameters> arrayList);
+
+		void messageReceived(String message);
+		
+	}
 	public void main(String[] args) throws Exception {
 		ClientCliArgs a=new ClientCliArgs();
 		UtilCli.parse(a, args, true);
-		run(a);
+		try {
+			run(a, new IListener() {
+				@Override
+				public void connected(Client client) {
+				}
+				@Override
+				public void closed(Client client) {
+				}
+				@Override
+				public void roomEntered(Client client, String room) {
+				}
+				@Override
+				public void usersUpdated(List<String> users) {
+				}
+				@Override
+				public void updateShares(List<StreamParameters> arrayList) {
+				}
+				@Override
+				public void messageReceived(String message) {
+					System.out.println("Message: "+message);
+				}
+			});
+		} catch (Throwable e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
 	}
 	private boolean isGui;
 	public IVideocomConnection conn;
@@ -52,58 +95,66 @@ public class Client implements IVideocomCallback {
 	private DelegateVideoStreamContainer selfVideo=new DelegateVideoStreamContainer();
 	private AbstractCliArgs args;
 	private IMultiplexer multiplexer;
-	public void run(AbstractCliArgs args) throws Exception
+	private volatile Thread mainThread;
+	private volatile NioThread nt;
+	private volatile List<String> users=new ArrayList<>();
+	private String room;
+	private IListener l;
+	public void run(AbstractCliArgs args, IListener l) throws Exception
 	{
-		args.apply();
-		this.args=args;
-		isGui=args instanceof GuiCliArgs;
-		if(!args.disablePulseEchoCancellation)
-		{
-			// TODO does setting property this way have an effect on pulseaudio?
-			System.setProperty("PULSE_PROP", "filter.want=echo-cancel");
-		}
-		System.out.println("Inited");
-		CoolRMINioClient cli=new CoolRMINioClient(Launcher.class.getClassLoader(), false);
-		cli.setExecutorService(Executors.newSingleThreadExecutor());
-		cli.getServiceRegistry().addProxyType(Client.class, IVideocomCallback.class);
-		connect(cli);
-		multiplexer=cli.getNioMultiplexer();
-		System.out.println("connected");
-		IVideocomServer srv=(IVideocomServer) cli.getService(IVideocomServer.class, IVideocomServer.id);
-		userName=""+System.nanoTime();
-		conn=srv.connect(userName);
-		id=conn.getId();
-		conn.registerCallback(this);
-		boolean streamstdin=true;
-		if(args instanceof ClientCliArgs)
-		{
-			ClientCliArgs cargs=(ClientCliArgs) args;
-			if(cargs.webcam)
+		try {
+			this.l=l;
+			args.apply();
+			this.args=args;
+			mainThread=Thread.currentThread();
+			isGui=args instanceof GuiCliArgs;
+			System.out.println("Inited");
+			CoolRMINioClient cli=new CoolRMINioClient(Launcher.class.getClassLoader(), false);
+			cli.setExecutorService(Executors.newSingleThreadExecutor());
+			cli.getServiceRegistry().addProxyType(Client.class, IVideocomCallback.class);
+			connect(cli);
+			multiplexer=cli.getNioMultiplexer();
+			System.out.println("connected");
+			IVideocomServer srv=(IVideocomServer) cli.getService(IVideocomServer.class, IVideocomServer.class.getName());
+			conn=srv.connect(args.userName==null?""+System.nanoTime():args.userName);
+			id=conn.getId();
+			userName=conn.getUserName();
+			conn.registerCallback(this);
+			enterRoom(args.room);
+			l.connected(this);
+			boolean streamstdin=true;
+			if(args instanceof ClientCliArgs)
 			{
-				try {
-					// Launch the first camera found
-					setVideoStreamingEnabled(args.platform.getCameras(args).values().iterator().next());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			setAudioStreamingEnabled(cargs.audio);
-			setVNCShareEnabled(cargs.vnc);
-			streamstdin=!cargs.disableStdinMessaging;
-		}
-		if(streamstdin)
-		{
-			try(Scanner br=new Scanner(System.in))
-			{
-				while(br.hasNextLine())
+				ClientCliArgs cargs=(ClientCliArgs) args;
+				if(cargs.webcam)
 				{
-					String line=br.nextLine();
-					conn.sendMessage(line);
+					try {
+						// Launch the first camera found
+						setVideoStreamingEnabled(args.platform.getCameras(args).values().iterator().next());
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
+				setAudioStreamingEnabled(cargs.audio);
+				setVNCShareEnabled(cargs.vnc);
+				streamstdin=!cargs.disableStdinMessaging;
 			}
-		}else
-		{
+			if(streamstdin)
+			{
+				new Thread("System input"){
+					public void run() {
+						try(Scanner br=new Scanner(System.in))
+						{
+							while(!exit&&br.hasNextLine())
+							{
+								String line=br.nextLine();
+								conn.sendMessage(line);
+							}
+						}
+					};
+				}.start();
+			}
 			while(!exit)
 			{
 				try {
@@ -113,15 +164,31 @@ public class Client implements IVideocomCallback {
 					e.printStackTrace();
 				}
 			}
+			cli.close();
+		} finally {
+			l.closed(this);
 		}
-		cli.close();
 	}
-
-	private void connect(CoolRMINioClient cli) throws Exception {
-		NioThread nt=new NioThread();
-		if(args.ssh!=null)
+	public void close()
+	{
+		exit=true;
+		mainThread.interrupt();
+		if(nt!=null)
 		{
-			ProcessBuilder pb=new ProcessBuilder(args.program_ssh, args.ssh);
+			nt.close();
+			nt=null;
+		}
+	}
+	private void connect(CoolRMINioClient cli) throws Exception {
+		nt=new NioThread();
+		cli.closedEvent.addListener(new UtilEventListener<CoolRMINioRemoter>() {
+			public void eventHappened(CoolRMINioRemoter msg) {
+				Client.this.close();
+			};
+		});
+		if(args.connectionString.indexOf('@')>0)
+		{
+			ProcessBuilder pb=new ProcessBuilder(args.program_ssh, args.connectionString);
 			pb.redirectError(Redirect.INHERIT);
 			final Process p=pb.start();
 			SourceChannel in=ConnectNio.inputStreamToPipe(p.getInputStream());
@@ -135,20 +202,28 @@ public class Client implements IVideocomCallback {
 			});
 			out.configureBlocking(false);
 			DualChannelProcessorMultiplexer multiplexer=new DualChannelProcessorMultiplexer(nt, in, out, false, 
-					CoolRMINioRemoter.clientId, CoolRMINioRemoter.serverId);
+					VideoConnection.clientIDBS, VideoConnection.serverIDBS);
 			cli.connect(multiplexer);
 			multiplexer.start();
+//			multiplexer.getClosedEvent().addListener(new UtilEventListener<Exception>() {
+//				
+//				@Override
+//				public void eventHappened(Exception msg) {
+//				}
+//			});
 		}else
 		{
-			cli.connect(nt, new InetSocketAddress(args.host, args.port));
+			int separator=args.connectionString.indexOf(':');
+			String host=args.connectionString.substring(0, separator);
+			int port=Integer.parseInt(args.connectionString.substring(separator+1));
+			cli.connect(nt, new InetSocketAddress(host, port), VideoConnection.clientIDBS, VideoConnection.serverIDBS);
 		}
 		nt.start();
-		
 	}
 
 	@Override
 	public void message(String message) {
-		System.out.println("Message: "+message);
+		l.messageReceived(message);
 	}
 	@Override
 	public void currentShares(List<StreamParameters> arrayList) {
@@ -174,6 +249,12 @@ public class Client implements IVideocomCallback {
 		{
 			unregister(s);
 		}
+		l.updateShares(arrayList);
+	}
+	@Override
+	public void currentUsers(List<String> users) {
+		this.users=users;
+		l.usersUpdated(users);
 	}
 
 	private void register(StreamParameters p) {
@@ -285,5 +366,22 @@ public class Client implements IVideocomCallback {
 	public ChannelOutputStream createStream() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	public void enterRoom(String room) {
+		if(room!=null&&room.length()>0)
+		{
+			setAudioStreamingEnabled(false);
+			setVideoStreamingEnabled(null);
+			setVNCShareEnabled(false);
+			String s=conn.enterRoom(room);
+			l.roomEntered(this, s);
+		}else
+		{
+			conn.leaveRoom();
+			l.roomEntered(this, null);
+		}
+	}
+	public void sendMessage(String text) {
+		conn.sendMessage(text);
 	}
 }

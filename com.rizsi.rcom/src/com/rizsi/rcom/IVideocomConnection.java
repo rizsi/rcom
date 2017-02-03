@@ -27,4 +27,22 @@ public interface IVideocomConnection {
 	void launchStream(String name);
 	void unregisterStream(String s);
 	void unshare(StreamParameters params);
+	/**
+	 * The client enters a room.
+	 * Streams can only be shared after a room was entered.
+	 * @param room
+	 * @return the room name (equals to parameter) if entering was succesful
+	 */
+	String enterRoom(String room);
+	/**
+	 * The client leaves the current room.
+	 * All current shared streams are closed on the server side.
+	 * @param room
+	 */
+	void leaveRoom();
+	/**
+	 * Get the user name that the server knows of (ssh key id+requested username)
+	 * @return
+	 */
+	String getUserName();
 }

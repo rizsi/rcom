@@ -8,4 +8,6 @@ public interface IVideocomCallback {
 
 	void currentShares(List<StreamParameters> arrayList);
 
+	void currentUsers(List<String> users);
+
 }

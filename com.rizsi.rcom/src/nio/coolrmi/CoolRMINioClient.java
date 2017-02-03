@@ -8,14 +8,14 @@ import nio.NioThread;
 public class CoolRMINioClient extends CoolRMINioRemoter
 {
 	public CoolRMINioClient(ClassLoader classLoader, boolean guaranteeOrdering) {
-		super(classLoader, guaranteeOrdering, false);
+		super(classLoader, guaranteeOrdering);
 	}
 
-	public void connect(NioThread nt, SocketAddress address) throws Exception
+	public void connect(NioThread nt, SocketAddress address, byte[] thisId, byte[] otherId) throws Exception
 	{
 		SocketChannel sc=SocketChannel.open();
 		sc.configureBlocking(false);
 		sc.connect(address);
-		connect(nt, sc, true);
+		connect(nt, sc, true, thisId, otherId);
 	}
 }

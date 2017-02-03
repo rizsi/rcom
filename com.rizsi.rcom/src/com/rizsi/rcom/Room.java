@@ -5,28 +5,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
-
 public class Room {
-	private int nClient;
 	private List<VideoConnection> conns=new ArrayList<>();
 	private Map<String, StreamShare> shares=new HashMap<>();
 	private VideocomServer server;
+	private String name;
 	
-	public Room(VideocomServer server) {
+	public Room(VideocomServer server, String name) {
 		super();
 		this.server = server;
+		this.name=name;
+	}
+	public void addUser(VideoConnection videoConnection) {
+		synchronized (this) {
+			conns.add(videoConnection);
+		}
+		updateUsersToClients();
+		videoConnection.callbackCurrentShares(getSharesList());
 	}
 
-	public IVideocomConnection connect(GenericCoolRMIRemoter remoter, String userName) {
-		VideoConnection ret;
-		synchronized (this) {
-			ret=new VideoConnection(server.getArgs(), this, remoter, nClient++, userName);
-			conns.add(ret);
-		}
-		ret.init();
-		return ret;
-	}
 
 	public void messageReceived(VideoConnection videoConnection, String message) {
 		synchronized (this) {
@@ -50,11 +47,38 @@ public class Room {
 	
 	void updateSharesToClients()
 	{
-		System.out.println("Current shares list: "+getSharesList());
 		synchronized (this) {
 			for(VideoConnection c: conns)
 			{
-				c.callbackCurrentShares(getSharesList());
+				try
+				{
+					c.callbackCurrentShares(getSharesList());
+				}catch(Exception e)
+				{
+					e.printStackTrace();
+					c.dispose();
+				}
+			}
+		}
+	}
+	public void updateUsersToClients()
+	{
+		synchronized (this) {
+			List<String> users=new ArrayList<>();
+			for(VideoConnection c: conns)
+			{
+				users.add(c.getUserName());
+			}
+			for(VideoConnection c: conns)
+			{
+				try
+				{
+					c.callbackCurrentUsers(users);
+				}catch(Exception e)
+				{
+					e.printStackTrace();
+					c.dispose();
+				}
 			}
 		}
 	}
@@ -70,21 +94,35 @@ public class Room {
 		}
 	}
 
-	public void remove(VideoConnection videoConnection) {
+	public void removeUser(VideoConnection videoConnection) {
 		System.out.println("Connection removed: "+videoConnection.getUserName());
 		List<StreamShare> toDispose=new ArrayList<>();
-		synchronized (this) {
-			conns.remove(videoConnection);
-			for(StreamShare s: shares.values())
-			{
-				if(s.conn==videoConnection)
+		synchronized (server) {
+			synchronized (this) {
+				conns.remove(videoConnection);
+				try
 				{
-					toDispose.add(s);
+					videoConnection.callbackCurrentShares(new ArrayList<StreamParameters>());
+					videoConnection.callbackCurrentUsers(new ArrayList<String>());
+				}catch(Exception e){
+					// If we remove user due to doscinnect then this throws an exception
 				}
-			}
-			for(StreamShare s: toDispose)
-			{
-				shares.remove(s.params.name);
+				for(StreamShare s: shares.values())
+				{
+					if(s.conn==videoConnection)
+					{
+						toDispose.add(s);
+					}
+				}
+				for(StreamShare s: toDispose)
+				{
+					shares.remove(s.params.name);
+				}
+				if(conns.size()==0)
+				{
+					// No further dispose is required as there is no reference to this object and all streams are closed.
+					server.removeRoom(name);
+				}
 			}
 		}
 		for(StreamShare s: toDispose)
@@ -92,6 +130,7 @@ public class Room {
 			s.dispose();
 		}
 		updateSharesToClients();
+		updateUsersToClients();
 	}
 
 	public StreamShare getShare(String name) {

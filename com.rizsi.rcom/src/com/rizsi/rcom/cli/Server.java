@@ -31,10 +31,10 @@ public class Server {
 			NioThread nt=new NioThread();
 			CoolRMIServiceRegistry reg=new CoolRMIServiceRegistry();
 			reg.addProxyType(VideoConnection.class, IVideocomConnection.class);
-			reg.addService(new CoolRMIService(IVideocomServer.id,
+			reg.addService(new CoolRMIService(IVideocomServer.class.getName(),
 					IVideocomServer.class, new VideocomServer(a)));
 			CoolRMINioServer srv=new CoolRMINioServer(getClass().getClassLoader(), reg);
-			srv.listen(nt, new InetSocketAddress(a.host, a.port));
+			srv.listen(nt, new InetSocketAddress(a.host, a.port), VideoConnection.serverIDBS, VideoConnection.clientIDBS);
 			nt.start();
 		}
 	}

@@ -12,6 +12,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import hu.qgears.commons.UtilEvent;
+import hu.qgears.commons.UtilEventListener;
 import hu.qgears.commons.UtilFile;
 import hu.qgears.coolrmi.messages.AbstractCoolRMIMessage;
 import hu.qgears.coolrmi.multiplexer.ISocketMultiplexer;
@@ -33,8 +35,8 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 	private IMultiplexer nioMultiplexer;
 	private Send s;
 	private LinkedBlockingQueue<byte[]> toProcess=new LinkedBlockingQueue<>();
-	private boolean server;
 	private ExecutorService executorService;
+	public final UtilEvent<CoolRMINioRemoter> closedEvent=new UtilEvent<>();
 	class Msg
 	{
 		byte[] bs;
@@ -142,9 +144,8 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 		
 	}
 
-	public CoolRMINioRemoter(ClassLoader classLoader, boolean guaranteeOrdering, boolean server) {
+	public CoolRMINioRemoter(ClassLoader classLoader, boolean guaranteeOrdering) {
 		super(classLoader, guaranteeOrdering);
-		this.server=server;
 	}
 
 	@Override
@@ -152,6 +153,7 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 		exit=true;
 		// Notify the message processing thread
 		toProcess.add(new byte[]{});
+		closedEvent.eventHappened(this);
 	}
 
 	/**
@@ -163,10 +165,22 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 	 * @throws InterruptedException
 	 * @throws ExecutionException
 	 */
-	public void connect(NioThread t, SocketChannel sc, boolean client) throws ClosedChannelException, InterruptedException, ExecutionException {
+	public void connect(NioThread t, SocketChannel sc, boolean client, byte[] thisId, byte[] otherId) throws ClosedChannelException, InterruptedException, ExecutionException {
 		nioMultiplexer=new ChannelProcessorMultiplexer(t, sc, client,
-				server?serverId:clientId, server?clientId:serverId);
+				thisId, otherId);
 		s=new Send(nioMultiplexer);
+		nioMultiplexer.getClosedEvent().addListener(new UtilEventListener<Exception>() {
+			
+			@Override
+			public void eventHappened(Exception msg) {
+				try {
+					close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
 		s.register();
 		Recv r=new Recv();
 		r.register(nioMultiplexer, 0);
