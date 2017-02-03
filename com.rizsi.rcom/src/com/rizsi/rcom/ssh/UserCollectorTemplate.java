@@ -6,10 +6,11 @@ import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import com.rizsi.rcom.VideoConnection;
+
 import hu.qgears.commons.UtilString;
 import hu.qgears.rtemplate.runtime.DummyCodeGeneratorContext;
 import hu.qgears.rtemplate.runtime.RAbstractTemplatePart;
-import nio.coolrmi.CoolRMINioRemoter;
 import nio.multiplexer.AbstractMultiplexer;
 
 public class UserCollectorTemplate extends RAbstractTemplatePart {
@@ -85,7 +86,7 @@ public class UserCollectorTemplate extends RAbstractTemplatePart {
 		{
 			String line=UtilString.split(key.key, "\r\n").get(0).trim();
 			EchoEscaper ee=new EchoEscaper();
-			ee.append(new String(CoolRMINioRemoter.clientId, StandardCharsets.UTF_8));
+			ee.append(VideoConnection.clientID);
 			ee.append('u');
 			ee.append((char)0);
 			ee.append((char)0);
