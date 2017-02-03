@@ -41,7 +41,7 @@ public class UserCollectorTemplate extends RAbstractTemplatePart {
 					{
 						str.append("\\\\x");
 						bs[0]=out.get();
-						str.append(UtilString.toHex(bs));
+						str.append(UtilString.toHexPadZero(bs));
 					}
 				}
 		}
