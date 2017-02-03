@@ -26,7 +26,6 @@ public class VideoConnection implements IVideocomConnection
 	private IVideocomCallback callback;
 	private String userName;
 	private Map<String, StreamRegistration> registrations=new HashMap<>();
-	private AbstractRcomArgs args;
 	private VideocomServer server;
 	public VideoConnection(VideocomServer server, AbstractRcomArgs args, IMultiplexer c, int id, String userName) {
 		this.c=c;
@@ -182,7 +181,7 @@ public class VideoConnection implements IVideocomConnection
 		room.updateSharesToClients();
 	}
 	public AbstractRcomArgs getArgs() {
-		return args;
+		return server.getArgs();
 	}
 	public String getUserName() {
 		return userName;

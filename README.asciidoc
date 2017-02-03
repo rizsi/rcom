@@ -8,10 +8,13 @@ See: https://github.com/rizsi/rcom
 
 == Download
 
+This README is for version: rcom_0.0.4.jar
+
 Binary build can be downloaded from: http://rizsi.com/rcom/
 
 == Features
 
+ * Conference rooms
  * Share WebCam
  * Share audio
  * Share screen (VNC)
@@ -22,7 +25,7 @@ Binary build can be downloaded from: http://rizsi.com/rcom/
 
 === Java 1.8
 
-The binary is compiled to Java 1.8. Maybe it is possible to compile for 1.7.
+The binary is compiled to Java 1.7.
 
 === Programs executed by RCOM
 
@@ -56,12 +59,14 @@ Start server on a computer that is accessible from all clients and do not close 
 
 Start client:
 
- $ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar gui --host rcomserver.example.com
+ $ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar gui --connectionString rcomserver.example.com:9643
  
 When the client is running then in the GUI:
 
+ * enter a room by clicking "Room" button
  * tick in "Stream WebCam" then select from the available cameras and formats.
  * tick in "Stream Audio".
+ * Write messages to the chat box
 
 Start other client similarly on a different PC.
 
@@ -69,15 +74,11 @@ Start other client similarly on a different PC.
 
 RCOM client simply opens the first available device throug the Java sound API. If PulseAudio is used then from the system mixer both the input and the output levels can be controlled.
  
-== Limitations
-
-Server runs a single room. Each client connects to the global room and all users see all shared streams of all others.
-
 === Known Security issues
 
 Server opens public VNC ports when VNC is streamed. This is due to a problem in the current x11vnc in Ubuntu.
 
-CoolRMI is used for remoting. This remoting framwork is not secure. See: https://github.com/qgears/opensource-utils/tree/master/coolrmi
+CoolRMI is used for remoting. This remoting framwork is not secure. Only use the program with trusted clients over ssh. See: https://github.com/qgears/opensource-utils/tree/master/coolrmi
 
 VNC transfers control too. The control messages are not yet filtered out from clients. The clients are launched in ViewOnly mode though.
 
@@ -99,15 +100,6 @@ Without an external noise canceller the audio can not be used. It has been teste
 Command to run programs with PULSE audio filter enabled (works on current Pulse Audio versions):
 
 $ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar ...
-
-=== Video
-
-Playback is not synched with real time.
-
-=== Streaming in general
-
-Error handling and traffic jam handling is not implemented yet.
-
 
 
 == Usage:

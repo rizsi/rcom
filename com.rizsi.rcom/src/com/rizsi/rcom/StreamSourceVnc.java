@@ -1,59 +1,62 @@
 package com.rizsi.rcom;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ProcessBuilder.Redirect;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.rizsi.rcom.ChannelMultiplexer.ChannelOutputStream;
 import com.rizsi.rcom.cli.Client;
 import com.rizsi.rcom.util.ChainList;
-import com.rizsi.rcom.util.UtilStream;
 import com.rizsi.rcom.vnc.LogFilterOutpurStream;
 
-import hu.qgears.commons.UtilProcess;
+import hu.qgears.commons.ConnectStreams;
+import nio.multiplexer.InputStreamReceiver;
+import nio.multiplexer.OutputStreamSender;
 
-public class StreamSourceVnc implements IChannelReader, AutoCloseable {
+public class StreamSourceVnc implements AutoCloseable {
 	private Socket s;
-	OutputStream os;
-	private byte[] buffer=new byte[DemuxedConnection.bufferSize];
-	ChannelOutputStream cos;
-	StreamParameters params;
-	IVideocomConnection conn;
+	private OutputStream os;
+	private OutputStreamSender oss;
+	private InputStreamReceiver isr;
+	private StreamParameters params;
+	private IVideocomConnection conn;
 	public void start(Client client, String streamName) throws IOException {
 		conn=client.conn;
-		cos = client.createStream();
-		ServerSocket ss=new ServerSocket();
-		ss.bind(new InetSocketAddress("localhost", 0));
-		int localport=ss.getLocalPort();
-		System.out.println("Local port: "+localport);
-		params=new StreamParametersVNC(streamName, client.id);
-		StreamDataDuplex data=(StreamDataDuplex)client.conn.shareStream(cos.getChannel(), params);
-		client.addListener(data.backChannel, this);
-		ChainList<String> command=new ChainList<>(client.getArgs().program_x11vnc,"-connect", "localhost:"+localport);
-		//command.addcs("-clip", "200x200+50+50");
-		command.add("-localhost");
-		Process p=new ProcessBuilder(command).start();
-		UtilProcess.streamErrorOfProcess(p.getErrorStream(), System.err);
-		UtilProcess.streamErrorOfProcess(p.getInputStream(), System.out);
-		s=ss.accept();
-		os=new LogFilterOutpurStream(s.getOutputStream());
-		System.out.println("CONNECTED!");
-		UtilProcess.streamErrorOfProcess(s.getInputStream(), cos);
-		ss.close();
-	}
-
-	@Override
-	public void readFully(InputStream is, int len) throws IOException {
-		UtilStream.pipeToFully(is, len, buffer, os);
+		oss=new OutputStreamSender(client.getMultiplexer(), StreamShareVNC.bufferSize);
+		try(ServerSocket ss=new ServerSocket())
+		{
+			ss.bind(new InetSocketAddress("localhost", 0));
+			int localport=ss.getLocalPort();
+			System.out.println("Local port: "+localport);
+			params=new StreamParametersVNC(streamName, client.id);
+			StreamDataDuplex data=(StreamDataDuplex)client.conn.shareStream(oss.getId(), params);
+			isr=new InputStreamReceiver(StreamShareVNC.bufferSize);
+			client.getMultiplexer().register(isr, data.backChannel);
+			ChainList<String> command=new ChainList<>(client.getArgs().program_x11vnc,"-connect", "localhost:"+localport);
+			//command.addcs("-clip", "200x200+50+50");
+			command.add("-localhost");
+			new ProcessBuilder(command).redirectError(Redirect.INHERIT)
+					.redirectOutput(Redirect.INHERIT)
+					.start();
+			s=ss.accept();
+			os=new LogFilterOutpurStream(s.getOutputStream());
+			System.out.println("CONNECTED!");
+			ConnectStreams.startStreamThread(s.getInputStream(), oss.os);
+			ConnectStreams.startStreamThread(isr.in, os);
+		}
 	}
 	@Override
 	public void close() {
 		if(params!=null)
 		{
-			conn.unshare(params);
+			try {
+				conn.unshare(params);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			params=null;
 		}
 		if(s!=null)
@@ -67,15 +70,15 @@ public class StreamSourceVnc implements IChannelReader, AutoCloseable {
 			s=null;
 		}
 		// VNC process closes itself when the socket is closed.
-		if(cos!=null)
+		if(isr!=null)
 		{
 			try {
-				cos.close();
-			} catch (IOException e) {
+				isr.close(null);
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			cos=null;
+			isr=null;
 		}
 	}
 }

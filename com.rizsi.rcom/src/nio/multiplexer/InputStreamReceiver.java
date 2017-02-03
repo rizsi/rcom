@@ -39,7 +39,6 @@ public class InputStreamReceiver extends MultiplexerReceiver
 						cap=(int)(nWrite-nRead);
 					}
 					nRead++;
-					// TODO reading one by one is not optimal
 					byte ret=reader.get();
 					if(!reader.hasRemaining())
 					{
@@ -127,7 +126,8 @@ public class InputStreamReceiver extends MultiplexerReceiver
 		}
 		return cap;
 	}
-	public InputStreamReceiver(int pipeSize) throws IOException {
+	public InputStreamReceiver(int pipeSize)
+	{
 		super();
 		bb=ByteBuffer.allocateDirect(pipeSize);
 		reader=bb.asReadOnlyBuffer();

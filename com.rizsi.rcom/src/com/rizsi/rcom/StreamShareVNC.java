@@ -1,18 +1,17 @@
 package com.rizsi.rcom;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.lang.ProcessBuilder.Redirect;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.rizsi.rcom.ChannelMultiplexer.ChannelOutputStream;
 import com.rizsi.rcom.util.ChainList;
-import com.rizsi.rcom.util.UtilStream;
 
+import hu.qgears.commons.ConnectStreams;
 import hu.qgears.commons.UtilProcess;
 import hu.qgears.commons.UtilString;
 import hu.qgears.commons.signal.SignalFuture;
@@ -22,23 +21,37 @@ import nio.multiplexer.InputStreamReceiver;
 import nio.multiplexer.OutputStreamSender;
 
 public class StreamShareVNC extends StreamShare {
-	class Reg implements StreamRegistration, IChannelReader
+	class Reg implements StreamRegistration
 	{
-		ChannelOutputStream cos;
+		OutputStreamSender cos;
+		InputStreamReceiver isr;
 		private int clientChannel;
-		private OutputStream os;
-		private InputStream is;
-		private byte[] buffer2=new byte[DemuxedConnection.bufferSize];
+		private Socket s;
 		
-		public Reg() {
+		public Reg()
+		{
 			super();
+		}
+		public void connect(VideoConnection videoConnection, int clientChannel) throws UnknownHostException, IOException {
+			waitUntilServerportisAccessible(port);
+			s=new Socket("localhost", port);
+			this.clientChannel=clientChannel;
+			this.cos=new OutputStreamSender(videoConnection.getConnection(), bufferSize);
+			isr=new InputStreamReceiver(bufferSize);
+			isr.register(videoConnection.getConnection(), clientChannel);
 		}
 
 		@Override
 		public void close() {
 			try {
-				cos.close();
-			} catch (IOException e) {
+				cos.close(null);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				isr.close(null);
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -46,42 +59,33 @@ public class StreamShareVNC extends StreamShare {
 
 		@Override
 		public IStreamData getData() {
-			return new StreamDataDuplex(clientChannel, cos.getChannel());
-		}
-
-		public void setChannels(VideoConnection videoConnection, Socket s, int clientChannel, ChannelOutputStream cos) throws IOException {
-			this.clientChannel=clientChannel;
-			this.cos=cos;
-			os=s.getOutputStream();
-			is=s.getInputStream();
-			// TODO connect received stream to the VNC process!
-			throw new RuntimeException("VNC is not implemented in non-blocking version");
-//			videoConnection.getConnection().getMultiplexer().addListener(clientChannel, this);
-		}
-
-		@Override
-		public void readFully(InputStream is, int len) throws IOException {
-			UtilStream.pipeToFully(is, len, buffer2, os);
+			return new StreamDataDuplex(clientChannel, cos.getId());
 		}
 
 		@Override
 		public void launch() {
-			UtilProcess.streamErrorOfProcess(is, cos);
+			try {
+				ConnectStreams.startStreamThread(s.getInputStream(), cos.os);
+				ConnectStreams.startStreamThread(isr.in, s.getOutputStream());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
+	public static int bufferSize=4000000;
+	private IStreamData streamData;
 	private List<Reg> clients=new ArrayList<>();
-	private byte[] buffer=new byte[DemuxedConnection.bufferSize];
-	private int channel;
 	private OutputStreamSender back;
 	private Socket s;
-	private OutputStream os;
 	private int port=9998;
 	private SignalFutureWrapper<Integer> processresult;
+	private InputStreamReceiver isr;
 	private Process p;
 	public StreamShareVNC(VideoConnection videoConnection, int channel, StreamParameters params) {
 		super(videoConnection, params);
-		this.channel=channel;
 		back=new OutputStreamSender(videoConnection.getConnection(), VideoConnection.bufferSize);
+		isr=new InputStreamReceiver(bufferSize);
 		int n=5;
 		int localport=5900+n;
 		try {
@@ -91,7 +95,7 @@ public class StreamShareVNC extends StreamShare {
 				ss.bind(new InetSocketAddress("localhost", localport));
 				ChainList<String> command=new ChainList<>(videoConnection.getArgs().program_x11vnc).addcall(
 						UtilString.split("-reflect localhost:"+n+" -forever -rfbport "+port+" -localhost", " "));
-				p=new ProcessBuilder(command).start();
+				p=new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectOutput(Redirect.INHERIT).start();
 				processresult=UtilProcess.getProcessReturnValueFuture(p);
 				processresult.addOnReadyHandler(new Slot<SignalFuture<Integer>>() {
 					
@@ -103,16 +107,14 @@ public class StreamShareVNC extends StreamShare {
 				s=ss.accept();
 				System.out.println("X11vnc connected to local VNC server endpoint as reflect client.");
 				UtilProcess.streamErrorOfProcess(s.getInputStream(), back.os);
-				os=s.getOutputStream();
-				UtilProcess.streamErrorOfProcess(p.getErrorStream(), System.err);
-				UtilProcess.streamErrorOfProcess(p.getInputStream(), System.out);
 //				waitUntilServerportisAccessible(port);
 			}finally
 			{
 				ss.close();
 			}
-			// TODO connect received stream to the VNC process!
-			throw new RuntimeException("VNC is not implemented in non-blocking version");
+			isr.register(videoConnection.getConnection(), channel);
+			ConnectStreams.startStreamThread(isr.in, s.getOutputStream());
+			streamData=new StreamDataDuplex(channel, back.getId());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -156,31 +158,42 @@ public class StreamShareVNC extends StreamShare {
 		if(p!=null){
 			p.destroy();
 		}
+		if(isr!=null)
+		{
+			try {
+				isr.close(null);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			isr=null;
+		}
+		if(s!=null)
+		{
+			try {
+				s.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public StreamRegistration registerClient(VideoConnection videoConnection, int clientChannel) {
 		Reg ret=new Reg();
 		try {
-			waitUntilServerportisAccessible(port);
-			Socket s=new Socket("localhost", port);
-			// TODO connect received stream to the VNC process!
-			throw new RuntimeException("VNC is not implemented in non-blocking version");
-			//			ChannelOutputStream cos=videoConnection.getConnection().getMultiplexer().createStream();
-			//			ret.setChannels(videoConnection, s, clientChannel, cos);
+			ret.connect(videoConnection, clientChannel);
+			clients.add(ret);
+			return ret;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		clients.add(ret);
-		return ret;
 	}
-
 	@Override
 	public IStreamData getStreamData() {
-		// TODO connect received stream to the VNC process!
-		throw new RuntimeException("VNC is not implemented in non-blocking version");
-		//return new StreamDataDuplex(channel, back.getChannel());
+		return streamData;
 	}
 
 }

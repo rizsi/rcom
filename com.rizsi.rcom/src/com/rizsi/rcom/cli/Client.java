@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 
 import com.rizsi.rcom.AbstractRcomArgs;
-import com.rizsi.rcom.ChannelMultiplexer.ChannelOutputStream;
 import com.rizsi.rcom.IVideocomCallback;
 import com.rizsi.rcom.IVideocomConnection;
 import com.rizsi.rcom.IVideocomServer;
@@ -97,8 +96,6 @@ public class Client implements IVideocomCallback {
 	private IMultiplexer multiplexer;
 	private volatile Thread mainThread;
 	private volatile NioThread nt;
-	private volatile List<String> users=new ArrayList<>();
-	private String room;
 	private IListener l;
 	public void run(AbstractCliArgs args, IListener l) throws Exception
 	{
@@ -253,7 +250,6 @@ public class Client implements IVideocomCallback {
 	}
 	@Override
 	public void currentUsers(List<String> users) {
-		this.users=users;
 		l.usersUpdated(users);
 	}
 
@@ -358,15 +354,6 @@ public class Client implements IVideocomCallback {
 		return multiplexer;
 	}
 
-	public void addListener(int backChannel, StreamSourceVnc streamSourceVnc) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public ChannelOutputStream createStream() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	public void enterRoom(String room) {
 		if(room!=null&&room.length()>0)
 		{

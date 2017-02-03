@@ -1,0 +1,33 @@
+= RCOM release notes
+
+== 0.0.4
+
+ * VNC works again on Linux clients (if not disabled by command line argument)
+
+== 0.0.3
+
+ * NIO based server
+    * Lagging client does not stop the communication of others
+ * use {echo;cat} | socat to stream incoming connections when ssh
+ * VNC does not work
+ * Implement multiple conference rooms
+ * Improve GUI
+    * Chat
+    * Show list of users in room
+    * Show list of shared streams in room
+    * Reconnect/disconnect from GUI
+ * Several command line arguments changed
+
+
+== 0.0.2
+
+Forget it :-)
+
+
+== 0.0.1
+
+Disable VNC by default because it is not safe.
+
+== 0.0.0
+
+Initial public proof of concept release
