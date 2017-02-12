@@ -93,12 +93,15 @@ public class OutputStreamSender extends MultiplexerSender
 		}
 	}
 	public final OutputStream os;
-	ByteBuffer writeBuffer;
-	ByteBuffer readBuffer;
-	long nWritten;
-	long nRead;
-	public OutputStreamSender(IMultiplexer multiplexer, int bufferSize) {
+	private ByteBuffer writeBuffer;
+	private ByteBuffer readBuffer;
+	private long nWritten;
+	private long nRead;
+	private volatile long nRemote;
+	private boolean noOverflow;
+	public OutputStreamSender(IMultiplexer multiplexer, int bufferSize, boolean noOverflow) {
 		super(multiplexer);
+		this.noOverflow=noOverflow;
 		writeBuffer=ByteBuffer.allocateDirect(bufferSize).order(ChannelProcessorMultiplexer.order);
 		readBuffer=writeBuffer.asReadOnlyBuffer().order(ChannelProcessorMultiplexer.order);
 		os=new SendOutputStream();
@@ -132,8 +135,31 @@ public class OutputStreamSender extends MultiplexerSender
 	@Override
 	public int getAvailable() {
 		synchronized (writeBuffer) {
-			return (int)(nWritten-nRead);
+			long n;
+			if(noOverflow)
+			{
+				if(nRemote<0)
+				{
+					return 0;
+				}
+				n=Math.min(nWritten, nRemote);
+			}else
+			{
+				n=nWritten;
+			}
+			return (int)(n-nRead);
 		}
 	}
-
+	@Override
+	public void receiveBufferAvailable(long receiverAvailable) {
+		if(nRemote!=receiverAvailable)
+		{
+			nRemote=receiverAvailable;
+			int avail=getAvailable();
+			if(avail>0)
+			{
+				dataAvailable();
+			}
+		}
+	}
 }

@@ -36,8 +36,8 @@ public class StreamShareVNC extends StreamShare {
 			waitUntilServerportisAccessible(port);
 			s=new Socket("localhost", port);
 			this.clientChannel=clientChannel;
-			this.cos=new OutputStreamSender(videoConnection.getConnection(), bufferSize);
-			isr=new InputStreamReceiver(bufferSize);
+			this.cos=new OutputStreamSender(videoConnection.getConnection(), bufferSize, true);
+			isr=new InputStreamReceiver(bufferSize, true);
 			isr.register(videoConnection.getConnection(), clientChannel);
 		}
 
@@ -73,7 +73,7 @@ public class StreamShareVNC extends StreamShare {
 			}
 		}
 	}
-	public static int bufferSize=4000000;
+	public static int bufferSize=1000000;
 	private IStreamData streamData;
 	private List<Reg> clients=new ArrayList<>();
 	private OutputStreamSender back;
@@ -84,8 +84,8 @@ public class StreamShareVNC extends StreamShare {
 	private Process p;
 	public StreamShareVNC(VideoConnection videoConnection, int channel, StreamParameters params) {
 		super(videoConnection, params);
-		back=new OutputStreamSender(videoConnection.getConnection(), VideoConnection.bufferSize);
-		isr=new InputStreamReceiver(bufferSize);
+		back=new OutputStreamSender(videoConnection.getConnection(), bufferSize, true);
+		isr=new InputStreamReceiver(bufferSize, true);
 		int n=5;
 		int localport=5900+n;
 		try {

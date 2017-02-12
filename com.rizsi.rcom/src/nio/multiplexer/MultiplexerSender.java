@@ -49,4 +49,9 @@ abstract public class MultiplexerSender {
 	{
 		multiplexer.remove(this);
 	}
+	/**
+	 * The length of the remote receiver buffer has changed.
+	 * @param receiverAvailable
+	 */
+	abstract public void receiveBufferAvailable(long receiverAvailable);
 }

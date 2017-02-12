@@ -9,6 +9,8 @@ public interface IMultiplexer {
 	void register(MultiplexerSender multiplexerSender);
 
 	void dataAvailable(MultiplexerSender multiplexerSender);
+	
+	void availableChanged(MultiplexerReceiver receiver);
 
 	void remove(MultiplexerSender multiplexerSender);
 

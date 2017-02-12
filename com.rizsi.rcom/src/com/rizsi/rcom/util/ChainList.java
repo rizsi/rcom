@@ -3,8 +3,8 @@ package com.rizsi.rcom.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
+import hu.qgears.commons.CompatFunction;
 import hu.qgears.commons.UtilComma;
 import hu.qgears.commons.UtilString;
 
@@ -52,7 +52,7 @@ public class ChainList<T> extends ArrayList<T> {
 	}
 
 	public String concat(String string) {
-		return UtilString.concat(this, new UtilComma(" "), new Function<T, String>() {
+		return UtilString.concat(this, new UtilComma(" "), new CompatFunction<T, String>() {
 			@Override
 			public String apply(T t) {
 				return ""+t;

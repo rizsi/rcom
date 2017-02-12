@@ -30,7 +30,7 @@ public class StreamSourceAudio implements AutoCloseable {
 
 	public void start(Client client, String streamName) {
 		conn=client.conn;
-		oss=new OutputStreamSender(client.getMultiplexer(), VideoConnection.bufferSize);
+		oss=new OutputStreamSender(client.getMultiplexer(), VideoConnection.bufferSize, false);
 		client.conn.shareStream(oss.getId(), params=new StreamParametersAudio(streamName, client.id));
 		new Thread("Audio capture") {
 			public void run() {

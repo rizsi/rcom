@@ -17,8 +17,8 @@ public class DuplexNioConnection implements IConnection
 	InputStreamReceiver is;
 	OutputStreamSender os;
 	public DuplexNioConnection(ChannelProcessorMultiplexer m) throws IOException {
-		is=new InputStreamReceiver(UtilFile.defaultBufferSize.get()*8);
-		os=new OutputStreamSender(m, UtilFile.defaultBufferSize.get()*8);
+		is=new InputStreamReceiver(UtilFile.defaultBufferSize.get()*8, true);
+		os=new OutputStreamSender(m, UtilFile.defaultBufferSize.get()*8, true);
 		is.register(m, 0);
 	}
 	@Override

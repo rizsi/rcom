@@ -11,10 +11,10 @@ import nio.multiplexer.OutputStreamSender;
 public class ConnectToStdout {
 
 	public ConnectToStdout(ChannelProcessorMultiplexer m) throws IOException {
-		InputStreamReceiver isr=new InputStreamReceiver(UtilFile.defaultBufferSize.get()*8);
+		InputStreamReceiver isr=new InputStreamReceiver(UtilFile.defaultBufferSize.get()*8, true);
 		isr.register(m, 0);
 		ConnectStreams.startStreamThread(isr.in, System.out);
-		OutputStreamSender oss=new OutputStreamSender(m, UtilFile.defaultBufferSize.get()*8);
+		OutputStreamSender oss=new OutputStreamSender(m, UtilFile.defaultBufferSize.get()*8, true);
 		ConnectStreams.startStreamThread(System.in, oss.os);
 	}
 

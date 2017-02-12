@@ -141,6 +141,10 @@ public class CoolRMINioRemoter extends GenericCoolRMIRemoter {
 				e1.printStackTrace();
 			}
 		}
+		@Override
+		public void receiveBufferAvailable(long receiverAvailable) {
+			// There is no buffering handling in this class.
+		}
 		
 	}
 

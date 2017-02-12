@@ -55,9 +55,9 @@ public class StreamSinkVNC extends StreamSink
 			p=new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectOutput(Redirect.INHERIT).start();
 			s=ss.accept();
 		}
-		oss=new OutputStreamSender(multiplexer, StreamShareVNC.bufferSize);
+		oss=new OutputStreamSender(multiplexer, StreamShareVNC.bufferSize, true);
 		StreamDataDuplex stream=(StreamDataDuplex)conn.registerStream(streamParametersVNC.name, oss.getId());
-		isr=new InputStreamReceiver(StreamShareVNC.bufferSize);
+		isr=new InputStreamReceiver(StreamShareVNC.bufferSize, true);
 		isr.register(multiplexer, stream.backChannel);
 		conn.launchStream(streamParametersVNC.name);
 		ConnectStreams.startStreamThread(isr.in, s.getOutputStream());

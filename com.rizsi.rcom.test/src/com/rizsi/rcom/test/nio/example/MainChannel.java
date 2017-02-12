@@ -29,6 +29,10 @@ public class MainChannel {
 		public int getAvailable() {
 			return bb.remaining();
 		}
+
+		@Override
+		public void receiveBufferAvailable(long receiverAvailable) {
+		}
 	}
 	class Receive extends MultiplexerReceiver
 	{

@@ -53,7 +53,6 @@ public class RoundBuffer {
 	{
 		private long nSent;
 		private ByteBuffer sendBuffer;
-		private boolean overflow;
 		public Send(IMultiplexer multiplexer) {
 			super(multiplexer);
 			synchronized (buffer) {
@@ -74,7 +73,6 @@ public class RoundBuffer {
 				long lag=nRead-nSent;
 				if(lag>sendBuffer.capacity())
 				{
-					overflow=true;
 					// Overflow error, close this sender. 
 					n=0;
 				}else
@@ -114,6 +112,12 @@ public class RoundBuffer {
 				senders.remove(this);
 			}
 			super.close(e);
+		}
+
+		@Override
+		public void receiveBufferAvailable(long receiverAvailable) {
+			// TODO Round Buffer does not implement receiver buffer size handling.
+			
 		}
 	}
 	public RoundBuffer(int capacity)

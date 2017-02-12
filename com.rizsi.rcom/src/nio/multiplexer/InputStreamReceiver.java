@@ -22,6 +22,7 @@ public class InputStreamReceiver extends MultiplexerReceiver
 	private long nRead;
 	private long closedAt=-1;
 	public InputStream in;
+	private boolean noOverflow;
 	class Is extends InputStream
 	{
 		@Override
@@ -43,6 +44,10 @@ public class InputStreamReceiver extends MultiplexerReceiver
 					if(!reader.hasRemaining())
 					{
 						reader.clear();
+					}
+					if(noOverflow)
+					{
+						setReceiveBufferAvailable(bb.capacity()+nRead);
 					}
 					return 0xff&ret;
 				}
@@ -80,6 +85,10 @@ public class InputStreamReceiver extends MultiplexerReceiver
 					if(reader.position()==reader.capacity())
 					{
 						reader.clear();
+					}
+					if(noOverflow)
+					{
+						setReceiveBufferAvailable(bb.capacity()+nRead);
 					}
 					return l;
 				}
@@ -126,12 +135,17 @@ public class InputStreamReceiver extends MultiplexerReceiver
 		}
 		return cap;
 	}
-	public InputStreamReceiver(int pipeSize)
+	public InputStreamReceiver(int pipeSize, boolean noOverflow)
 	{
 		super();
 		bb=ByteBuffer.allocateDirect(pipeSize);
 		reader=bb.asReadOnlyBuffer();
 		in=new Is();
+		this.noOverflow=noOverflow;
+		if(noOverflow)
+		{
+			setReceiveBufferAvailable(bb.capacity()+nRead);
+		}
 	}
 	@Override
 	public void close(Exception e) {
@@ -141,5 +155,4 @@ public class InputStreamReceiver extends MultiplexerReceiver
 			bb.notifyAll();
 		}
 	}
-
 }

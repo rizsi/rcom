@@ -15,7 +15,7 @@ abstract public class StreamSinkSimplex extends StreamSink
 	abstract public void start() throws IOException, Exception;
 	@Override
 	public void start(AbstractRcomArgs args, IVideocomConnection conn, IMultiplexer multiplexer) throws Exception {
-		receiver=new InputStreamReceiver(VideoConnection.bufferSize);
+		receiver=new InputStreamReceiver(VideoConnection.bufferSize, false);
 		start();
 		IStreamData data=conn.registerStream(name, -1);
 		StreamDataSimplex d=(StreamDataSimplex) data;

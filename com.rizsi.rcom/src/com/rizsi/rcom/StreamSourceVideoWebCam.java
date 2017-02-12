@@ -30,7 +30,7 @@ public class StreamSourceVideoWebCam implements AutoCloseable, IVideoStreamConta
 
 	public void start(Client c, String streamName) throws IOException {
 		conn=c.conn;
-		oss=new OutputStreamSender(c.getMultiplexer(), VideoConnection.bufferSize);
+		oss=new OutputStreamSender(c.getMultiplexer(), VideoConnection.bufferSize, false);
 		c.conn.shareStream(oss.getId(), params=new StreamParametersVideo(streamName, c.id, wcp.getW(), wcp.getH(), "mpegts"));
 		stream=new VideoStreamProcessor(c.getArgs(), params.width, params.height, params.width/2, params.height/2, params.encoding);
 		ChainList<String> command=c.getArgs().platform.createWebCamStreamCommand(c.getArgs(), wcp, params);

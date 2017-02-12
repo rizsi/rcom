@@ -24,7 +24,7 @@ public class StreamSourceVnc implements AutoCloseable {
 	private IVideocomConnection conn;
 	public void start(Client client, String streamName) throws IOException {
 		conn=client.conn;
-		oss=new OutputStreamSender(client.getMultiplexer(), StreamShareVNC.bufferSize);
+		oss=new OutputStreamSender(client.getMultiplexer(), StreamShareVNC.bufferSize, true);
 		try(ServerSocket ss=new ServerSocket())
 		{
 			ss.bind(new InetSocketAddress("localhost", 0));
@@ -32,7 +32,7 @@ public class StreamSourceVnc implements AutoCloseable {
 			System.out.println("Local port: "+localport);
 			params=new StreamParametersVNC(streamName, client.id);
 			StreamDataDuplex data=(StreamDataDuplex)client.conn.shareStream(oss.getId(), params);
-			isr=new InputStreamReceiver(StreamShareVNC.bufferSize);
+			isr=new InputStreamReceiver(StreamShareVNC.bufferSize, true);
 			client.getMultiplexer().register(isr, data.backChannel);
 			ChainList<String> command=new ChainList<>(client.getArgs().program_x11vnc,"-connect", "localhost:"+localport);
 			//command.addcs("-clip", "200x200+50+50");

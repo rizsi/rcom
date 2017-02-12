@@ -42,11 +42,13 @@ abstract public class AbstractMultiplexer implements IMultiplexer
 	 */
 	private static final int STATE_USERNAME=3;
 	/**
-	 * Lenght of the authenticated user name in bytes.
+	 * Length of the authenticated user name in bytes.
 	 */
 	public static final int userNameLength=64;
-	int recvState=STATE_INIT;
-	int sendState=STATE_INIT;
+	private static final int COMMAND_UPDATE_RECEIVER_AVAILABLE = 0;
+	private static final int COMMAND_DATA = 1;
+	private int recvState=STATE_INIT;
+	private int sendState=STATE_INIT;
 	private Map<Integer, MultiplexerReceiver> inputs=new HashMap<>();
 	private Map<Integer, MultiplexerSender> outputs=new HashMap<>();
 	private MultiplexerReceiver currentInput;
@@ -60,6 +62,7 @@ abstract public class AbstractMultiplexer implements IMultiplexer
 	private int nextSenderId;
 	private String userName;
 	private UtilEvent<Exception> closedEvent= new UtilEvent<>();
+	private AutoGrowBuffer availableReceiveBuffer=new AutoGrowBuffer();
 	/**
 	 * 
 	 * @param t
@@ -99,28 +102,39 @@ abstract public class AbstractMultiplexer implements IMultiplexer
 		case STATE_READY:
 			if(!sendBuffer.hasRemaining())
 			{
-				synchronized (this) {
-					loop:
-					for(MultiplexerSender sender: outputs.values())
-					{
-						int avail=sender.getAvailable();
-						if(avail>0)
+				if(availableReceiveBuffer.readSize()>=12)
+				{
+					sendBuffer.clear();
+					sendBuffer.putInt(COMMAND_UPDATE_RECEIVER_AVAILABLE);
+					availableReceiveBuffer.copyTo(sendBuffer, 12);
+					sendBuffer.flip();
+				}else
+				{
+					synchronized (this) {
+						loop:
+						for(MultiplexerSender sender: outputs.values())
 						{
-							currentSender=sender;
-							sendBuffer.clear();
-							sendBuffer.putInt(currentSender.getId());
-							sendCurrentLength=avail;
-							sendBuffer.putInt(sendCurrentLength);
-							sendBuffer.flip();
-							break loop;
+							int avail=sender.getAvailable();
+							if(avail>0)
+							{
+								currentSender=sender;
+								sendBuffer.clear();
+								sendBuffer.putInt(COMMAND_DATA);
+								sendBuffer.putInt(currentSender.getId());
+								sendCurrentLength=avail;
+								sendBuffer.putInt(sendCurrentLength);
+								sendBuffer.putInt(0); // All headers are 12 bytes
+								sendBuffer.flip();
+								break loop;
+							}
 						}
 					}
-				}
-				if(currentSender==null)
-				{
-					// No sender has data
-					signalHasDataToWrite(false);
-					return;
+					if(currentSender==null)
+					{
+						// No sender has data
+						signalHasDataToWrite(false);
+						return;
+					}
 				}
 			}
 			c.write(sendBuffer);
@@ -228,7 +242,7 @@ abstract public class AbstractMultiplexer implements IMultiplexer
 		{
 			if(!recvBuffer.hasRemaining())
 			{
-				recvBuffer.limit(8);
+				recvBuffer.limit(16);
 			}
 			int n=bc.read(recvBuffer);
 			if(n<0)
@@ -238,10 +252,30 @@ abstract public class AbstractMultiplexer implements IMultiplexer
 			if(recvBuffer.remaining()==0)
 			{
 				recvBuffer.flip();
-				int channel=recvBuffer.getInt();
-				recvCurrentLength=recvBuffer.getInt();
-				currentInput=inputs.get(channel);
-				recvState=STATE_MESSAGE;
+				int command=recvBuffer.getInt();
+				switch (command) {
+				case COMMAND_DATA:
+				{
+					int channel=recvBuffer.getInt();
+					recvCurrentLength=recvBuffer.getInt();
+					currentInput=inputs.get(channel);
+					recvState=STATE_MESSAGE;
+					break;
+				}
+				case COMMAND_UPDATE_RECEIVER_AVAILABLE:
+				{
+					int channel=recvBuffer.getInt();
+					long receiverAvailable=recvBuffer.getLong();
+					synchronized (this) {
+						MultiplexerSender sender=outputs.get(channel);
+						sender.receiveBufferAvailable(receiverAvailable);
+					}
+					recvBuffer.position(0).limit(0);
+					break;
+				}
+				default:
+					throw new IOException("Invalid command: "+command);
+				}
 			}
 			break;
 		}
@@ -312,11 +346,36 @@ abstract public class AbstractMultiplexer implements IMultiplexer
 	}
 
 	public void register(MultiplexerReceiver multiplexerReceiver, int id) {
+		long avail=multiplexerReceiver.getReceiveBufferAvailable();
 		synchronized (this) {
 			inputs.put(id, multiplexerReceiver);
+			if(avail>=0)
+			{
+				sendAvailable(id, avail);
+			}
 		}
 		
 	}
+	/**
+	 * Update the available buffer size of the receiver.
+	 * @param id
+	 * @param avail
+	 */
+	private void sendAvailable(int id, long avail) {
+		availableReceiveBuffer.putInt(id);
+		availableReceiveBuffer.putLong(avail);
+		signalHasDataToWrite(true);
+	}
+	/**
+	 * The available receive buffer size has changed.
+	 * Send the new buffer size to the cleint.
+	 * @param receiver
+	 */
+	public void availableChanged(MultiplexerReceiver receiver)
+	{
+		sendAvailable(receiver.getId(), receiver.getReceiveBufferAvailable());
+	}
+
 	public void register(MultiplexerSender multiplexerSender) {
 		synchronized (this) {
 			int id=nextSenderId++;

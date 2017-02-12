@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
@@ -33,6 +32,7 @@ import com.rizsi.rcom.cli.UtilCli;
 import com.rizsi.rcom.webcam.ListCams;
 import com.rizsi.rcom.webcam.WebCamParameter;
 
+import hu.qgears.commons.CompatFunction;
 import hu.qgears.commons.UtilComma;
 import hu.qgears.commons.UtilString;
 
@@ -337,7 +337,7 @@ public class Gui extends JFrame implements IListener {
 			
 			@Override
 			public void run() {
-				shares.setText(UtilString.concat(arrayList, new UtilComma("\n"), new Function<StreamParameters, String>() {
+				shares.setText(UtilString.concat(arrayList, new UtilComma("\n"), new CompatFunction<StreamParameters, String>() {
 					@Override
 					public String apply(StreamParameters t) {
 						return t.name;
