@@ -1,5 +1,10 @@
-package com.rizsi.rcom;
+package com.rizsi.rcom.audio;
 
+import com.rizsi.rcom.StreamParameters;
+import com.rizsi.rcom.StreamShare;
+import com.rizsi.rcom.StreamShareSimplex;
+import com.rizsi.rcom.StreamSink;
+import com.rizsi.rcom.VideoConnection;
 import com.rizsi.rcom.cli.Client;
 
 public class StreamParametersAudio extends StreamParameters {

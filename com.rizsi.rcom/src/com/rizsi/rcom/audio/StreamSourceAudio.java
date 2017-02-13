@@ -1,4 +1,4 @@
-package com.rizsi.rcom;
+package com.rizsi.rcom.audio;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,6 +8,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.TargetDataLine;
 
+import com.rizsi.rcom.IVideocomConnection;
+import com.rizsi.rcom.VideoConnection;
 import com.rizsi.rcom.cli.Client;
 
 import nio.multiplexer.OutputStreamSender;

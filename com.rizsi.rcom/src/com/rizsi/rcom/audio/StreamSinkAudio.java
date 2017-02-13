@@ -1,10 +1,12 @@
-package com.rizsi.rcom;
+package com.rizsi.rcom.audio;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 
+import com.rizsi.rcom.StreamParameters;
+import com.rizsi.rcom.StreamSinkSimplex;
 import com.rizsi.rcom.util.UtilStream;
 
 public class StreamSinkAudio extends StreamSinkSimplex {
