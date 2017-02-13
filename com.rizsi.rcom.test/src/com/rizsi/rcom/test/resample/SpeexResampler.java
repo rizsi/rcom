@@ -15,7 +15,7 @@ public class SpeexResampler {
 	public InputStream startResampling(int framesamples, final InputStream original) throws Exception
 	{
 		buffer=new byte[framesamples*2];
-		ProcessBuilder pb=new ProcessBuilder("/home/rizsi/github/rcom/speexexample/a.out");
+		ProcessBuilder pb=new ProcessBuilder("/home/rizsi/github/rcom/speexexample/a.out", "resample", ""+framesamples, ""+8000);
 		pb.redirectError(Redirect.INHERIT);
 		Process p=pb.start();
 		InputStream is=p.getInputStream();

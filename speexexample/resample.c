@@ -35,7 +35,6 @@ int main(int argc, char ** argv)
 {
 	int frame_size=256;
 	int sample_size=2;
-	int tail_length=1024;
 	int sampleRate = 8000;
 	spx_uint32_t sourceHz=sampleRate;
 	spx_uint32_t targetHz=sampleRate;
