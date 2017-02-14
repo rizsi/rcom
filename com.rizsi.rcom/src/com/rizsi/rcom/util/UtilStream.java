@@ -6,16 +6,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class UtilStream {
+	public static void readFully(byte[] bs, InputStream i) throws IOException {
+		readFully(bs, i, bs.length);
+	}
 	public static void readFully(byte[] bs, InputStream i, int k) throws IOException {
 		int at=0;
-		while(at<k)
+		while(k>0)
 		{
-			int n=i.read(bs, at, k-at);
-			if(n<0)
+			int n=i.read(bs, at, k);
+			if(n<=0)
 			{
-				throw new EOFException();
+				throw new EOFException("Data read returned: "+n);
 			}
 			at+=n;
+			k-=n;
 		}
 	}
 	public static void pipeToFully(InputStream is, int len, byte[] buffer, OutputStream os) throws IOException

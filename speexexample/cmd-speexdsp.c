@@ -1,4 +1,4 @@
-// Build: $ gcc resample.c -lspeexdsp
+// Build: $ gcc cmd-speexdsp.c -lspeexdsp
 
 #include <speex/speex_resampler.h>
 #include <speex/speex_echo.h>
@@ -16,8 +16,9 @@ int readFully(int fd, char * buf, size_t count)
 	while(count>0)
 	{
 		ssize_t n=read(fd, buf, count);
-		if(n<0)
+		if(n<=0)
 		{
+			fprintf(stderr, "Read fully error: %d\n", (int)n);
 			return -1;
 		}
 		count-=n;
@@ -55,50 +56,62 @@ int resample()
 	SpeexResamplerState * resampler_state=speex_resampler_init( 2, //spx_uint32_t nb_channels, 
                                           sampleRate, //spx_uint32_t in_rate, 
                                           sampleRate, //spx_uint32_t out_rate, 
-                                          10, // int quality [0,10] 10 is best,
+                                          5, // int quality [0,10] 10 is best,
                                           &err// int *err
 					);
 	checkError(err);
 	while(1)
 	{
-		if(readFully(STDIN_FILENO, (char *) input_frame, frame_size*sample_size))
+		if(readFully(STDIN_FILENO, (char *) &in_len, 4))
 		{
 			return 1;
 		}
+		fprintf(stderr, "In LEN: %d\n", in_len);
+		if(readFully(STDIN_FILENO, (char *) input_frame, in_len*sample_size))
+		{
+			return 1;
+		}
+		fprintf(stderr, "Input frame read\n");
 		if(readFully(STDIN_FILENO, (char *) &sourceHzNew, 4))
 		{
 			return 1;
 		}
+		fprintf(stderr, "srchy read\n");
 		if(readFully(STDIN_FILENO, (char *) &targetHzNew, 4))
 		{
 			return 1;
 		}
+		fprintf(stderr, "trghy read\n");
 		if(sourceHzNew!=sourceHz || targetHzNew!=targetHz)
 		{
 			sourceHz=sourceHzNew;
 			targetHz=targetHzNew;
+			fprintf(stderr, "Set rates: %d %d\n", sourceHz, targetHz);
 			err=speex_resampler_set_rate(resampler_state, 
                               sourceHz, 
                               targetHz);
 			checkError(err);
 		}
-		in_len=frame_size;
+		fprintf(stderr, "OK\n");
 		out_len=frame_size;
-		do
+		//fprintf(stderr, "Data received... %d\n", in_len);
+		err=speex_resampler_process_int(resampler_state, // SpeexResamplerState *st, 
+	                         0, //spx_uint32_t channel_index, 
+	                         input_frame, // const spx_int16_t *in, 
+	                         &in_len, //spx_uint32_t *in_len, 
+	                         output_frame, //spx_int16_t *out, 
+	                         &out_len //spx_uint32_t *out_len
+				);
+		checkError(err);
+		fprintf(stderr, "OK2\n");
+		write(STDOUT_FILENO, (char *)&in_len, 4);
+		write(STDOUT_FILENO, (char *)&out_len, 4);
+		fprintf(stderr, "OK3 %d %d\n", in_len, out_len);
+		if(out_len>0)
 		{
-			err=speex_resampler_process_int(resampler_state, // SpeexResamplerState *st, 
-		                         0, //spx_uint32_t channel_index, 
-		                         input_frame, // const spx_int16_t *in, 
-		                         &in_len, //spx_uint32_t *in_len, 
-		                         output_frame, //spx_int16_t *out, 
-		                         &out_len //spx_uint32_t *out_len
-					);
-			checkError(err);
-			if(out_len>0)
-			{
-				write(STDOUT_FILENO, (char *) output_frame, out_len*sample_size);
-			}
-		}while(in_len==0);
+			write(STDOUT_FILENO, (char *) output_frame, out_len*sample_size);
+		}
+		fprintf(stderr, "OK4\n");
 	}
 }
 
