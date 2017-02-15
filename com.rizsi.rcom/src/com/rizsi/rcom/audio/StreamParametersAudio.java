@@ -19,7 +19,7 @@ public class StreamParametersAudio extends StreamParameters {
 	}
 	@Override
 	public StreamSink createSink(Client c) {
-		return new StreamSinkAudio(this);
+		return new StreamSinkAudio(this, c.getArgs());
 	}
 	@Override
 	public StreamShare createShare(VideoConnection videoConnection, int channel) {

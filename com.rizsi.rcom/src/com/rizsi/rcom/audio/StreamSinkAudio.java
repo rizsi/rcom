@@ -5,27 +5,49 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 
-import com.rizsi.rcom.StreamParameters;
+import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.StreamSinkSimplex;
 import com.rizsi.rcom.util.UtilStream;
 
 public class StreamSinkAudio extends StreamSinkSimplex {
-	StreamParameters p;
-	private byte[] buffer;
+	private StreamParametersAudio p;
 	private AudioFormat format;
 	private volatile boolean exit;
+	private JitterResampler resampler;
+	private AbstractRcomArgs args;
 
-	public StreamSinkAudio(StreamParametersAudio p) {
+	public StreamSinkAudio(StreamParametersAudio p, AbstractRcomArgs abstractRcomArgs) {
 		super(p.name);
 		this.p = p;
+		args=abstractRcomArgs;
 	}
 
 	@Override
 	public void start() throws Exception {
-		new Thread("Audio output") {
+		format = StreamSourceAudio.getFormat();
+		resampler=new JitterResampler(args, (int)format.getSampleRate(), StreamSourceAudio.requestBufferSize/2, 2);
+		new Thread("Audio jitter resampler")
+		{
+			private byte[] buffer;
+			@Override
 			public void run() {
 				try {
-					format = StreamSourceAudio.getFormat();
+					buffer=new byte[StreamSourceAudio.requestBufferSize];
+					while(!exit)
+					{
+						UtilStream.readFully(buffer, receiver.in, buffer.length);
+						resampler.writeInput(buffer);
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}.start();
+		new Thread("Audio output") {
+			private byte[] buffer;
+			public void run() {
+				try {
 					// final AudioInputStream ais =
 					// new AudioInputStream(input, format,
 					// audio.length / format.getFrameSize());
@@ -37,7 +59,7 @@ public class StreamSinkAudio extends StreamSinkSimplex {
 						buffer=new byte[line.getBufferSize()];
 						while(!exit)
 						{
-							UtilStream.readFully(buffer, receiver.in, buffer.length);
+							resampler.readOutput(buffer);
 							line.write(buffer, 0, buffer.length);
 						}
 					}
@@ -52,6 +74,11 @@ public class StreamSinkAudio extends StreamSinkSimplex {
 	@Override
 	public void dispose() {
 		exit=true;
+		if(resampler!=null)
+		{
+			resampler.close();
+			resampler=null;
+		}
 		super.dispose();
 	}
 

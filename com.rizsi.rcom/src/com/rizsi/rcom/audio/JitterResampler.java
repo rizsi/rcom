@@ -96,6 +96,10 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver {
 			{
 				System.out.println("Read data from empty channel.");
 			}
+			for(int i=0;i<data.length; ++i)
+			{
+				data[i]=0;
+			}
 			return;
 		}
 		int at=0;
@@ -119,7 +123,7 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver {
 		if(currsec!=sec)
 		{
 			updateReqRate();
-			System.out.println("Current time: "+sec+" Buffer length: "+getBufferLengthInSecs()+" rate: "+rate+" reqRate: "+reqRate+" target: "+bufferLengthTarget);
+			// System.out.println("Current time: "+sec+" Buffer length: "+getBufferLengthInSecs()+" rate: "+rate+" reqRate: "+reqRate+" target: "+bufferLengthTarget);
 		}
 		sec=currsec;
 	}

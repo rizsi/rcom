@@ -57,10 +57,12 @@ public class SpeexResampler implements AutoCloseable
 		try {
 			checkresult.get(3, TimeUnit.SECONDS);
 		} catch (Exception e) {
+			p.destroy();
 			throw new RuntimeException("Invalid version of speexcmd. Required: '"+req+"'", e);
 		}
 		if(!Arrays.equals(reqb, recv))
 		{
+			p.destroy();
 			throw new RuntimeException("Invalid version of speexcmd. Required: "+req);
 		}
 		return;

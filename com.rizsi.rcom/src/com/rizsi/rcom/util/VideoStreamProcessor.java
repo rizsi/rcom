@@ -147,7 +147,7 @@ public class VideoStreamProcessor implements AutoCloseable
 		{
 			// Buffer overflow
 			int overflow=maxIndex-bufferingLength+1-reqIndex;
-			System.out.println("Oerflow "+overflow);
+			// System.out.println("Oerflow "+overflow);
 			reqIndex+=overflow;
 			timeStampIndex+=overflow;
 		}
