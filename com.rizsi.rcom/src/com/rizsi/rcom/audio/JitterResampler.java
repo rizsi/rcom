@@ -1,9 +1,8 @@
 package com.rizsi.rcom.audio;
 
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 
+import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.audio.SpeexResampler.ResampledReceiver;
 import com.rizsi.rcom.util.MyAssert;
 
@@ -37,20 +36,18 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver {
 	 */
 	private double bufferLengthTarget;
 	private SpeexResampler resampler;
-	private PipedInputStream pis;
-	private PipedOutputStream pos;
-	public JitterResampler(int sampleRate, int framesamples, int sampleSizeInBytes) throws Exception
+	private Pipe pis;
+	private Pipe pos;
+	public JitterResampler(AbstractRcomArgs args, int sampleRate, int framesamples, int sampleSizeInBytes) throws Exception
 	{
 		MyAssert.myAssert(sampleSizeInBytes==2);
 		this.sampleRate=sampleRate;
 		bufferLengthTarget=((double)framesamples)/sampleRate*3;
 		bytesPerSecond=sampleSizeInBytes*sampleRate;
 		this.framesamples=framesamples;
-		resampler=new SpeexResampler(framesamples, this);
+		resampler=new SpeexResampler(args, framesamples, this);
 		// 5 seconds of buffer
-		pos=new PipedOutputStream();
-		pis=new PipedInputStream(sampleRate*sampleSizeInBytes*5);
-		pis.connect(pos);
+		pis=pos=new Pipe(sampleRate*sampleSizeInBytes*5);
 	}
 	/**
 	 * Write input data to the resampler.
@@ -59,17 +56,9 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver {
 	 */
 	synchronized public void writeInput(byte[] data) throws Exception
 	{
-		if(received==0)
-		{
-			// Reset the used branch so both streams start at the same time
-//			used=0;
-//			resampled=0;
-		}
 		received+=data.length;
 		int sourceRate=(int)(reqRate*sampleRate);
 		resampler.feed(data, sourceRate, sampleRate);
-		
-		updateReqRate();
 	}
 	private void updateReqRate() {
 		// Update rate
@@ -84,7 +73,6 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver {
 		reqRate=rate+diff/regulateTime;
 		if(reqRate<0.2) reqRate=0.2;
 		if(reqRate>3) reqRate=3;
-		System.out.println("reqrate: "+reqRate);
 	}
 	@Override
 	public void receiveResampled(byte[] data, int nsamples) throws IOException {
@@ -96,6 +84,20 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver {
 	}
 	synchronized public void readOutput(byte[] data) throws IOException
 	{
+		while(received<bufferLengthTarget*bytesPerSecond)
+		{
+			if(received>0)
+			{
+				// TODO would be better to initialize the counters when playback is started with "good" values.
+				System.out.println("Buffering... "+received);
+				used+=data.length;
+				resampled+=data.length;
+			}else
+			{
+				System.out.println("Read data from empty channel.");
+			}
+			return;
+		}
 		int at=0;
 		used+=data.length;
 		long missing=Math.max(0, used-resampled);
@@ -105,8 +107,8 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver {
 		}
 		if(missing>0)
 		{
-			System.out.println("Samples missing: "+missing+" at second: "+sec);
-			// TODO Add silence - We don't have enough samples
+			// System.out.println("Samples missing: "+missing+" at second: "+sec);
+			// Add silence - We don't have enough samples
 			resampled+=missing;
 			for(int i=at;i<data.length; ++i)
 			{
@@ -116,6 +118,7 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver {
 		long currsec=used/bytesPerSecond;
 		if(currsec!=sec)
 		{
+			updateReqRate();
 			System.out.println("Current time: "+sec+" Buffer length: "+getBufferLengthInSecs()+" rate: "+rate+" reqRate: "+reqRate+" target: "+bufferLengthTarget);
 		}
 		sec=currsec;

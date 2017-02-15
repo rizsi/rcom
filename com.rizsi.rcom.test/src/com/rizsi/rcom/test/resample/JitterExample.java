@@ -10,8 +10,9 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 
+import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.audio.JitterResampler;
-import com.rizsi.rcom.audio.SpeexResampler;
+import com.rizsi.rcom.cli.UtilCli;
 import com.rizsi.rcom.test.echocancel.ManualTestEchoCancel;
 
 import hu.qgears.commons.UtilFile;
@@ -19,6 +20,8 @@ import hu.qgears.commons.UtilFile;
 public class JitterExample {
 	static int framesamples=256;
 	public static void main(String[] args) throws Exception {
+		AbstractRcomArgs a=new AbstractRcomArgs();
+		UtilCli.parse(a, args, true);
 		File folder=new File("/home/rizsi/tmp/video");
 		byte[] data=UtilFile.loadFile(new File(folder, "remote.sw"));
 		AudioFormat format=ManualTestEchoCancel.getFormat();
@@ -29,7 +32,7 @@ public class JitterExample {
 		s.start();
 		try(LoopInputStream lis=new LoopInputStream(data))
 		{
-			try(JitterResampler rs=new JitterResampler(8000, framesamples, 2))
+			try(JitterResampler rs=new JitterResampler(a, 8000, framesamples, 2))
 			{
 				new FeedThread(lis, rs).start();
 				final byte[] buffer=new byte[framesamples*2];;
@@ -78,20 +81,5 @@ public class JitterExample {
 				TimeUnit.NANOSECONDS.sleep(diff);
 			}
 		}
-	}
-	static class ResampledReceiver implements SpeexResampler.ResampledReceiver
-	{
-		private SourceDataLine s;
-		
-		public ResampledReceiver(SourceDataLine s) {
-			super();
-			this.s = s;
-		}
-
-		@Override
-		public void receiveResampled(byte[] data, int nsamples) {
-			s.write(data, 0, nsamples*2);
-		}
-		
 	}
 }

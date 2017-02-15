@@ -1,4 +1,4 @@
-// Build: $ gcc cmd-speexdsp.c -lspeexdsp
+// Build: $ gcc -o speexcmd cmd-speexdsp.c -lspeexdsp
 
 #include <speex/speex_resampler.h>
 #include <speex/speex_echo.h>
@@ -56,7 +56,7 @@ int resample()
 	SpeexResamplerState * resampler_state=speex_resampler_init( 2, //spx_uint32_t nb_channels, 
                                           sampleRate, //spx_uint32_t in_rate, 
                                           sampleRate, //spx_uint32_t out_rate, 
-                                          5, // int quality [0,10] 10 is best,
+                                          10, // int quality [0,10] 10 is best,
                                           &err// int *err
 					);
 	checkError(err);
@@ -66,33 +66,27 @@ int resample()
 		{
 			return 1;
 		}
-		fprintf(stderr, "In LEN: %d\n", in_len);
 		if(readFully(STDIN_FILENO, (char *) input_frame, in_len*sample_size))
 		{
 			return 1;
 		}
-		fprintf(stderr, "Input frame read\n");
 		if(readFully(STDIN_FILENO, (char *) &sourceHzNew, 4))
 		{
 			return 1;
 		}
-		fprintf(stderr, "srchy read\n");
 		if(readFully(STDIN_FILENO, (char *) &targetHzNew, 4))
 		{
 			return 1;
 		}
-		fprintf(stderr, "trghy read\n");
 		if(sourceHzNew!=sourceHz || targetHzNew!=targetHz)
 		{
 			sourceHz=sourceHzNew;
 			targetHz=targetHzNew;
-			fprintf(stderr, "Set rates: %d %d\n", sourceHz, targetHz);
 			err=speex_resampler_set_rate(resampler_state, 
                               sourceHz, 
                               targetHz);
 			checkError(err);
 		}
-		fprintf(stderr, "OK\n");
 		out_len=frame_size;
 		//fprintf(stderr, "Data received... %d\n", in_len);
 		err=speex_resampler_process_int(resampler_state, // SpeexResamplerState *st, 
@@ -103,15 +97,12 @@ int resample()
 	                         &out_len //spx_uint32_t *out_len
 				);
 		checkError(err);
-		fprintf(stderr, "OK2\n");
 		write(STDOUT_FILENO, (char *)&in_len, 4);
 		write(STDOUT_FILENO, (char *)&out_len, 4);
-		fprintf(stderr, "OK3 %d %d\n", in_len, out_len);
 		if(out_len>0)
 		{
 			write(STDOUT_FILENO, (char *) output_frame, out_len*sample_size);
 		}
-		fprintf(stderr, "OK4\n");
 	}
 }
 
@@ -141,53 +132,50 @@ void cancelecho()
 
 int main(int argc, char ** argv)
 {
-	fprintf(stderr, "Argc: %d\n", argc);
-        for(int i=0;i<argc;++i)
-        {
-            fprintf(stderr, "Arg: %s\n", argv[i]);
-        }
+	printf("speexcmd for RCOM0.0.4:");
+	fflush(stdout);
         if(argc<2)
         {
-            fprintf(stderr, "Missing first arg: program to execute: resample or cancelecho\n");
+            fprintf(stderr, "speexcmd - Missing first arg: program to execute: resample or cancelecho\n");
             exit(1);
         }
         if(argc<3)
         {
-            fprintf(stderr, "Missing second arg: frame size in samples\n");
+            fprintf(stderr, "speexcmd - Missing second arg: frame size in samples\n");
             exit(1);
         }
         if(argc<4)
         {
-            fprintf(stderr, "Missing third arg: samplerate\n");
+            fprintf(stderr, "speexcmd - Missing third arg: samplerate\n");
             exit(1);
         }
         frame_size=atoi(argv[2]);
-        fprintf(stderr, "Frame size in samples: %d\n", frame_size);
+        fprintf(stderr, "speexcmd - Frame size in samples: %d\n", frame_size);
         if(frame_size<1)
         {
-            fprintf(stderr, "Frame size must be positive\n");
+            fprintf(stderr, "speexcmd - Frame size must be positive\n");
             exit(1);
         }
         sampleRate=atoi(argv[3]);
-        fprintf(stderr, "Sample rate: %d\n", sampleRate);
+        fprintf(stderr, "speexcmd - Sample rate: %d\n", sampleRate);
         if(sampleRate<3500)
         {
-            fprintf(stderr, "Sample rate must be more than 3499\n");
+            fprintf(stderr, "speexcmd - Sample rate must be more than 3499\n");
             exit(1);
         }
         if(!strcmp("resample", argv[1]))
         {
-            fprintf(stderr, "Resampler started...\n");
+            fprintf(stderr, "speexcmd - Resampler started...\n");
             resample();
             return 0;
         } else if(!strcmp("cancelecho", argv[1]))
         {
-            fprintf(stderr, "Cancel echo\n");
+            fprintf(stderr, "speexcmd - Cancel echo\n");
             exit(1);
             return 1;
         }else
         {
-            fprintf(stderr, "Error: program to executer\n");
+            fprintf(stderr, "speexcmd - Error: program to execute\n");
             exit(1);
             return 1;
         }

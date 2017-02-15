@@ -54,6 +54,8 @@ public class Pipe {
 			len-=n;
 			at+=n;
 		}
+		this.readAt=readAt;
+		this.available-=len;
 	}
 
 	public void read(int len) {

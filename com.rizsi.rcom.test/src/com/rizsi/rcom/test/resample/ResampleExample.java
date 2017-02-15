@@ -8,7 +8,9 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 
+import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.audio.SpeexResampler;
+import com.rizsi.rcom.cli.UtilCli;
 import com.rizsi.rcom.test.echocancel.ManualTestEchoCancel;
 import com.rizsi.rcom.util.UtilStream;
 
@@ -17,6 +19,8 @@ import hu.qgears.commons.UtilFile;
 public class ResampleExample {
 	static int framesamples=256;
 	public static void main(String[] args) throws Exception {
+		AbstractRcomArgs a=new AbstractRcomArgs();
+		UtilCli.parse(a, args, true);
 		File folder=new File("/home/rizsi/tmp/video");
 		byte[] data=UtilFile.loadFile(new File(folder, "remote.sw"));
 		AudioFormat format=ManualTestEchoCancel.getFormat();
@@ -27,7 +31,7 @@ public class ResampleExample {
 		s.start();
 		try(LoopInputStream lis=new LoopInputStream(data))
 		{
-			try(SpeexResampler resampler=new SpeexResampler(framesamples, new ResampledReceiver(s)))
+			try(SpeexResampler resampler=new SpeexResampler(a, framesamples, new ResampledReceiver(s)))
 			{
 				final byte[] buffer=new byte[framesamples*2];;
 				while(true)
@@ -44,7 +48,7 @@ public class ResampleExample {
 		}
 	}
 	private static void feed(SpeexResampler resampler, byte[] buffer) throws Exception {
-		resampler.feed(buffer, 8000,  8000);
+		resampler.feed(buffer, 8000,  9000);
 	}
 	static class ResampledReceiver implements SpeexResampler.ResampledReceiver
 	{
@@ -57,6 +61,7 @@ public class ResampleExample {
 
 		@Override
 		public void receiveResampled(byte[] data, int nsamples) {
+//			System.out.println("Receive resampled: "+nsamples);
 			s.write(data, 0, nsamples*2);
 		}
 		
