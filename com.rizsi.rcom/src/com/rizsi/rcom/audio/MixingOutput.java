@@ -1,6 +1,5 @@
 package com.rizsi.rcom.audio;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -8,11 +7,7 @@ import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
 
 /**
  * Real-time mix a list of sources into a single output.
@@ -21,65 +16,84 @@ import javax.sound.sampled.SourceDataLine;
  * @author rizsi
  *
  */
-public class MixingOutput {
+abstract public class MixingOutput extends Thread
+{
 	private boolean exit;
 	private List<ISyncAudioSource> sources=new ArrayList<ISyncAudioSource>();
 	private List<ISyncAudioSource> toAdd=new ArrayList<>();
 	private List<ISyncAudioSource> toRemove=new ArrayList<>();
 	public static int linearLimit=28000;
 	public static int negLinearLimit=-linearLimit;
-	void run() throws LineUnavailableException, IOException
+	public MixingOutput()
 	{
-		AudioFormat format = StreamSourceAudio.getFormat();
-		DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-		try(SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info))
-		{
-			line.open(format, StreamSourceAudio.requestBufferSize);
-			line.start();
-			int n=line.getBufferSize();
-			byte[] buffer=new byte[n];
-			ShortBuffer asShort=ByteBuffer.wrap(buffer).order(ByteOrder.nativeOrder()).asShortBuffer();
-			IntBuffer mixing=IntBuffer.allocate(n);
-			while(!exit)
+		super("Audio mixer output");
+	}
+	public void run()
+	{
+		try {
+			int nbyte=openAudioOutput();
+			try
 			{
-				mixing.clear();
-				for(int i=0;i<n;++i)
+				byte[] buffer=new byte[nbyte];
+				ShortBuffer asShort=ByteBuffer.wrap(buffer).order(ByteOrder.nativeOrder()).asShortBuffer();
+				int n=nbyte/2;
+				IntBuffer mixing=IntBuffer.allocate(n);
+				startAudioOutput();
+				while(!exit)
 				{
-					mixing.put(0);
-				}
-				mixing.flip();
-				for(ISyncAudioSource resampler: sources)
-				{
-					resampler.readOutput(buffer);
+					mixing.clear();
+					for(int i=0;i<n;++i)
+					{
+						mixing.put(0);
+					}
+					mixing.flip();
+					for(ISyncAudioSource resampler: sources)
+					{
+						if(resampler.isClosed())
+						{
+							removeResampler(resampler);
+						}
+						resampler.readOutput(buffer);
+						for(int i=0;i<n;++i)
+						{
+							int sum=mixing.get(i);
+							sum+=asShort.get(i);
+							mixing.put(i, sum);
+						}
+					}
 					for(int i=0;i<n;++i)
 					{
 						int sum=mixing.get(i);
-						sum+=asShort.get(i);
-						mixing.put(i, sum);
+						short value=nonLinearResampling(sum);
+						asShort.put(i, value);
+					}
+					writeAudioOutput(buffer);
+					synchronized (this) {
+						for(ISyncAudioSource src: toAdd)
+						{
+							sources.add(src);
+						}
+						toAdd.clear();
+						for(ISyncAudioSource src: toRemove)
+						{
+							sources.remove(src);
+						}
+						toRemove.clear();
 					}
 				}
-				for(int i=0;i<n;++i)
-				{
-					int sum=mixing.get(i);
-					short value=nonLinearResampling(sum);
-					asShort.put(i, value);
-				}
-				line.write(buffer, 0, buffer.length);
-				synchronized (this) {
-					for(ISyncAudioSource src: toAdd)
-					{
-						sources.add(src);
-					}
-					toAdd.clear();
-					for(ISyncAudioSource src: toRemove)
-					{
-						sources.remove(src);
-					}
-					toRemove.clear();
-				}
+			} finally
+			{
+				closeAudioOutput();
 			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
+	abstract protected void closeAudioOutput();
+	abstract protected void writeAudioOutput(byte[] buffer);
+	abstract protected int openAudioOutput() throws LineUnavailableException;
+	abstract protected void startAudioOutput();
 	public static short nonLinearResampling(int sum) {
 		if(sum>linearLimit)
 		{

@@ -1,4 +1,4 @@
-package com.rizsi.rcom.test.echocancel;
+package com.rizsi.rcom.audio;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,7 +17,7 @@ public class Mic extends Thread
 		super();
 		DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
 		t=(TargetDataLine) mixer.getLine(info);
-		t.open(format, frameSamples);
+		t.open(format, frameSamples*2);
 		System.out.println("Bytebuffer t: "+t.getBufferSize());
 	}
 

@@ -99,14 +99,20 @@ public class Client implements IVideocomCallback {
 	private volatile Thread mainThread;
 	private volatile NioThread nt;
 	private IListener l;
-	private SimpleAudioSystem audioSystem;
+	private IAudioSystem audioSystem;
 	public void run(AbstractCliArgs args, IListener l) throws Exception
 	{
 		try {
 			this.l=l;
 			args.apply();
 			this.args=args;
-			audioSystem=new SimpleAudioSystem(args);
+			if(args.echoCanceller)
+			{
+				audioSystem=new EchoCancellerAudioSystem(args);
+			}else
+			{
+				audioSystem=new SimpleAudioSystem(args);
+			}
 			mainThread=Thread.currentThread();
 			isGui=args instanceof GuiCliArgs;
 			System.out.println("Inited");

@@ -7,6 +7,8 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 
+import com.rizsi.rcom.audio.Mic;
+
 public class Record {
 	public static void main(String[] args) throws Exception {
 		AudioFormat format=ManualTestEchoCancel.getFormat();

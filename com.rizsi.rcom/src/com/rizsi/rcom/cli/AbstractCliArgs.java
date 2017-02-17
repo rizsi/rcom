@@ -3,6 +3,7 @@ package com.rizsi.rcom.cli;
 import com.rizsi.rcom.AbstractRcomArgs;
 
 import joptsimple.annot.JOHelp;
+import joptsimple.annot.JOSimpleBoolean;
 
 public class AbstractCliArgs extends AbstractRcomArgs
 {
@@ -12,4 +13,10 @@ public class AbstractCliArgs extends AbstractRcomArgs
 	public String room;
 	@JOHelp("The requested username. A timestamp will replace it if none is given.")
 	public String userName;
+	@JOHelp("Disable audio jitter buffer. Not recommended, development feature only.")
+	@JOSimpleBoolean
+	public boolean disableAudioJitterResampler;
+	@JOHelp("Enable echo canceller (Speex). Use this when the operating system does not implement one.")
+	@JOSimpleBoolean
+	public boolean echoCanceller;
 }

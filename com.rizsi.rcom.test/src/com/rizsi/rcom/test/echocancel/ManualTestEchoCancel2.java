@@ -8,6 +8,10 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 
+import com.rizsi.rcom.audio.Mic;
+import com.rizsi.rcom.audio.Play;
+import com.rizsi.rcom.audio.SpeexEchoCancel;
+
 import hu.qgears.commons.UtilFile;
 
 /**

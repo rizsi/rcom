@@ -6,15 +6,13 @@ import java.io.OutputStream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
 import com.rizsi.rcom.cli.AbstractCliArgs;
-import com.rizsi.rcom.util.UtilStream;
 
-import nio.multiplexer.InputStreamReceiver;
-
-public class SimpleAudioSystem implements IAudioSystem
+public class SimpleAudioSystem extends AudioSystemAbstract
 {
 	class Capture extends Thread implements ICapture
 	{
@@ -30,7 +28,8 @@ public class SimpleAudioSystem implements IAudioSystem
 			try {
 				AudioFormat format=StreamSourceAudio.getFormat();
 				DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-				try(final TargetDataLine line = (TargetDataLine) AudioSystem.getLine(info))
+				Mixer m=AudioSystem.getMixer(null);
+				try(final TargetDataLine line = (TargetDataLine) m.getLine(info))
 				{
 					line.open(format, StreamSourceAudio.requestBufferSize);
 					byte buffer[] = new byte[line.getBufferSize()];
@@ -62,48 +61,6 @@ public class SimpleAudioSystem implements IAudioSystem
 		}
 	}
 	
-	class Playback implements IPlayback
-	{
-		private ISyncAudioSource resampler;
-		private InputStreamReceiver receiver;
-		public Playback(StreamParametersAudio p, InputStreamReceiver receiver) {
-			this.receiver=receiver;
-		}
-		void start() throws Exception
-		{
-			if(!args.disableAudioJitterResampler)
-			{
-				final JitterResampler jr=new JitterResampler(args, (int)StreamSourceAudio.getFormat().getSampleRate(), StreamSourceAudio.requestBufferSize/2, 2);
-				resampler=jr;
-				new Thread("Audio jitter resampler")
-				{
-					private byte[] buffer;
-					@Override
-					public void run() {
-						try {
-							buffer=new byte[StreamSourceAudio.requestBufferSize];
-							while(!jr.isClosed())
-							{
-								UtilStream.readFully(buffer, receiver.in, buffer.length);
-								jr.writeInput(buffer);
-							}
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				}.start();
-			}else
-			{
-				resampler=new ZeroResampler(receiver);
-			}
-			startPlayback(resampler);
-		}
-		@Override
-		public void close() {
-			resampler.close();
-		}
-	}
 	@Override
 	public void startPlayback(final ISyncAudioSource resampler) {
 		final AudioFormat format = StreamSourceAudio.getFormat();
@@ -133,12 +90,8 @@ public class SimpleAudioSystem implements IAudioSystem
 			};
 		}.start();
 	}
-	private AbstractCliArgs args;
-	
-
 	public SimpleAudioSystem(AbstractCliArgs args) {
-		super();
-		this.args = args;
+		super(args);
 	}
 
 	@Override
@@ -147,12 +100,4 @@ public class SimpleAudioSystem implements IAudioSystem
 		c.start();
 		return c;
 	}
-
-	@Override
-	public IPlayback startPlayback(StreamParametersAudio p, InputStreamReceiver receiver) throws Exception {
-		Playback ret=new Playback(p, receiver);
-		ret.start();
-		return ret;
-	}
-
 }
