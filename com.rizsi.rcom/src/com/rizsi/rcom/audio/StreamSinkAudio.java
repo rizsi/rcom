@@ -25,50 +25,80 @@ public class StreamSinkAudio extends StreamSinkSimplex {
 	@Override
 	public void start() throws Exception {
 		format = StreamSourceAudio.getFormat();
-		resampler=new JitterResampler(args, (int)format.getSampleRate(), StreamSourceAudio.requestBufferSize/2, 2);
-		new Thread("Audio jitter resampler")
+		if(!args.disableAudioJitterResampler)
 		{
-			private byte[] buffer;
-			@Override
-			public void run() {
-				try {
-					buffer=new byte[StreamSourceAudio.requestBufferSize];
-					while(!exit)
-					{
-						UtilStream.readFully(buffer, receiver.in, buffer.length);
-						resampler.writeInput(buffer);
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}.start();
-		new Thread("Audio output") {
-			private byte[] buffer;
-			public void run() {
-				try {
-					// final AudioInputStream ais =
-					// new AudioInputStream(input, format,
-					// audio.length / format.getFrameSize());
-					DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-					try(SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info))
-					{
-						line.open(format, StreamSourceAudio.requestBufferSize);
-						line.start();
-						buffer=new byte[line.getBufferSize()];
+			resampler=new JitterResampler(args, (int)format.getSampleRate(), StreamSourceAudio.requestBufferSize/2, 2);
+			new Thread("Audio jitter resampler")
+			{
+				private byte[] buffer;
+				@Override
+				public void run() {
+					try {
+						buffer=new byte[StreamSourceAudio.requestBufferSize];
 						while(!exit)
 						{
-							resampler.readOutput(buffer);
-							line.write(buffer, 0, buffer.length);
+							UtilStream.readFully(buffer, receiver.in, buffer.length);
+							resampler.writeInput(buffer);
 						}
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
-			};
-		}.start();
+			}.start();
+			new Thread("Audio output") {
+				private byte[] buffer;
+				public void run() {
+					try {
+						// final AudioInputStream ais =
+						// new AudioInputStream(input, format,
+						// audio.length / format.getFrameSize());
+						DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+						try(SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info))
+						{
+							line.open(format, StreamSourceAudio.requestBufferSize);
+							line.start();
+							buffer=new byte[line.getBufferSize()];
+							while(!exit)
+							{
+								resampler.readOutput(buffer);
+								line.write(buffer, 0, buffer.length);
+							}
+						}
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				};
+			}.start();
+		}else
+		{
+			new Thread("Audio output - NOJITTER") {
+				private byte[] buffer;
+				public void run() {
+					try {
+						// final AudioInputStream ais =
+						// new AudioInputStream(input, format,
+						// audio.length / format.getFrameSize());
+						DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+						try(SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info))
+						{
+							line.open(format, StreamSourceAudio.requestBufferSize);
+							line.start();
+							buffer=new byte[line.getBufferSize()];
+							while(!exit)
+							{
+								UtilStream.readFully(buffer, receiver.in, buffer.length);	
+								line.write(buffer, 0, buffer.length);
+							}
+						}
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				};
+			}.start();
+		}
 	}
 
 	@Override

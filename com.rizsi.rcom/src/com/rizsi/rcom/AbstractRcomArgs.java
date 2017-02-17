@@ -25,6 +25,9 @@ public class AbstractRcomArgs {
 	public int bufferSize=VideoConnection.BUFFER_SIZE_DEFAULT;
 	@JOHelp("speexcmd program path. This program is part of the RCOM project. Must be matching version.")
 	public String program_speexcmd="speexcmd";
+	@JOHelp("Disable audio jitter buffer. Not recommended, development feature only.")
+	@JOSimpleBoolean
+	public boolean disableAudioJitterResampler;
 	public AbstractRcomArgs() {
 		if(System.getProperty("os.name").contains("Linux"))
 		{

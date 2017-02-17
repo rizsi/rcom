@@ -17,10 +17,10 @@ import nio.multiplexer.OutputStreamSender;
 public class StreamSourceAudio implements AutoCloseable {
 	public static AudioFormat getFormat() {
 		float sampleRate = 8000;
-		int sampleSizeInBits = 8;
+		int sampleSizeInBits = 16;
 		int channels = 1;
 		boolean signed = true;
-		boolean bigEndian = true;
+		boolean bigEndian = false;
 		return new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
 	}
 	private IVideocomConnection conn;
