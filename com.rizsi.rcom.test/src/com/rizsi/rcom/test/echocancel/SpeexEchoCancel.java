@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
-import com.rizsi.rcom.IChannelReader;
 import com.rizsi.rcom.NullOutputStream;
 import com.rizsi.rcom.util.TeeOutputStream;
 import com.rizsi.rcom.util.UtilStream;

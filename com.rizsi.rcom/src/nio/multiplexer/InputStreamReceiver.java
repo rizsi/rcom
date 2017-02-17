@@ -21,10 +21,20 @@ public class InputStreamReceiver extends MultiplexerReceiver
 	private long nWrite;
 	private long nRead;
 	private long closedAt=-1;
-	public InputStream in;
+	public Is in;
 	private boolean noOverflow;
-	class Is extends InputStream
+	public class Is extends InputStream
 	{
+		/**
+		 * Get the number of bytes that can be read without blocking.
+		 * @return
+		 */
+		public int getAvailable()
+		{
+			synchronized (bb) {
+				return (int)(nWrite-nRead);
+			}			
+		}
 		@Override
 		public int read() throws IOException {
 			try {

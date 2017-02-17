@@ -6,10 +6,11 @@ import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.audio.SpeexResampler.ResampledReceiver;
 import com.rizsi.rcom.util.MyAssert;
 
-public class JitterResampler implements AutoCloseable, ResampledReceiver {
+public class JitterResampler implements AutoCloseable, ResampledReceiver, ISyncAudioSource {
 	private int bytesPerSecond;
 	private int sampleRate;
 	private int framesamples;
+	private volatile boolean closed=false;
 	/**
 	 * Number of received bytes.
 	 */
@@ -82,6 +83,7 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver {
 		pos.write(data, 0, nsamples*2);
 		resampled+=nsamples*2;
 	}
+	@Override
 	synchronized public void readOutput(byte[] data) throws IOException
 	{
 		while(received<bufferLengthTarget*bytesPerSecond)
@@ -137,5 +139,10 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver {
 		{
 			resampler.close();
 		}
+		closed=true;
+	}
+	@Override
+	public boolean isClosed() {
+		return closed;
 	}
 }

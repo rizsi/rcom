@@ -24,6 +24,8 @@ import com.rizsi.rcom.StreamSink;
 import com.rizsi.rcom.StreamSourceVideoWebCam;
 import com.rizsi.rcom.StreamSourceVnc;
 import com.rizsi.rcom.VideoConnection;
+import com.rizsi.rcom.audio.IAudioSystem;
+import com.rizsi.rcom.audio.SimpleAudioSystem;
 import com.rizsi.rcom.audio.StreamSourceAudio;
 import com.rizsi.rcom.gui.DelegateVideoStreamContainer;
 import com.rizsi.rcom.gui.GuiCliArgs;
@@ -97,12 +99,14 @@ public class Client implements IVideocomCallback {
 	private volatile Thread mainThread;
 	private volatile NioThread nt;
 	private IListener l;
+	private SimpleAudioSystem audioSystem;
 	public void run(AbstractCliArgs args, IListener l) throws Exception
 	{
 		try {
 			this.l=l;
 			args.apply();
 			this.args=args;
+			audioSystem=new SimpleAudioSystem(args);
 			mainThread=Thread.currentThread();
 			isGui=args instanceof GuiCliArgs;
 			System.out.println("Inited");
@@ -370,5 +374,8 @@ public class Client implements IVideocomCallback {
 	}
 	public void sendMessage(String text) {
 		conn.sendMessage(text);
+	}
+	public IAudioSystem getAudio() {
+		return audioSystem;
 	}
 }
