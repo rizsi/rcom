@@ -8,8 +8,6 @@ import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import com.rizsi.rcom.audio.Mic;
-
 public class MeasurePower extends Thread
 {
 	int bufferSize;

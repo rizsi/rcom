@@ -1,4 +1,4 @@
-package com.rizsi.rcom.audio;
+package com.rizsi.rcom.test.echocancel;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

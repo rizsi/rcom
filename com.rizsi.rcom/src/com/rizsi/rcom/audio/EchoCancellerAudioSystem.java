@@ -8,32 +8,37 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 
+import com.rizsi.rcom.NullOutputStream;
 import com.rizsi.rcom.cli.AbstractCliArgs;
 
 public class EchoCancellerAudioSystem extends AudioSystemAbstract
 {
 	MixingOutput mixing;
 	Mic m;
-	Play p;
 	SpeexEchoCancel echo;
+	public class Capture implements ICapture
+	{
+
+		@Override
+		public void close() {
+			// TODO in case we are already recording an other then it may cause problem.
+			echo.setProcessed(new NullOutputStream());
+		}
+		
+	}
 	public EchoCancellerAudioSystem(AbstractCliArgs args) throws LineUnavailableException, IOException {
 		super(args);
 		AudioFormat format=StreamSourceAudio.getFormat();
 		
 		final Mixer mixer = AudioSystem.getMixer(null);
 		m=new Mic(mixer, format, StreamSourceAudio.requestBufferSize/2);
-		p=new Play(mixer, format, StreamSourceAudio.requestBufferSize/2);
+		mixing=new MixingOutputSimple(mixer);
 		echo=new SpeexEchoCancel();
 		echo.setLog(true);
-		echo.setup(m, p, StreamSourceAudio.requestBufferSize/2);
+		echo.setup(args, m, mixing, StreamSourceAudio.requestBufferSize/2);
 		echo.start();
-		p.start();
-		m.start();
-		
-		
-		
-		mixing=new MixingOutputSimple();
 		mixing.start();
+		m.start();
 	}
 
 	@Override
@@ -43,7 +48,8 @@ public class EchoCancellerAudioSystem extends AudioSystemAbstract
 
 	@Override
 	public ICapture startCapture(OutputStream os) {
-		// TODO Auto-generated method stub
-		return null;
+//		m.setRecord(os);
+		echo.setProcessed(os);
+		return new Capture();
 	}
 }

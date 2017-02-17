@@ -1,4 +1,4 @@
-package com.rizsi.rcom.audio;
+package com.rizsi.rcom.test.echocancel;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,7 +8,6 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 import com.rizsi.rcom.NullOutputStream;
-import com.rizsi.rcom.cli.AbstractCliArgs;
 import com.rizsi.rcom.util.TeeOutputStream;
 import com.rizsi.rcom.util.UtilStream;
 
@@ -33,18 +32,18 @@ public class SpeexEchoCancel extends Thread
 	{
 		super();
 	}
-	public void setup(AbstractCliArgs args, Mic m, MixingOutput player, int frameSamples) throws IOException {
+	public void setup(Mic m, Play player, int frameSamples) throws IOException {
 		bufferSize=frameSamples*2;
 		int pipeSize=(Math.abs(nLate)+100)*bufferSize;
 		play=new PipedInputStream(pipeSize);
 		play.connect(playSink);
 		rec=new PipedInputStream(pipeSize);
 		rec.connect(recSink);
-		Process p=new ProcessBuilder(args.program_speexcmd, "cancelecho", ""+frameSamples, ""+(int)StreamSourceAudio.getFormat().getFrameRate()).start();
+		Process p;
+		p=Runtime.getRuntime().exec("/home/rizsi/github/rcom/speexexample/a.out");
 		speexInputMic=p.getOutputStream();
 		speexInputMonitor=p.getOutputStream();
 		speexOutput=p.getInputStream();
-		SpeexResampler.checkSpeexCmdVersion(p, speexOutput);
 		if(log)
 		{
 			speexInputMic=new TeeOutputStream(new OutputStream[]{speexInputMic, new FileOutputStream("/tmp/mic.sw")});

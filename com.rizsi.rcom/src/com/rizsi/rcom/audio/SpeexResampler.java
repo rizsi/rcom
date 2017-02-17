@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import com.rizsi.rcom.AbstractRcomArgs;
-import com.rizsi.rcom.VideoConnection;
 import com.rizsi.rcom.util.UtilStream;
 
 import hu.qgears.commons.signal.SignalFutureWrapper;
@@ -42,7 +41,11 @@ public class SpeexResampler implements AutoCloseable
 		p=pb.start();
 		is=p.getInputStream();
 		os=p.getOutputStream();
-		String req="speexcmd for "+VideoConnection.serviceID+":";
+		checkSpeexCmdVersion(p, is);
+		return;
+	}
+	public static void checkSpeexCmdVersion(Process p, final InputStream is) {
+		String req="speexcmd 0.0.5 for RCOM:";
 		final byte[] reqb=req.getBytes(StandardCharsets.UTF_8);
 		final byte[] recv=new byte[reqb.length];
 		final SignalFutureWrapper<Boolean> checkresult=new SignalFutureWrapper<>();
@@ -65,7 +68,6 @@ public class SpeexResampler implements AutoCloseable
 			p.destroy();
 			throw new RuntimeException("Invalid version of speexcmd. Required: "+req);
 		}
-		return;
 	}
 	public void feed(byte[] buffer, int sourceHz, int targetHz) throws Exception {
 		pis.write(buffer, 0, buffer.length);

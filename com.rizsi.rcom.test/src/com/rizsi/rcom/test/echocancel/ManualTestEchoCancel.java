@@ -7,10 +7,6 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 
-import com.rizsi.rcom.audio.Mic;
-import com.rizsi.rcom.audio.Play;
-import com.rizsi.rcom.audio.SpeexEchoCancel;
-
 /**
  * Manually test echo cancel on a single machine:
  * 

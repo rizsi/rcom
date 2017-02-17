@@ -1,5 +1,7 @@
 package com.rizsi.rcom.audio;
 
+import java.io.IOException;
+import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -91,7 +93,7 @@ abstract public class MixingOutput extends Thread
 		}
 	}
 	abstract protected void closeAudioOutput();
-	abstract protected void writeAudioOutput(byte[] buffer);
+	abstract protected void writeAudioOutput(byte[] buffer) throws IOException;
 	abstract protected int openAudioOutput() throws LineUnavailableException;
 	abstract protected void startAudioOutput();
 	public static short nonLinearResampling(int sum) {
@@ -126,4 +128,5 @@ abstract public class MixingOutput extends Thread
 			toRemove.add(src);
 		}
 	}
+	abstract public void setSpeexCopy(PipedOutputStream playSink);
 }

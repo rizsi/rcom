@@ -1,4 +1,4 @@
-package com.rizsi.rcom.audio;
+package com.rizsi.rcom.test.echocancel;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,7 +18,7 @@ public class Mic extends Thread
 		DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
 		t=(TargetDataLine) mixer.getLine(info);
 		t.open(format, frameSamples*2);
-		System.out.println("Recording buffer size: "+t.getBufferSize());
+		System.out.println("Bytebuffer t: "+t.getBufferSize());
 	}
 
 	volatile private OutputStream os;
@@ -27,6 +27,7 @@ public class Mic extends Thread
 	public void run() {
 		byte[] buffer=new byte[t.getBufferSize()];
 		t.start();
+		int frameindex=0;
 		try {
 			while(true)
 			{
@@ -43,12 +44,20 @@ public class Mic extends Thread
 				{
 					speexCopy.write(buffer);
 				}
+				frameFinished(frameindex);
+				frameindex++;
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
+	protected void frameFinished(int frameindex) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public void setRecord(OutputStream record) {
 		this.os=record;
 	}

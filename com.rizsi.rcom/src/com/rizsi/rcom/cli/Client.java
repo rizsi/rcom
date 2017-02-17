@@ -24,6 +24,7 @@ import com.rizsi.rcom.StreamSink;
 import com.rizsi.rcom.StreamSourceVideoWebCam;
 import com.rizsi.rcom.StreamSourceVnc;
 import com.rizsi.rcom.VideoConnection;
+import com.rizsi.rcom.audio.EchoCancellerAudioSystem;
 import com.rizsi.rcom.audio.IAudioSystem;
 import com.rizsi.rcom.audio.SimpleAudioSystem;
 import com.rizsi.rcom.audio.StreamSourceAudio;

@@ -11,9 +11,6 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
-import com.rizsi.rcom.audio.Mic;
-import com.rizsi.rcom.audio.Play;
-
 /**
  * Measure echo latency.
  * 

@@ -59,8 +59,8 @@ public class VideoStreamProcessor implements AutoCloseable
 		{
 			scale=" -vf scale="+w+":"+h+" ";
 		}
-		String vdeo_size=" -video_size "+origW+"x"+origH+" ";
-		String trace="-v trace";
+		// String vdeo_size=" -video_size "+origW+"x"+origH+" ";
+		// String trace="-v trace";
 		ChainList<String> command=new ChainList<>(args.program_ffmpeg).addcall(UtilString.split("-analyzeduration 0 -fpsprobesize 0 -probesize 32000 -f "+enconding+" -i - "+scale+" -f rawvideo -pix_fmt bgr24 -", " "));
 		System.out.println("Decoder command: $ "+command.concat(" "));
 		p=new ProcessBuilder(command).start();

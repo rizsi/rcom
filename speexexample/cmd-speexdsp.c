@@ -132,7 +132,7 @@ void cancelecho()
 
 int main(int argc, char ** argv)
 {
-	printf("speexcmd for RCOM0.0.4:");
+	printf("speexcmd 0.0.5 for RCOM:");
 	fflush(stdout);
         if(argc<2)
         {
@@ -171,8 +171,8 @@ int main(int argc, char ** argv)
         } else if(!strcmp("cancelecho", argv[1]))
         {
             fprintf(stderr, "speexcmd - Cancel echo\n");
-            exit(1);
-            return 1;
+	    cancelecho();
+            return 0;
         }else
         {
             fprintf(stderr, "speexcmd - Error: program to execute\n");

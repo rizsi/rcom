@@ -3,8 +3,6 @@ package com.rizsi.rcom.test.echocancel;
 import java.io.ByteArrayOutputStream;
 
 import com.rizsi.rcom.NullOutputStream;
-import com.rizsi.rcom.audio.Mic;
-import com.rizsi.rcom.audio.SpeexEchoCancel;
 
 public class RecordBoth 
 {
