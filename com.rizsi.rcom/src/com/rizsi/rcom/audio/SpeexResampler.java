@@ -37,6 +37,7 @@ public class SpeexResampler implements AutoCloseable
 		this.pis=new Pipe(framesamples*2*2);
 		receivebuffer=new byte[framesamples*2];
 		ProcessBuilder pb=new ProcessBuilder(args.program_speexcmd, "resample", ""+framesamples, ""+8000);
+//		ProcessBuilder pb=new ProcessBuilder("wine", "/home/rizsi/github/rcom/speexexample/speexcmd.exe", "resample", ""+framesamples, ""+8000);
 		pb.redirectError(Redirect.INHERIT);
 		p=pb.start();
 		is=p.getInputStream();
@@ -74,7 +75,6 @@ public class SpeexResampler implements AutoCloseable
 		while(pis.available()>=framesamples*2)
 		{
 			int n=Math.min(pis.available(), buffer.length);
-			//System.out.println("Send n samples: "+n/2);
 			pis.readAhead(buffer, 0, n);
 			bb.clear();
 			bb.putInt(n/2);
@@ -94,7 +94,6 @@ public class SpeexResampler implements AutoCloseable
 				UtilStream.readFully(receivebuffer, is, out_len*2);
 				receiver.receiveResampled(receivebuffer, out_len);
 			}
-			// System.out.println("Received n samples: "+out_len+" processed: "+in_len+" fed: "+n/2);
 			pis.read(in_len*2);
 		}
 	}

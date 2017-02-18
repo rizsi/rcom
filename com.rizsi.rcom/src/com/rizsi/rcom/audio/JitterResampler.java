@@ -96,7 +96,7 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver, ISyncA
 				resampled+=data.length;
 			}else
 			{
-				System.out.println("Read data from empty channel.");
+				// System.out.println("Read data from empty channel.");
 			}
 			for(int i=0;i<data.length; ++i)
 			{

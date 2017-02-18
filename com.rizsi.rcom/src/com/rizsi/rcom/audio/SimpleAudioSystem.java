@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
-import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
@@ -27,9 +26,7 @@ public class SimpleAudioSystem extends AudioSystemAbstract
 		public void run() {
 			try {
 				AudioFormat format=StreamSourceAudio.getFormat();
-				DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-				Mixer m=AudioSystem.getMixer(null);
-				try(final TargetDataLine line = (TargetDataLine) m.getLine(info))
+				try(final TargetDataLine line = args.platform.openTargetDataLine())
 				{
 					line.open(format, StreamSourceAudio.requestBufferSize);
 					byte buffer[] = new byte[line.getBufferSize()];
@@ -68,9 +65,6 @@ public class SimpleAudioSystem extends AudioSystemAbstract
 			private byte[] buffer;
 			public void run() {
 				try {
-					// final AudioInputStream ais =
-					// new AudioInputStream(input, format,
-					// audio.length / format.getFrameSize());
 					DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
 					try(SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info))
 					{

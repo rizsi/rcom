@@ -9,14 +9,16 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 
+import com.rizsi.rcom.cli.AbstractCliArgs;
+
 public class MixingOutputSimple extends MixingOutput
 {
 	private SourceDataLine line;
 	private Mixer mixer;
 	private volatile PipedOutputStream speexCopy;
 	
-	public MixingOutputSimple(Mixer mixer) {
-		super();
+	public MixingOutputSimple(Mixer mixer, AbstractCliArgs args) {
+		super(args);
 		this.mixer = mixer;
 	}
 	protected void writeAudioOutput(byte[] buffer) throws IOException {
@@ -43,7 +45,7 @@ public class MixingOutputSimple extends MixingOutput
 	protected int openAudioOutput() throws LineUnavailableException {
 		AudioFormat format = StreamSourceAudio.getFormat();
 		DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-		line = (SourceDataLine) mixer.getLine(info);
+		line = args.platform.openSourceDataLine(mixer, info);
 		try {
 			line.open(format, StreamSourceAudio.requestBufferSize);
 			return line.getBufferSize();

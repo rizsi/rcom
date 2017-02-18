@@ -11,6 +11,8 @@ import java.util.List;
 
 import javax.sound.sampled.LineUnavailableException;
 
+import com.rizsi.rcom.cli.AbstractCliArgs;
+
 /**
  * Real-time mix a list of sources into a single output.
  * values below linearLimit are unaltered
@@ -26,9 +28,11 @@ abstract public class MixingOutput extends Thread
 	private List<ISyncAudioSource> toRemove=new ArrayList<>();
 	public static int linearLimit=28000;
 	public static int negLinearLimit=-linearLimit;
-	public MixingOutput()
+	protected AbstractCliArgs args;
+	public MixingOutput(AbstractCliArgs args)
 	{
 		super("Audio mixer output");
+		this.args=args;
 	}
 	public void run()
 	{
@@ -101,14 +105,12 @@ abstract public class MixingOutput extends Thread
 		{
 			double mul=200;
 			double x=sum-linearLimit-1;
-			System.out.println("x: "+x);
 			int v=(int)(Math.log((x/mul+1))*mul)+linearLimit+1;
 			return (short)v;
 		}else if(sum<-linearLimit)
 		{
 			double mul=200;
 			double x=negLinearLimit-sum-1;
-			System.out.println("x: "+x);
 			int v=(int)(Math.log((x/mul+1))*mul)+linearLimit+1;
 			return (short)-v;
 		}else

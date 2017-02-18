@@ -79,15 +79,21 @@ public class UserCollector extends Thread
 		
 		for(char ch:userName.toCharArray())
 		{
-			if(ch>126)
+			if(ch=='-'||ch=='_')
 			{
-				// lower ASCII only and DEL is prohibited
-				return false;
-			}
-			if(ch<='@')
+				
+			}else
 			{
-				// characters below are possible escaping characters also disallowed
-				return false;
+				if(ch>126)
+				{
+					// lower ASCII only and DEL is prohibited
+					return false;
+				}
+				if(ch<='@')
+				{
+					// characters below are possible escaping characters also disallowed
+					return false;
+				}
 			}
 		}
 		byte[] bytes=userName.getBytes(StandardCharsets.UTF_8);

@@ -5,8 +5,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.DataLine.Info;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
+import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.TargetDataLine;
+
 import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.StreamParametersVideo;
+import com.rizsi.rcom.audio.StreamSourceAudio;
 import com.rizsi.rcom.util.ChainList;
 import com.rizsi.rcom.webcam.WebCamParameter;
 
@@ -59,6 +69,25 @@ public enum EPlatform {
 				StreamParametersVideo params) {
 			return new ChainList<>(args.program_ffmpeg).addcall(UtilString.split("-f v4l2 -framerate "+params.framerate+" -video_size "+params.width+"x"+params.height+" -i "+wcp.getDevice()+" -f "+params.encoding+" -", " "));
 		}
+
+		@Override
+		public TargetDataLine openTargetDataLine() throws LineUnavailableException {
+			AudioFormat format=StreamSourceAudio.getFormat();
+			DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+			// For some reason on Linux if we do not get first a mixer then the data line consumes 100% CPU
+			// Java 8, Pulseaudio on Ubuntu 16.04.2
+			Mixer m=AudioSystem.getMixer(null);
+			return (TargetDataLine) m.getLine(info);
+		}
+		@Override
+		public TargetDataLine openTargetDataLine(Mixer mixer, Info info) throws LineUnavailableException {
+			return (TargetDataLine) mixer.getLine(info);
+		}
+		
+		@Override
+		public SourceDataLine openSourceDataLine(Mixer mixer, Info info) throws LineUnavailableException {
+			return (SourceDataLine) mixer.getLine(info);
+		}
 	},
 	windows{
 
@@ -76,10 +105,33 @@ public enum EPlatform {
 			ret.addc("-");
 			return ret;
 		}
-		
+
+		@Override
+		public TargetDataLine openTargetDataLine() throws LineUnavailableException {
+			AudioFormat format=StreamSourceAudio.getFormat();
+			DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+			// For some reason on windows if we first query a mixer then there are no formats available.
+			// Windows 7 Java 1.8.0_60 in VirtualBox
+			return (TargetDataLine) AudioSystem.getLine(info);
+		}
+
+		@Override
+		public TargetDataLine openTargetDataLine(Mixer mixer, Info info) throws LineUnavailableException {
+			return (TargetDataLine) AudioSystem.getLine(info);
+		}
+		@Override
+		public SourceDataLine openSourceDataLine(Mixer mixer, Info info) throws LineUnavailableException {
+			return (SourceDataLine) AudioSystem.getLine(info);
+		}
 	};
 
 	abstract public Map<String, WebCamParameter> getCameras(AbstractRcomArgs args) throws Exception;
 
 	abstract public ChainList<String> createWebCamStreamCommand(AbstractRcomArgs abstractRcomArgs, WebCamParameter wcp, StreamParametersVideo params);
+
+	abstract public TargetDataLine openTargetDataLine() throws LineUnavailableException;
+
+	abstract public TargetDataLine openTargetDataLine(Mixer mixer, Info info) throws LineUnavailableException;
+
+	abstract public SourceDataLine openSourceDataLine(Mixer mixer, Info info) throws LineUnavailableException;
 }

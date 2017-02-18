@@ -38,6 +38,9 @@ public class Launcher {
 			} else if ("gui".equals(args[0])) {
 				Gui.commandline(subArgs);
 				return;
+			} else if ("listaudio".equals(args[0])) {
+				ListAudio.commandline(subArgs);
+				return;
 			}
 		}
 		System.out.println(new HelpTemplate().generate());

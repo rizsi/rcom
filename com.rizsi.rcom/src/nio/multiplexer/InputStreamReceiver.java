@@ -29,8 +29,8 @@ public class InputStreamReceiver extends MultiplexerReceiver
 		 * Get the number of bytes that can be read without blocking.
 		 * @return
 		 */
-		public int getAvailable()
-		{
+		@Override
+		public int available() throws IOException {
 			synchronized (bb) {
 				return (int)(nWrite-nRead);
 			}			

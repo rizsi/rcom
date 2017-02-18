@@ -31,10 +31,10 @@ public class EchoCancellerAudioSystem extends AudioSystemAbstract
 		AudioFormat format=StreamSourceAudio.getFormat();
 		
 		final Mixer mixer = AudioSystem.getMixer(null);
-		m=new Mic(mixer, format, StreamSourceAudio.requestBufferSize/2);
-		mixing=new MixingOutputSimple(mixer);
+		m=new Mic(args, mixer, format, StreamSourceAudio.requestBufferSize/2);
+		mixing=new MixingOutputSimple(mixer, args);
 		echo=new SpeexEchoCancel();
-		echo.setLog(true);
+		//echo.setLog(true);
 		echo.setup(args, m, mixing, StreamSourceAudio.requestBufferSize/2);
 		echo.start();
 		mixing.start();

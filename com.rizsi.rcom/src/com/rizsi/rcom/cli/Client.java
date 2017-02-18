@@ -107,12 +107,19 @@ public class Client implements IVideocomCallback {
 			this.l=l;
 			args.apply();
 			this.args=args;
-			if(args.echoCanceller)
+			try
 			{
-				audioSystem=new EchoCancellerAudioSystem(args);
-			}else
+				if(args.echoCanceller)
+				{
+					audioSystem=new EchoCancellerAudioSystem(args);
+				}else
+				{
+					audioSystem=new SimpleAudioSystem(args);
+				}
+			}catch(Exception e)
 			{
-				audioSystem=new SimpleAudioSystem(args);
+				e.printStackTrace();
+				// TODO
 			}
 			mainThread=Thread.currentThread();
 			isGui=args instanceof GuiCliArgs;
