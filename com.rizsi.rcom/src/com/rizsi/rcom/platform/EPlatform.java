@@ -99,7 +99,7 @@ public enum EPlatform {
 		@Override
 		public ChainList<String> createWebCamStreamCommand(AbstractRcomArgs args, WebCamParameter wcp,
 				StreamParametersVideo params) {
-			ChainList<String> ret=new ChainList<>(args.program_ffmpeg, "-f", "dshow", "-video_size", ""+params.width+"x"+params.height, "-i", "video=\""+wcp.getDevice()+"\"", "-f", params.encoding);
+			ChainList<String> ret=new ChainList<>(args.program_ffmpeg, "-f", "dshow", "-video_size", ""+params.width+"x"+params.height, "-i", "video="+wcp.getDevice(), "-f", params.encoding);
 			// TODO framerate
 			// ret.addcs("-framerate", ""+params.framerate);
 			ret.addc("-");

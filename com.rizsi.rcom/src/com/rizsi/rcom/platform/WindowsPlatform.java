@@ -23,7 +23,9 @@ public class WindowsPlatform {
 		List<String> camIds=parseCamIds(streamError(new ProcessBuilder(command).start()));
 		for(String dev: camIds)
 		{
-			ChainList<String> sizesCommand=new ChainList<String>(args.program_ffmpeg, "-f", "dshow", "-list_options", "true", "-i", "video=\""+dev+"\"");
+//			System.out.println("Camid: '"+dev+"'");
+			ChainList<String> sizesCommand=new ChainList<String>(args.program_ffmpeg, "-f", "dshow", "-list_options", "true", "-i", "video="+dev+"");
+//			System.out.println("Command: '"+sizesCommand+"'");
 			String data=streamError(new ProcessBuilder(sizesCommand).start());
 			parseCamModes(data, dev, ret);
 		}
@@ -33,7 +35,9 @@ public class WindowsPlatform {
 	private static String streamError(Process p) throws InterruptedException, ExecutionException
 	{
 		byte[] errOut = UtilProcess.saveOutputsOfProcess(p).get().getB();
-		return new String(errOut, StandardCharsets.UTF_8);
+		String ret=new String(errOut, StandardCharsets.UTF_8);
+//		System.out.println("STRERR: "+ret);
+		return ret;
 	}
 
 	public static List<String> parseCamIds(String execute) {

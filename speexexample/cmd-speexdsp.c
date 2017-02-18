@@ -36,10 +36,11 @@ int writeFully(char * buf, size_t count)
 		int n=fwrite(buf, 1, count, stdout);
 		if(n!=count)
 		{
-			if(feof(stdout)||ferror(stdout)||n<0)
+			if(feof(stdout)||ferror(stdout)||n<=0)
 			{
 				fprintf(stderr, "WRITEFULLY error %d %d %d\n", feof(stdin), ferror(stdin), n);
 				fflush(stderr);
+				exit(-1);
 				return 1;
 			}else
 			{
@@ -78,10 +79,11 @@ int readFully(char * buf, size_t count)
 		int n=fread(buf, 1, count, stdin);
 		if(n!=count)
 		{
-			if(feof(stdin)||ferror(stdin)||n<0)
+			if(feof(stdin)||ferror(stdin)||n<=0)
 			{
 				fprintf(stderr, "READFULLY error %d %d %d\n", feof(stdin), ferror(stdin), n);
 				fflush(stderr);
+				exit(-1);
 				return 1;
 			}else
 			{
