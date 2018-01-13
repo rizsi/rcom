@@ -50,6 +50,11 @@ public class DualChannelProcessorMultiplexer extends AbstractMultiplexer
 		}
 		@Override
 		public void close(Exception e) {
+			try {
+				c.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			DualChannelProcessorMultiplexer.this.closeMultiplexer(e);
 		}
 	}

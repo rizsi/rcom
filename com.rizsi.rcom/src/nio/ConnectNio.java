@@ -15,7 +15,7 @@ public class ConnectNio {
 	{
 		final Pipe in=Pipe.open();
 		in.sink().configureBlocking(true);
-		new Thread(){
+		new Thread(ConnectNio.class.getSimpleName()+" input"){
 			public void run() {
 				byte[] arr=new byte[8096];
 				ByteBuffer bb=ByteBuffer.wrap(arr);
@@ -33,6 +33,9 @@ public class ConnectNio {
 						bb.flip();
 						in.sink().write(bb);
 					}
+				} catch (EOFException e)
+				{
+					// EOF is the normal way to close this thread.
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -45,7 +48,7 @@ public class ConnectNio {
 	public static SinkChannel outputStreamToPipe(final OutputStream os, final Closeable toClose) throws IOException {
 		final Pipe out=Pipe.open();
 		out.source().configureBlocking(true);
-		new Thread(){
+		new Thread(ConnectNio.class.getSimpleName()+" output"){
 			public void run() {
 				byte[] arr=new byte[8096];
 				ByteBuffer bb=ByteBuffer.wrap(arr);
@@ -60,11 +63,14 @@ public class ConnectNio {
 							{
 								toClose.close();
 							}
-							throw new IOException();
+							throw new EOFException();
 						}
 						os.write(arr, 0, n);
 						os.flush();
 					}
+				} catch (EOFException e)
+				{
+					// This is normal shutdown.
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

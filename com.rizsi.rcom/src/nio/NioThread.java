@@ -48,7 +48,7 @@ public class NioThread extends Thread {
 			@Override
 			public void run() {
 				try {
-					Object o=task.call();
+					T o=task.call();
 					ret.ready(o, null);
 				} catch (Exception e) {
 					ret.ready(null, e);
@@ -64,6 +64,7 @@ public class NioThread extends Thread {
 	 * @throws IOException
 	 */
 	public NioThread() throws IOException {
+		super("NIO communication thread");
 		s = SelectorProvider.provider().openSelector();
 	}
 

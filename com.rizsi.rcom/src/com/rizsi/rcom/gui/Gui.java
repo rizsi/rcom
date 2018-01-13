@@ -65,7 +65,7 @@ public class Gui extends JFrame implements IListener {
 		disconnect.setEnabled(true);
 		disconnect.setText("Disconnect from "+a.connectionString);
 		client=new Client();
-		new Thread("Client thread")
+		new Thread("Client mainThread")
 		{
 			public void run() {
 				try {

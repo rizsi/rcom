@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.rizsi.rcom.AbstractRcomArgs;
@@ -33,7 +34,9 @@ import com.rizsi.rcom.gui.GuiCliArgs;
 import com.rizsi.rcom.gui.IVideoStreamContainer;
 import com.rizsi.rcom.webcam.WebCamParameter;
 
+import hu.qgears.commons.NamedThreadFactory;
 import hu.qgears.commons.UtilEventListener;
+import hu.qgears.commons.signal.SignalFutureWrapper;
 import nio.ConnectNio;
 import nio.NioThread;
 import nio.coolrmi.CoolRMINioClient;
@@ -101,6 +104,8 @@ public class Client implements IVideocomCallback {
 	private volatile NioThread nt;
 	private IListener l;
 	private IAudioSystem audioSystem;
+	private ExecutorService rmiExecutor;
+	private volatile Thread sysIn;
 	public void run(AbstractCliArgs args, IListener l) throws Exception
 	{
 		try {
@@ -125,7 +130,7 @@ public class Client implements IVideocomCallback {
 			isGui=args instanceof GuiCliArgs;
 			System.out.println("Inited");
 			CoolRMINioClient cli=new CoolRMINioClient(Launcher.class.getClassLoader(), false);
-			cli.setExecutorService(Executors.newSingleThreadExecutor());
+			cli.setExecutorService(rmiExecutor=Executors.newSingleThreadExecutor(new NamedThreadFactory(getClass().getName()+" RMI method executor")));
 			cli.getServiceRegistry().addProxyType(Client.class, IVideocomCallback.class);
 			connect(cli);
 			multiplexer=cli.getNioMultiplexer();
@@ -137,7 +142,7 @@ public class Client implements IVideocomCallback {
 			conn.registerCallback(this);
 			enterRoom(args.room);
 			l.connected(this);
-			boolean streamstdin=true;
+			boolean streamstdin=false;
 			if(args instanceof ClientCliArgs)
 			{
 				ClientCliArgs cargs=(ClientCliArgs) args;
@@ -157,41 +162,62 @@ public class Client implements IVideocomCallback {
 			}
 			if(streamstdin)
 			{
-				new Thread("System input"){
+				sysIn=new Thread("System input"){
 					public void run() {
 						try(Scanner br=new Scanner(System.in))
 						{
 							while(!exit&&br.hasNextLine())
 							{
-								String line=br.nextLine();
-								conn.sendMessage(line);
+								if(!exit)
+								{
+									String line=br.nextLine();
+									conn.sendMessage(line);
+								}
 							}
 						}
 					};
-				}.start();
+				};
+				sysIn.start();
 			}
 			while(!exit)
 			{
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.err.println("Client thread interrupted. Exit: "+exit);
 				}
 			}
 			cli.close();
 		} finally {
+			mainthreadFinished.ready(this, null);
 			l.closed(this);
 		}
 	}
+	private SignalFutureWrapper<Client> mainthreadFinished=new SignalFutureWrapper<>();
 	public void close()
 	{
-		exit=true;
-		mainThread.interrupt();
-		if(nt!=null)
+		if(!exit)
 		{
-			nt.close();
-			nt=null;
+			exit=true;
+			if(mainThread!=Thread.currentThread())
+			{
+				mainThread.interrupt();
+				try {
+					mainthreadFinished.get();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			rmiExecutor.shutdown();
+			if(sysIn!=null)
+			{
+				sysIn.interrupt();
+			}
+			if(nt!=null)
+			{
+				nt.close();
+				nt=null;
+			}
 		}
 	}
 	private void connect(CoolRMINioClient cli) throws Exception {
@@ -220,12 +246,12 @@ public class Client implements IVideocomCallback {
 					VideoConnection.clientIDBS, VideoConnection.serverIDBS);
 			cli.connect(multiplexer);
 			multiplexer.start();
-//			multiplexer.getClosedEvent().addListener(new UtilEventListener<Exception>() {
-//				
-//				@Override
-//				public void eventHappened(Exception msg) {
-//				}
-//			});
+			multiplexer.getClosedEvent().addListener(new UtilEventListener<Exception>() {
+				@Override
+				public void eventHappened(Exception msg) {
+					p.destroy();
+				}
+			});
 		}else
 		{
 			int separator=args.connectionString.indexOf(':');
