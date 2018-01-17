@@ -2,8 +2,8 @@ package com.rizsi.rcom.audio;
 
 import java.io.IOException;
 
-import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.audio.SpeexResampler.ResampledReceiver;
+import com.rizsi.rcom.cli.AbstractCliArgs;
 import com.rizsi.rcom.util.MyAssert;
 
 public class JitterResampler implements AutoCloseable, ResampledReceiver, ISyncAudioSource {
@@ -39,7 +39,7 @@ public class JitterResampler implements AutoCloseable, ResampledReceiver, ISyncA
 	private SpeexResampler resampler;
 	private Pipe pis;
 	private Pipe pos;
-	public JitterResampler(AbstractRcomArgs args, int sampleRate, int framesamples, int sampleSizeInBytes) throws Exception
+	public JitterResampler(AbstractCliArgs args, int sampleRate, int framesamples, int sampleSizeInBytes) throws Exception
 	{
 		MyAssert.myAssert(sampleSizeInBytes==2);
 		this.sampleRate=sampleRate;

@@ -19,4 +19,6 @@ public class AbstractCliArgs extends AbstractRcomArgs
 	@JOHelp("Enable echo canceller (Speex). Use this when the operating system does not implement one.")
 	@JOSimpleBoolean
 	public boolean echoCanceller;
+	@JOHelp("speexcmd program path. This program is part of the RCOM project. Must be matching version.")
+	public String program_speexcmd="speexcmd";
 }

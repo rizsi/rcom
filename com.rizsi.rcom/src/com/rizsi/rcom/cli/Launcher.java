@@ -7,7 +7,6 @@ import org.apache.log4j.PatternLayout;
 
 import com.rizsi.rcom.DemuxedConnection;
 import com.rizsi.rcom.gui.Gui;
-import com.rizsi.rcom.ssh.Connect;
 
 import hu.qgears.commons.UtilFile;
 
@@ -32,9 +31,9 @@ public class Launcher {
 			} else if ("client".equals(args[0])) {
 				new Client().main(subArgs);
 				return;
-			} else if ("connect".equals(args[0])) {
-				new Connect().main(subArgs);
-				return;
+//			} else if ("connect".equals(args[0])) {
+//				new Connect().main(subArgs);
+//				return;
 			} else if ("gui".equals(args[0])) {
 				Gui.commandline(subArgs);
 				return;

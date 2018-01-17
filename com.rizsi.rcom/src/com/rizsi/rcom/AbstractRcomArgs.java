@@ -23,8 +23,6 @@ public class AbstractRcomArgs {
 	public boolean enableVNC;
 	@JOHelp("Size of streaming buffers for audio and video.")
 	public int bufferSize=VideoConnection.BUFFER_SIZE_DEFAULT;
-	@JOHelp("speexcmd program path. This program is part of the RCOM project. Must be matching version.")
-	public String program_speexcmd="speexcmd";
 	public AbstractRcomArgs() {
 		if(System.getProperty("os.name").contains("Linux"))
 		{

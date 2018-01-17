@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import com.rizsi.rcom.AbstractRcomArgs;
+import com.rizsi.rcom.cli.AbstractCliArgs;
 import com.rizsi.rcom.util.UtilStream;
 
 import hu.qgears.commons.signal.SignalFutureWrapper;
@@ -30,14 +30,13 @@ public class SpeexResampler implements AutoCloseable
 	final Process p;
 	final private Pipe pis;
 	final private int framesamples;
-	public SpeexResampler(AbstractRcomArgs args, int framesamples, ResampledReceiver receiver) throws Exception
+	public SpeexResampler(AbstractCliArgs args, int framesamples, ResampledReceiver receiver) throws Exception
 	{
 		this.receiver=receiver;
 		this.framesamples=framesamples;
 		this.pis=new Pipe(framesamples*2*2);
 		receivebuffer=new byte[framesamples*2];
 		ProcessBuilder pb=new ProcessBuilder(args.program_speexcmd, "resample", ""+framesamples, ""+8000);
-//		ProcessBuilder pb=new ProcessBuilder("wine", "/home/rizsi/github/rcom/speexexample/speexcmd.exe", "resample", ""+framesamples, ""+8000);
 		pb.redirectError(Redirect.INHERIT);
 		p=pb.start();
 		is=p.getInputStream();

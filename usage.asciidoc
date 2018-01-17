@@ -1,0 +1,205 @@
+== Usage:
+
+Version: RCOM0.0.4
+
+=== GUI
+
+ $ java -jar rcom.jar gui [...arguments...]
+
+----
+Option                         Description                            
+------                         -----------                            
+--bufferSize <Integer>         Size of streaming buffers for audio    
+                                 and video. (default: 1048576)        
+--connectionString             Connection string to the server. If it 
+                                 contains a '@' character then it is  
+                                 an ssh user@server address.          
+                                 Otherwise it has to contain a ':'    
+                                 and must be host:port format TCP     
+                                 address.                             
+--disableAudioJitterResampler  Disable audio jitter buffer. Not       
+                                 recommended, development feature     
+                                 only.                                
+--echoCanceller                Enable echo canceller (Speex). Use     
+                                 this when the operating system does  
+                                 not implement one.                   
+--enableVNC                    Enable VNC support. VNC suport is      
+                                 disabled by default as it is not     
+                                 safely implemented yet.              
+--platform                     The platform the program is running    
+                                 on. The parameters of the launched   
+                                 executables (ffmpeg webcam grabber,  
+                                 VNC) depend on the platform.         
+                               (possible values:  linux,  windows)    
+                                (default: linux)                      
+--program_ffmpeg               ffmpeg is started using this command   
+                                 (Used by video sharing and showing   
+                                 client). It is possible to set full  
+                                 path if necessary. (default: ffmpeg) 
+--program_speexcmd             speexcmd program path. This program is 
+                                 part of the RCOM project. Must be    
+                                 matching version. (default: speexcmd)
+--program_ssh                  ssh is started using this command      
+                                 (Used by secure connected client).   
+                                 It is possible to set full path if   
+                                 necessary. (default: ssh)            
+--program_v4l2                 v4l2-ctl is started using this command 
+                                 (Used by webcam sharing Linux        
+                                 client). It is possible to set full  
+                                 path if necessary. (default: v4l2-   
+                                 ctl)                                 
+--program_vncviewer            VNC viewer is started using this       
+                                 command (Used by x11 showing Linux   
+                                 client). It is possible to set full  
+                                 path if necessary. (default:         
+                                 xvnc4viewer)                         
+--program_x11vnc               x11vnc is started using this command   
+                                 (Used by x11 sharing Linux client    
+                                 and th server). It is possible to    
+                                 set full path if necessary.          
+                                 (default: x11vnc)                    
+--room                         Room to connect to. If not set the     
+                                 client does not connect              
+                                 automatically to a room.             
+--userName                     The requested username. A timestamp    
+                                 will replace it if none is given.    
+----
+
+=== Server
+
+ $ java -jar rcom.jar server [...arguments...]
+
+----
+Option                              Description                            
+------                              -----------                            
+--authFile <File>                   ~/.ssh/authorized_keys file target to  
+                                      generate by the program. (If this,   
+                                      keyDir and connectCommand is present 
+                                      then this file is periodically       
+                                      updated with the authorized users.)  
+--beforeKeyDirUpdateCommand         If set then this command is executed   
+                                      before updating the keydir. Example: 
+                                      'git pull -C keydir'. Warning:       
+                                      command path must not contain spaces!
+--bufferSize <Integer>              Size of streaming buffers for audio    
+                                      and video. (default: 1048576)        
+--disableServer                     Do not execute the server. Can be used 
+                                      to only run the auth file updater    
+                                      mechanism.                           
+--enableVNC                         Enable VNC support. VNC suport is      
+                                      disabled by default as it is not     
+                                      safely implemented yet.              
+--host                              Host to bind the server port to        
+                                      (default: localhost)                 
+--keyDir <File>                     Folder where the authorized users .pub 
+                                      identifiers are found. (Similar to   
+                                      gitolite configuration keydir)       
+--keyDirUpdateTimeoutMillis <Long>  Timeout of periodic keydir update      
+                                      loop. (default: 1000)                
+--platform                          The platform the program is running    
+                                      on. The parameters of the launched   
+                                      executables (ffmpeg webcam grabber,  
+                                      VNC) depend on the platform.         
+                                    (possible values:  linux,  windows)    
+                                     (default: linux)                      
+--port <Integer>                    Port to bind the server port to        
+                                      (default: 9643)                      
+--program_ffmpeg                    ffmpeg is started using this command   
+                                      (Used by video sharing and showing   
+                                      client). It is possible to set full  
+                                      path if necessary. (default: ffmpeg) 
+--program_ssh                       ssh is started using this command      
+                                      (Used by secure connected client).   
+                                      It is possible to set full path if   
+                                      necessary. (default: ssh)            
+--program_v4l2                      v4l2-ctl is started using this command 
+                                      (Used by webcam sharing Linux        
+                                      client). It is possible to set full  
+                                      path if necessary. (default: v4l2-   
+                                      ctl)                                 
+--program_vncviewer                 VNC viewer is started using this       
+                                      command (Used by x11 showing Linux   
+                                      client). It is possible to set full  
+                                      path if necessary. (default:         
+                                      xvnc4viewer)                         
+--program_x11vnc                    x11vnc is started using this command   
+                                      (Used by x11 sharing Linux client    
+                                      and th server). It is possible to    
+                                      set full path if necessary.          
+                                      (default: x11vnc)                    
+----
+
+=== Command line client
+
+For testing purpose only
+
+ $ java -jar rcom.jar client [...arguments...]
+
+----
+Option                         Description                            
+------                         -----------                            
+--audio                        Stream microphone audio source when    
+                                 connected to the server.             
+--bufferSize <Integer>         Size of streaming buffers for audio    
+                                 and video. (default: 1048576)        
+--connectionString             Connection string to the server. If it 
+                                 contains a '@' character then it is  
+                                 an ssh user@server address.          
+                                 Otherwise it has to contain a ':'    
+                                 and must be host:port format TCP     
+                                 address.                             
+--disableAudioJitterResampler  Disable audio jitter buffer. Not       
+                                 recommended, development feature     
+                                 only.                                
+--disableStdinMessaging        Do not use stdin as message source.    
+--echoCanceller                Enable echo canceller (Speex). Use     
+                                 this when the operating system does  
+                                 not implement one.                   
+--enableVNC                    Enable VNC support. VNC suport is      
+                                 disabled by default as it is not     
+                                 safely implemented yet.              
+--platform                     The platform the program is running    
+                                 on. The parameters of the launched   
+                                 executables (ffmpeg webcam grabber,  
+                                 VNC) depend on the platform.         
+                               (possible values:  linux,  windows)    
+                                (default: linux)                      
+--program_ffmpeg               ffmpeg is started using this command   
+                                 (Used by video sharing and showing   
+                                 client). It is possible to set full  
+                                 path if necessary. (default: ffmpeg) 
+--program_speexcmd             speexcmd program path. This program is 
+                                 part of the RCOM project. Must be    
+                                 matching version. (default: speexcmd)
+--program_ssh                  ssh is started using this command      
+                                 (Used by secure connected client).   
+                                 It is possible to set full path if   
+                                 necessary. (default: ssh)            
+--program_v4l2                 v4l2-ctl is started using this command 
+                                 (Used by webcam sharing Linux        
+                                 client). It is possible to set full  
+                                 path if necessary. (default: v4l2-   
+                                 ctl)                                 
+--program_vncviewer            VNC viewer is started using this       
+                                 command (Used by x11 showing Linux   
+                                 client). It is possible to set full  
+                                 path if necessary. (default:         
+                                 xvnc4viewer)                         
+--program_x11vnc               x11vnc is started using this command   
+                                 (Used by x11 sharing Linux client    
+                                 and th server). It is possible to    
+                                 set full path if necessary.          
+                                 (default: x11vnc)                    
+--room                         Room to connect to. If not set the     
+                                 client does not connect              
+                                 automatically to a room.             
+--userName                     The requested username. A timestamp    
+                                 will replace it if none is given.    
+--vnc                          Stream screen as VNC session when      
+                                 connected to the server.             
+--webcam                       Stream webcam video source when        
+                                 connected to the server.             
+----
+
+
+
