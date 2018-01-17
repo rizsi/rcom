@@ -8,9 +8,9 @@ See: https://github.com/rizsi/rcom
 
 == Download
 
-This README is for version: rcom_0.0.4.jar
+This README is for version: 0.0.4
 
-Binary build can be downloaded from: http://rizsi.com/rcom/
+Binary build can be downloaded from: http://rizsi.com/programs/rcom/0.0.4
 
 == Features
 
@@ -25,9 +25,13 @@ Binary build can be downloaded from: http://rizsi.com/rcom/
 
 === Java 1.8
 
-The binary is compiled to Java 1.7.
+The binary is compiled to Java 1.7 but 1.8 is better.
 
 === libspeexdsp
+
+----
+$ sudo apt-get install libspeexdsp1
+----
 
 === Programs executed by RCOM
 
@@ -40,6 +44,7 @@ Client:
  * *x11vnc* - to share screen through VNC protocol
  * *xvnc4viewer* to show shared VNC screen
  * *ssh* to connect the server through secured channel
+ * speexcmd - part of the RCOM but you may have to rebuild it for your system.
 
 Server:
 
@@ -104,8 +109,7 @@ Command to run programs with PULSE audio filter enabled (works on current Pulse 
 $ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar ...
 
 
-include::usage.asciidoc
-
+== link:usage.asciidoc[Usage]
 
 == Build
 
