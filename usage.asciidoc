@@ -1,10 +1,24 @@
+= RCOM communication software Usage Help
+
+Simple video communication software that builds on exisiting command line tools to generate and decode video.
+
+*This project is a proof of concept, not a real product yet.*
+
+See: https://github.com/rizsi/rcom
+
 == Usage:
 
 Version: RCOM0.0.4
 
 === GUI
 
- $ java -jar rcom.jar gui [...arguments...]
+With PulseAudio echo cancellation:
+
+ $ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar gui [...arguments...]
+
+With libspeex echo cancellation:
+
+ $ java -jar rcom.jar gui --echoCanceller [...other arguments...]
 
 ----
 Option                         Description                            
@@ -17,9 +31,10 @@ Option                         Description
                                  Otherwise it has to contain a ':'    
                                  and must be host:port format TCP     
                                  address.                             
---disableAudioJitterResampler  Disable audio jitter buffer. Not       
-                                 recommended, development feature     
-                                 only.                                
+--disableAudioJitterResampler  Disable audio jitter buffer            
+                                 (Implemented using Speex dsp         
+                                 library). Not recommended,           
+                                 development feature only.            
 --echoCanceller                Enable echo canceller (Speex). Use     
                                  this when the operating system does  
                                  not implement one.                   
@@ -148,9 +163,10 @@ Option                         Description
                                  Otherwise it has to contain a ':'    
                                  and must be host:port format TCP     
                                  address.                             
---disableAudioJitterResampler  Disable audio jitter buffer. Not       
-                                 recommended, development feature     
-                                 only.                                
+--disableAudioJitterResampler  Disable audio jitter buffer            
+                                 (Implemented using Speex dsp         
+                                 library). Not recommended,           
+                                 development feature only.            
 --disableStdinMessaging        Do not use stdin as message source.    
 --echoCanceller                Enable echo canceller (Speex). Use     
                                  this when the operating system does  

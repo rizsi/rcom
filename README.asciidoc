@@ -80,6 +80,19 @@ Start other client similarly on a different PC.
 === Audio settings
 
 RCOM client simply opens the first available device through the Java sound API. If PulseAudio is used then from the system mixer both the input and the output levels can be controlled.
+
+Audio is streamed unencoded in raw PCM format.
+
+Without a noise canceller the audio is very noisy. It has been tested with PulseAudio built in noise canceller with good results.
+
+Command to run programs with PULSE audio filter enabled (works on current Pulse Audio versions):
+
+$ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar ...
+
+Or command to run with speex based noise canceller:
+
+$ java -jar rcom.jar --echoCanceller ...
+
  
 === Known Security issues
 
@@ -97,17 +110,6 @@ VNC opens public ports on the server. For this reason a firewall must be used to
 Currently only a single VNC session is supported (dynamic port allocation has to be implemented to support more).
 
 VNC transfers control too. The control messages are not yet filtered out from clients. The clients are launched in ViewOnly mode though.
-
-=== Audio
-
-Audio is streamed unencoded in raw PCM format.
-
-Without an external noise canceller the audio can not be used. It has been tested with PulseAudio built in noise canceller with good results.
-
-Command to run programs with PULSE audio filter enabled (works on current Pulse Audio versions):
-
-$ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar ...
-
 
 == link:usage.asciidoc[Usage]
 
@@ -135,7 +137,7 @@ Install compile dependency:
 $ sudo apt-get install libspeexdsp-dev
 ----
 
-Compile the program: https://github.com/rizsi/rcom/master/speexcmd
+Compile the program: https://github.com/rizsi/rcom/tree/master/speexcmd
 
 ----
 github.com/rcom/speexexample$ gcc -o speexcmd cmd-speexdsp.c -lspeexdsp
