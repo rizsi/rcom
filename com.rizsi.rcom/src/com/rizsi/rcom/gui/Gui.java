@@ -186,7 +186,7 @@ public class Gui extends JFrame implements IListener {
 				client.setAudioStreamingEnabled(audio.isSelected());
 			}
 		});
-		if(a.enableVNC)
+		if(!a.disableVNC)
 		{
 			final JCheckBox vnc = new JCheckBox("Launch VNC");
 			c.add(vnc);
@@ -360,5 +360,11 @@ public class Gui extends JFrame implements IListener {
 				// TODO Notify user if application is minimized?
 			}
 		});
+	}
+
+	@Override
+	public void error(String string, Exception e) {
+		System.err.println("Error in: "+string);
+		e.printStackTrace();
 	}
 }

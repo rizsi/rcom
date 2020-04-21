@@ -24,9 +24,6 @@ public class Gui2 extends JFrame implements DockingConstants
 {
 	private static final long serialVersionUID = 1L;
 	private GuiMainView gmv;
-	public static void main(String[] args) throws Exception {
-		commandline(args);
-	}
 	public static void commandline(String[] args) throws Exception {
 		final GuiCliArgs a=new GuiCliArgs();
 		UtilCli.parse(a, args, true);

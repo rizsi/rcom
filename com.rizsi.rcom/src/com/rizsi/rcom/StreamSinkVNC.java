@@ -56,7 +56,13 @@ public class StreamSinkVNC extends StreamSink
 			s=ss.accept();
 		}
 		oss=new OutputStreamSender(multiplexer, StreamShareVNC.bufferSize, true);
-		StreamDataDuplex stream=(StreamDataDuplex)conn.registerStream(streamParametersVNC.name, oss.getId());
+		IStreamData strd=conn.registerStream(streamParametersVNC.name, oss.getId());
+		if(!(strd instanceof StreamDataDuplex))
+		{
+			System.err.println("Server does not support VNC - VNC sent by other user is cancelled");
+			return;
+		}
+		StreamDataDuplex stream=(StreamDataDuplex)strd;
 		isr=new InputStreamReceiver(StreamShareVNC.bufferSize, true);
 		isr.register(multiplexer, stream.backChannel);
 		conn.launchStream(streamParametersVNC.name);

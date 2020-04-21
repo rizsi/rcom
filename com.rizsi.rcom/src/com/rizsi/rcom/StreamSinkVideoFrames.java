@@ -14,6 +14,7 @@ public class StreamSinkVideoFrames extends StreamSinkSimplex implements IVideoSt
 	private OutputStream os;
 	private VideoStreamProcessor proc;
 	private AbstractRcomArgs args;
+	private volatile boolean closed=false;
 	public StreamSinkVideoFrames(AbstractRcomArgs args, StreamParametersVideo p) {
 		super(p.name);
 		this.p=p;
@@ -33,6 +34,7 @@ public class StreamSinkVideoFrames extends StreamSinkSimplex implements IVideoSt
 			proc.close();
 			proc=null;
 		}
+		closed=true;
 	}
 	@Override
 	public VideoStreamProcessor getVideoStream() {
@@ -47,5 +49,8 @@ public class StreamSinkVideoFrames extends StreamSinkSimplex implements IVideoSt
 	public Object getGuiObject() {
 		return guiObject;
 	}
-
+	@Override
+	public boolean isClosed() {
+		return closed;
+	}
 }

@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.swing.JOptionPane;
+
 import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.IVideocomCallback;
 import com.rizsi.rcom.IVideocomConnection;
@@ -59,6 +61,8 @@ public class Client implements IVideocomCallback {
 		void updateShares(List<StreamParameters> arrayList);
 
 		void messageReceived(String message);
+
+		void error(String string, Exception e);
 		
 	}
 	public void main(String[] args) throws Exception {
@@ -84,6 +88,11 @@ public class Client implements IVideocomCallback {
 				@Override
 				public void messageReceived(String message) {
 					System.out.println("Message: "+message);
+				}
+				@Override
+				public void error(String string, Exception e) {
+					System.err.println("Error in: "+string);
+					e.printStackTrace();
 				}
 			});
 		} catch (Throwable e) {
@@ -361,7 +370,13 @@ public class Client implements IVideocomCallback {
 			if(selected&&vnc==null)
 			{
 				vnc=new StreamSourceVnc();
-				vnc.start(this, userName+"screen");
+				try
+				{
+					vnc.start(this, userName+"screen");
+				}catch(Exception e)
+				{
+					l.error("Launch VNC", e);
+				}
 			}
 			if(!selected && vnc!=null)
 			{

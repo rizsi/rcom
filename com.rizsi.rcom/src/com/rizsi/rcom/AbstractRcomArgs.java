@@ -19,8 +19,8 @@ public class AbstractRcomArgs {
 	@JOHelp("The platform the program is running on. The parameters of the launched executables (ffmpeg webcam grabber, VNC) depend on the platform.")
 	public EPlatform platform;
 	@JOSimpleBoolean
-	@JOHelp("Enable VNC support. VNC suport is disabled by default as it is not safely implemented yet.")
-	public boolean enableVNC;
+	@JOHelp("Disable VNC support. VNC is enabled by default because the implementation is now considered safe.")
+	public boolean disableVNC;
 	@JOHelp("Size of streaming buffers for audio and video.")
 	public int bufferSize=VideoConnection.BUFFER_SIZE_DEFAULT;
 	public AbstractRcomArgs() {

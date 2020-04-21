@@ -14,7 +14,7 @@ public class StreamParametersVNC extends StreamParameters {
 	}
 	@Override
 	public StreamSink createSink(Client c) {
-		if(c.getArgs().enableVNC)
+		if(!c.getArgs().disableVNC)
 		{
 			return new StreamSinkVNC(this);
 		}else
@@ -24,7 +24,7 @@ public class StreamParametersVNC extends StreamParameters {
 	}
 	@Override
 	public StreamShare createShare(VideoConnection videoConnection, int channel) {
-		if(videoConnection.getArgs().enableVNC)
+		if(!videoConnection.getArgs().disableVNC)
 		{
 			return new StreamShareVNC(videoConnection, channel, this);
 		}else

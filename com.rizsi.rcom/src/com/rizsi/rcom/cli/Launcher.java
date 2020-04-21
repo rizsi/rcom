@@ -36,9 +36,6 @@ public class Launcher {
 //				new Connect().main(subArgs);
 //				return;
 			} else if ("gui".equals(args[0])) {
-				Gui.commandline(subArgs);
-				return;
-			} else if ("gui2".equals(args[0])) {
 				Gui2.commandline(subArgs);
 				return;
 			} else if ("listaudio".equals(args[0])) {

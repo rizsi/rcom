@@ -12,6 +12,7 @@ import com.rizsi.rcom.util.ChainList;
 import com.rizsi.rcom.vnc.LogFilterOutpurStream;
 
 import hu.qgears.commons.ConnectStreams;
+import hu.qgears.commons.UtilString;
 import nio.multiplexer.InputStreamReceiver;
 import nio.multiplexer.OutputStreamSender;
 
@@ -31,12 +32,20 @@ public class StreamSourceVnc implements AutoCloseable {
 			int localport=ss.getLocalPort();
 			System.out.println("Local port: "+localport);
 			params=new StreamParametersVNC(streamName, client.id);
-			StreamDataDuplex data=(StreamDataDuplex)client.conn.shareStream(oss.getId(), params);
+			int id=oss.getId();
+			IStreamData strd=client.conn.shareStream(id, params);
+			if(!(strd instanceof StreamDataDuplex))
+			{
+				throw new RuntimeException("Server does not support VNC!");
+			}
+			StreamDataDuplex data=(StreamDataDuplex)strd;
 			isr=new InputStreamReceiver(StreamShareVNC.bufferSize, true);
 			client.getMultiplexer().register(isr, data.backChannel);
-			ChainList<String> command=new ChainList<>(client.getArgs().program_x11vnc,"-connect", "localhost:"+localport);
+			ChainList<String> command=new ChainList<>(client.getArgs().program_x11vnc, "-connect_or_exit", "localhost:"+localport, "-rfbport", "0");
 			//command.addcs("-clip", "200x200+50+50");
-			command.add("-localhost");
+			// command.add("-localhost");
+			command.addcs("-rfbportv6", "-1"); // See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=672449
+			System.out.println("Command: "+UtilString.concat(command, " "));
 			new ProcessBuilder(command).redirectError(Redirect.INHERIT)
 					.redirectOutput(Redirect.INHERIT)
 					.start();

@@ -32,14 +32,13 @@ public class ScalablePane extends JPanel {
         }
 
         @Override
-        public Dimension getPreferredSize() {
-            return master == null ? super.getPreferredSize() : new Dimension(master.getWidth(this), master.getHeight(this));
-        }
-
-        @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Image toDraw = null;
+            if(scaled==null&&master!=null)
+            {
+            	generateScaledInstance();
+            }
             if (scaled != null) {
                 toDraw = scaled;
             } else if (master != null) {
@@ -51,12 +50,6 @@ public class ScalablePane extends JPanel {
                 int y = (getHeight() - toDraw.getHeight(this)) / 2;
                 g.drawImage(toDraw, x, y, this);
             }
-        }
-
-        @Override
-        public void invalidate() {
-            generateScaledInstance();
-            super.invalidate();
         }
 
         public boolean isToFit() {
@@ -276,4 +269,20 @@ public class ScalablePane extends JPanel {
             } while (w != targetWidth || h != targetHeight);
             return ret;
         }
+
+		public void setImage(BufferedImage im) {
+			if(im!=master)
+			{
+				// System.out.println("invalidate");
+				master=im;
+				scaled=null;
+				invalidate();
+				repaint();
+			}
+			else if(im!=null)
+			{
+				invalidate();
+				repaint();
+			}
+		}
     }

@@ -22,6 +22,7 @@ public class StreamSourceVideoWebCam implements AutoCloseable, IVideoStreamConta
 	private StreamParametersVideo params;
 	private IVideocomConnection conn;
 	private VideoStreamProcessor stream;
+	private volatile boolean closed;
 	
 	public StreamSourceVideoWebCam(WebCamParameter wcp) {
 		super();
@@ -74,6 +75,7 @@ public class StreamSourceVideoWebCam implements AutoCloseable, IVideoStreamConta
 		{
 			stream.close();
 		}
+		closed=true;
 	}
 	public VideoStreamProcessor getVideoStream() {
 		return stream;
@@ -86,5 +88,10 @@ public class StreamSourceVideoWebCam implements AutoCloseable, IVideoStreamConta
 	@Override
 	public Object getGuiObject() {
 		return guiObject;
+	}
+
+	@Override
+	public boolean isClosed() {
+		return closed;
 	}
 }

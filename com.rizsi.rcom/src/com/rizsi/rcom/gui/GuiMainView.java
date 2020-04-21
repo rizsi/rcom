@@ -1,7 +1,6 @@
 package com.rizsi.rcom.gui;
 
 import java.awt.Container;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -20,6 +19,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import org.flexdock.docking.Dockable;
+import org.flexdock.docking.DockingManager;
 import org.flexdock.view.View;
 
 import com.rizsi.rcom.StreamParameters;
@@ -77,7 +78,7 @@ public class GuiMainView implements IListener {
 		this.gui=gui;
 		view=new View("Connection", "Connection", "Connection");
 		//view.addAction(View.CLOSE_ACTION);
-		view.addAction(View.PIN_ACTION);
+		//view.addAction(View.PIN_ACTION);
 
 		JPanel left = new JPanel();
 		view.setContentPane(left);
@@ -172,7 +173,7 @@ public class GuiMainView implements IListener {
 				client.setAudioStreamingEnabled(audio.isSelected());
 			}
 		});
-		if(a.enableVNC)
+		if(!a.disableVNC)
 		{
 			final JCheckBox vnc = new JCheckBox("Launch VNC");
 			c.add(vnc);
@@ -207,16 +208,26 @@ public class GuiMainView implements IListener {
 		client.enterRoom(a.room);
 	}
 	private long lastSynced;
+	private List<AnimatedGuiElement> toDelete=new ArrayList<>();
 	protected void timer() {
 		for(AnimatedGuiElement anim: animated)
 		{
 			anim.update();
+			if(anim.isClosed())
+			{
+				toDelete.add(anim);
+			}
 		}
+		for(AnimatedGuiElement d: toDelete)
+		{
+			animated.remove(d);
+			DockingManager.undock((Dockable)d.view);
+		}
+		toDelete.clear();
 		long t=System.currentTimeMillis();
 		if(Math.abs(t-lastSynced)>1000)
 		{
 			lastSynced=t;
-			// TODO remove closed ones
 			Client c=client;
 			if(c!=null)
 			{
@@ -240,11 +251,9 @@ public class GuiMainView implements IListener {
 		animated.add(g);
 		int index=idCounter++;
 		View v=new View("Video"+index, "Video"+index, "Video"+index);
-		v.addAction(View.PIN_ACTION);
-		JPanel p=new JPanel();
-		p.setLayout(new FlowLayout());
-		p.add(g.getUiComponent());
-		v.setContentPane(p);
+		// v.addAction(View.PIN_ACTION);
+		v.setContentPane(g.getUiComponent());
+		g.view=v;
 		gui.showView(v);
 	}
 	@Override
@@ -362,5 +371,11 @@ public class GuiMainView implements IListener {
 	}
 	public View getView() {
 		return view;
+	}
+	@Override
+	public void error(String string, Exception e) {
+		System.err.println("Error in: "+string);
+		e.printStackTrace();
+		JOptionPane.showMessageDialog(gui, string+" error: "+e.getMessage());
 	}
 }

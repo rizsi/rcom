@@ -1,20 +1,21 @@
 package com.rizsi.rcom.gui;
 
-import java.awt.Component;
 import java.awt.image.BufferedImage;
 
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import org.flexdock.view.View;
 
 import com.rizsi.rcom.util.VideoStreamProcessor;
 
 public class AnimatedGuiElement {
-	JLabel selfVideo;
+	ScalablePane selfVideo;
 	IVideoStreamContainer source;
+	public View view;
 
 	public AnimatedGuiElement(IVideoStreamContainer source) {
 		this.source=source;
-		selfVideo = new JLabel();
+		selfVideo = new ScalablePane(null);
 	}
 
 	public void update() {
@@ -24,18 +25,22 @@ public class AnimatedGuiElement {
 			BufferedImage im=source.getVideoStream().getCurrentImage();
 			if(im!=null)
 			{
-				selfVideo.setIcon(new ImageIcon(im));
+				selfVideo.setImage(im);
 			}else
 			{
-				selfVideo.setIcon(null);
+				selfVideo.setImage(null);
 			}
 		}else
 		{
-			selfVideo.setIcon(null);
+			selfVideo.setImage(null);
 		}
 	}
 
-	public Component getUiComponent() {
+	public JPanel getUiComponent() {
 		return selfVideo;
+	}
+
+	public boolean isClosed() {
+		return source.isClosed();
 	}
 }

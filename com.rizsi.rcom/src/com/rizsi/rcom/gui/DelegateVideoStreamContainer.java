@@ -24,5 +24,9 @@ public class DelegateVideoStreamContainer implements IVideoStreamContainer {
 	@Override
 	public Object getGuiObject() {
 		return guiObject;
+	}
+	@Override
+	public boolean isClosed() {
+		return false;
 	}	
 }
