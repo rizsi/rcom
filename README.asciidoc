@@ -8,9 +8,9 @@ See: https://github.com/rizsi/rcom
 
 == Download
 
-This README is for version: 0.0.4
+This README is for version: 0.0.5
 
-Binary build can be downloaded from: http://rizsi.com/programs/rcom/0.0.4
+Binary build can be downloaded from: http://rizsi.com/programs/rcom/0.0.5
 
 == Features
 
@@ -66,15 +66,11 @@ Start server on a computer that is accessible from all clients and do not close 
 
 Start client:
 
- $ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar gui --connectionString rcomserver.example.com:9643
+ $ java -jar rcom.jar gui --connectionString rcomserver.example.com:9643
 
-Launch echo cancellation module manually for Pulse audio (It is not clear why but the PULSE_PROP parameter is not always enough):
+The program uses pactl command line program to enable echo cancellation before starting to stream audio. This feature can be disabled by the command line argument: ````--disablePactlEchoCancel <Boolean>````
 
-````
- $ pactl load-module module-echo-cancel
-````
-
-Unload it when not used any longer:
+You have to unload manually echo cancel module after using the program if you don't want that to keep running:
 
 ````
  $ pactl unload-module module-echo-cancel
@@ -83,9 +79,10 @@ Unload it when not used any longer:
 When the client is running then in the GUI:
 
  * enter a room by clicking "Room" button
- * tick in "Stream WebCam" then select from the available cameras and formats.
- * tick in "Stream Audio".
- * Write messages to the chat box
+ * tick in "Stream WebCam" then select from the available cameras and formats. Sending Camera image starts.
+ * tick in "Stream Audio". Sending audio stream starts.
+ * tick in "Stream VNC". Screen sharing starts at once.
+ * Write messages to the chat box - online users receive these messages
 
 Start other client similarly on a different PC.
 
@@ -95,29 +92,22 @@ RCOM client simply opens the first available device through the Java sound API. 
 
 Audio is streamed unencoded in raw PCM format.
 
-Without a noise canceller the audio is very noisy. It has been tested with PulseAudio built in noise canceller with good results.
+Without an echo canceller the audio echoes. There is no echo preventing measure in the program itself. If ````pactl load-module module-echo-canceller```` is not available then a headphone or other echo cancellation method has to be used.
 
-Command to run programs with PULSE audio filter enabled (works on current Pulse Audio versions):
-
-$ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar ...
-
-Or command to run with speex based noise canceller:
+Speex based echo canceller is also implemented within the program but it is not properly tested yet. It can be enabled using this command:
 
 $ java -jar rcom.jar --echoCanceller ...
 
  
 === Known Security issues
 
-Server opens public VNC ports when VNC is streamed. This is due to a problem in the current x11vnc in Ubuntu.
-
 CoolRMI is used for remoting. This remoting framwork is not secure. Only use the program with trusted clients over ssh. See: https://github.com/qgears/opensource-utils/tree/master/coolrmi
 
 VNC transfers control too. The control messages are not yet filtered out from clients. The clients are launched in ViewOnly mode though.
 
-
 === VNC
 
-VNC opens public ports on the server. For this reason a firewall must be used to not leak information.
+VNC opens localhost ports on the server.
 
 Currently only a single VNC session is supported (dynamic port allocation has to be implemented to support more).
 
