@@ -6,7 +6,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 import com.rizsi.rcom.DemuxedConnection;
-import com.rizsi.rcom.gui.Gui;
 import com.rizsi.rcom.gui.Gui2;
 
 import hu.qgears.commons.UtilFile;
