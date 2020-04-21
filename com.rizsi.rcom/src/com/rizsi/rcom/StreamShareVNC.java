@@ -96,6 +96,7 @@ public class StreamShareVNC extends StreamShare {
 				ChainList<String> command=new ChainList<>(videoConnection.getArgs().program_x11vnc).addcall(
 						UtilString.split("-reflect localhost:"+n+" -forever -rfbport "+port+" -localhost", " "));
 				command.addcs("-rfbportv6", "-1"); // See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=672449
+				command.addcs("-noipv6"); // See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=672449
 				System.out.println("VNC server command: "+UtilString.concat(command, " "));
 				p=new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectOutput(Redirect.INHERIT).start();
 				processresult=UtilProcess.getProcessReturnValueFuture(p);
