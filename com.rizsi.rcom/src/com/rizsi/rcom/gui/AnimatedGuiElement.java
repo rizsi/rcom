@@ -1,10 +1,10 @@
 package com.rizsi.rcom.gui;
 
+import java.awt.Component;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import com.rizsi.rcom.util.VideoStreamProcessor;
 
@@ -12,10 +12,9 @@ public class AnimatedGuiElement {
 	JLabel selfVideo;
 	IVideoStreamContainer source;
 
-	public AnimatedGuiElement(JPanel right, IVideoStreamContainer source) {
+	public AnimatedGuiElement(IVideoStreamContainer source) {
 		this.source=source;
 		selfVideo = new JLabel();
-		right.add(selfVideo);
 	}
 
 	public void update() {
@@ -36,4 +35,7 @@ public class AnimatedGuiElement {
 		}
 	}
 
+	public Component getUiComponent() {
+		return selfVideo;
+	}
 }

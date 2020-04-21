@@ -7,6 +7,7 @@ import org.apache.log4j.PatternLayout;
 
 import com.rizsi.rcom.DemuxedConnection;
 import com.rizsi.rcom.gui.Gui;
+import com.rizsi.rcom.gui.Gui2;
 
 import hu.qgears.commons.UtilFile;
 
@@ -36,6 +37,9 @@ public class Launcher {
 //				return;
 			} else if ("gui".equals(args[0])) {
 				Gui.commandline(subArgs);
+				return;
+			} else if ("gui2".equals(args[0])) {
+				Gui2.commandline(subArgs);
 				return;
 			} else if ("listaudio".equals(args[0])) {
 				ListAudio.commandline(subArgs);

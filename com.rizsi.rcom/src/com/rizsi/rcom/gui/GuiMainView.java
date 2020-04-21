@@ -1,7 +1,6 @@
 package com.rizsi.rcom.gui;
 
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,23 +11,21 @@ import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import org.flexdock.view.View;
+
 import com.rizsi.rcom.StreamParameters;
 import com.rizsi.rcom.StreamSink;
-import com.rizsi.rcom.VideoConnection;
 import com.rizsi.rcom.cli.Client;
 import com.rizsi.rcom.cli.Client.IListener;
-import com.rizsi.rcom.cli.UtilCli;
 import com.rizsi.rcom.webcam.ListCams;
 import com.rizsi.rcom.webcam.WebCamParameter;
 
@@ -36,28 +33,13 @@ import hu.qgears.commons.CompatFunction;
 import hu.qgears.commons.UtilComma;
 import hu.qgears.commons.UtilString;
 
-public class Gui extends JFrame implements IListener {
-	private static final long serialVersionUID = 1L;
+/**
+ * Main view is a dockable with main controls.
+ */
+public class GuiMainView implements IListener {
 	Client client;
 	private List<AnimatedGuiElement> animated=new ArrayList<AnimatedGuiElement>();
-	public static void commandline(String[] args) throws Exception {
-		final GuiCliArgs a=new GuiCliArgs();
-		UtilCli.parse(a, args, true);
-		final Gui g = new Gui(a);
-		SwingUtilities.invokeAndWait(new Runnable() {
-			@Override
-			public void run() {
-				g.setTitle(VideoConnection.serviceID+" communication");
-				g.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				g.setSize(new Dimension(640, 480));
-				g.setVisible(true);
-				if(a.connectionString!=null)
-				{
-					g.launchClient();
-				}
-			}
-		});
-	}
+	private int idCounter=0;
 
 	protected void launchClient() {
 		connect.setEnabled(false);
@@ -69,7 +51,7 @@ public class Gui extends JFrame implements IListener {
 		{
 			public void run() {
 				try {
-					client.run(a, Gui.this);
+					client.run(a, GuiMainView.this);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -79,7 +61,6 @@ public class Gui extends JFrame implements IListener {
 		.start();
 	}
 
-	private JPanel right;
 	private JButton connect;
 	private JButton disconnect;
 	private JButton room;
@@ -89,12 +70,17 @@ public class Gui extends JFrame implements IListener {
 	private JTextField message;
 	private List<AbstractButton> buttons=new ArrayList<>();
 	private GuiCliArgs a;
-	public Gui(GuiCliArgs a) {
+	private Gui2 gui;
+	private View view;
+	public GuiMainView(GuiCliArgs a, Gui2 gui) {
 		this.a=a;
+		this.gui=gui;
+		view=new View("Connection", "Connection", "Connection");
+		//view.addAction(View.CLOSE_ACTION);
+		view.addAction(View.PIN_ACTION);
+
 		JPanel left = new JPanel();
-		right = new JPanel();
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, left, right);
-		getContentPane().add(splitPane);
+		view.setContentPane(left);
 		
 		connect=new JButton("Connect...");
 		disconnect=new JButton("Disconnect");
@@ -199,7 +185,6 @@ public class Gui extends JFrame implements IListener {
 				}
 			});
 		}
-		right.setLayout(new FlowLayout());
 		int delay = 1000/20; // milliseconds
 		ActionListener taskPerformer = new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
@@ -210,42 +195,57 @@ public class Gui extends JFrame implements IListener {
 		disableButtons();
 	}
 	protected void connect() {
-		String connectionstring = JOptionPane.showInputDialog(this, "Server connection string", a.connectionString==null?"":a.connectionString);
+		String connectionstring = JOptionPane.showInputDialog(gui, "Server connection string", a.connectionString==null?"":a.connectionString);
 		a.connectionString=connectionstring;
 		launchClient();
 	}
 
 	protected void roomEnter() {
-		String connectionstring = JOptionPane.showInputDialog(this, "Enter room", a.room==null?"":a.room);
+		String connectionstring = JOptionPane.showInputDialog(gui, "Enter room", a.room==null?"":a.room);
 		a.room=connectionstring;
 		
 		client.enterRoom(a.room);
 	}
+	private long lastSynced;
 	protected void timer() {
 		for(AnimatedGuiElement anim: animated)
 		{
 			anim.update();
 		}
-		// TODO enough to sync them once every second
-		// TODO remove closed ones
-		Client c=client;
-		if(c!=null)
+		long t=System.currentTimeMillis();
+		if(Math.abs(t-lastSynced)>1000)
 		{
-			for(StreamSink s:c.getStreams())
+			lastSynced=t;
+			// TODO remove closed ones
+			Client c=client;
+			if(c!=null)
 			{
-				if(s instanceof IVideoStreamContainer)
+				for(StreamSink s:c.getStreams())
 				{
-					IVideoStreamContainer vs=(IVideoStreamContainer) s;
-					if(vs.getGuiObject()==null)
+					if(s instanceof IVideoStreamContainer)
 					{
-						AnimatedGuiElement g=new AnimatedGuiElement(vs);
-						right.add(g.getUiComponent());
-						vs.setGuiObject(g);
-						animated.add(g);
+						IVideoStreamContainer vs=(IVideoStreamContainer) s;
+						if(vs.getGuiObject()==null)
+						{
+							AnimatedGuiElement g=new AnimatedGuiElement(vs);
+							vs.setGuiObject(g);
+							showWindow(g);
+						}
 					}
 				}
 			}
 		}
+	}
+	private void showWindow(AnimatedGuiElement g) {
+		animated.add(g);
+		int index=idCounter++;
+		View v=new View("Video"+index, "Video"+index, "Video"+index);
+		v.addAction(View.PIN_ACTION);
+		JPanel p=new JPanel();
+		p.setLayout(new FlowLayout());
+		p.add(g.getUiComponent());
+		v.setContentPane(p);
+		gui.showView(v);
 	}
 	@Override
 	public void connected(final Client client) {
@@ -257,8 +257,7 @@ public class Gui extends JFrame implements IListener {
 				connect.setEnabled(false);
 				connect.setText("Connected");
 				AnimatedGuiElement anim=new AnimatedGuiElement(client.getSelfVideo());
-				animated.add(anim);
-				right.add(anim.getUiComponent());
+				showWindow(anim);
 				room.setEnabled(true);
 			}
 		});
@@ -360,5 +359,8 @@ public class Gui extends JFrame implements IListener {
 				// TODO Notify user if application is minimized?
 			}
 		});
+	}
+	public View getView() {
+		return view;
 	}
 }

@@ -67,6 +67,18 @@ Start server on a computer that is accessible from all clients and do not close 
 Start client:
 
  $ PULSE_PROP=filter.want=echo-cancel java -jar rcom.jar gui --connectionString rcomserver.example.com:9643
+
+Launch echo cancellation module manually for Pulse audio (It is not clear why but the PULSE_PROP parameter is not always enough):
+
+````
+ $ pactl load-module module-echo-cancel
+````
+
+Unload it when not used any longer:
+
+````
+ $ pactl unload-module module-echo-cancel
+````
  
 When the client is running then in the GUI:
 

@@ -1,0 +1,1 @@
+Leave room by cancel on enter room: stream is not stopped!
