@@ -4,9 +4,10 @@ import com.rizsi.rcom.cli.Client;
 
 public class StreamParametersVNC extends StreamParameters {
 	private static final long serialVersionUID = 1L;
-
-	public StreamParametersVNC(String name, int sourceClient) {
+	private boolean allowControl;
+	public StreamParametersVNC(String name, int sourceClient, boolean allowControl) {
 		super(name, sourceClient);
+		this.allowControl=allowControl;
 	}
 	@Override
 	public String toString() {
@@ -32,5 +33,7 @@ public class StreamParametersVNC extends StreamParameters {
 			return new StreamShareDummy(videoConnection, this);
 		}
 	}
-
+	public boolean isAllowControl() {
+		return allowControl;
+	}
 }

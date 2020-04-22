@@ -8,9 +8,9 @@ See: https://github.com/rizsi/rcom
 
 == Download
 
-This README is for version: 0.0.6
+This README is for version: 0.0.7
 
-Binary build can be downloaded from: http://rizsi.com/programs/rcom/0.0.6
+Binary build can be downloaded from: http://rizsi.com/programs/rcom/0.0.7
 
 == Features
 
@@ -148,6 +148,8 @@ The executable must be set up on the command line of the rcom.jar program so it 
 
 == Changelog
 
+ * 0.0.7
+ ** VNC remote control is possible by a GUI switch on the screen share side
  * 0.0.6
  ** Video draw is optimized to not allocate BufferedImage for each frame -> less GC
  ** VNC server share auto port allocation is implemented: any number of VNC sesssions can work in parallel

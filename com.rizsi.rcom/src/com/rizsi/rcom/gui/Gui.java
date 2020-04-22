@@ -45,7 +45,7 @@ public class Gui extends JFrame implements IListener {
 		SwingUtilities.invokeAndWait(new Runnable() {
 			@Override
 			public void run() {
-				g.setTitle("RCOM 0.0.6 communication");
+				g.setTitle("RCOM 0.0.7 communication");
 				g.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				g.setSize(new Dimension(800, 800));
 				g.setVisible(true);
@@ -189,6 +189,8 @@ public class Gui extends JFrame implements IListener {
 		});
 		if(!a.disableVNC)
 		{
+			final JCheckBox vncControl = new JCheckBox("VNC control allowed");
+			c.add(vncControl);
 			final JCheckBox vnc = new JCheckBox("Launch VNC");
 			c.add(vnc);
 			buttons.add(vnc);
@@ -196,7 +198,8 @@ public class Gui extends JFrame implements IListener {
 	
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					client.setVNCShareEnabled(vnc.isSelected());
+					vncControl.setEnabled(!vnc.isSelected());
+					client.setVNCShareEnabled(vnc.isSelected(), vncControl.isSelected());
 				}
 			});
 		}

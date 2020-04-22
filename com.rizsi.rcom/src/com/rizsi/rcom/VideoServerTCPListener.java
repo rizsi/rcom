@@ -12,7 +12,7 @@ import hu.qgears.coolrmi.streams.IConnectionServer;
 
 public class VideoServerTCPListener implements IConnectionServer {
 	public static final int port=9643;
-	public static final String serviceID="RCOM0.0.0";
+	public static final String serviceID="RCOM0.0.7";
 	public static final String clientID=serviceID+"client";
 	public static final String serverID=serviceID+"server";
 	private ServerSocket ss;

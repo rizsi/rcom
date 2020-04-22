@@ -13,7 +13,7 @@ import nio.multiplexer.IMultiplexer;
 
 public class VideoConnection implements IVideocomConnection
 {
-	public static final String serviceID="RCOM0.0.4";
+	public static final String serviceID=VideoServerTCPListener.serviceID;
 	public static final String clientID=serviceID+"client";
 	public static final String serverID=serviceID+"server";
 	public static final byte[] clientIDBS=clientID.getBytes(StandardCharsets.UTF_8);

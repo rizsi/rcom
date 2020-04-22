@@ -23,7 +23,7 @@ public class StreamSourceVnc implements AutoCloseable {
 	private InputStreamReceiver isr;
 	private StreamParameters params;
 	private IVideocomConnection conn;
-	public void start(Client client, String streamName) throws IOException {
+	public void start(Client client, String streamName, boolean allowControl) throws IOException {
 		conn=client.conn;
 		oss=new OutputStreamSender(client.getMultiplexer(), StreamShareVNC.bufferSize, true);
 		try(ServerSocket ss=new ServerSocket())
@@ -31,7 +31,7 @@ public class StreamSourceVnc implements AutoCloseable {
 			ss.bind(new InetSocketAddress("localhost", 0));
 			int localport=ss.getLocalPort();
 			System.out.println("Local port: "+localport);
-			params=new StreamParametersVNC(streamName, client.id);
+			params=new StreamParametersVNC(streamName, client.id, allowControl);
 			int id=oss.getId();
 			IStreamData strd=client.conn.shareStream(id, params);
 			if(!(strd instanceof StreamDataDuplex))
@@ -45,7 +45,10 @@ public class StreamSourceVnc implements AutoCloseable {
 			//command.addcs("-clip", "200x200+50+50");
 			// command.add("-localhost");
 			command.addcs("-rfbportv6", "-1"); // See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=672449
-			command.add("-noremote"); // Remote control is disabled
+			if(!allowControl)
+			{
+				command.add("-noremote"); // Remote control is disabled
+			}
 			System.out.println("Command: "+UtilString.concat(command, " "));
 			new ProcessBuilder(command).redirectError(Redirect.INHERIT)
 					.redirectOutput(Redirect.INHERIT)

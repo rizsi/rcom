@@ -16,8 +16,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.swing.JOptionPane;
-
 import com.rizsi.rcom.AbstractRcomArgs;
 import com.rizsi.rcom.IVideocomCallback;
 import com.rizsi.rcom.IVideocomConnection;
@@ -166,7 +164,7 @@ public class Client implements IVideocomCallback {
 					}
 				}
 				setAudioStreamingEnabled(cargs.audio);
-				setVNCShareEnabled(cargs.vnc);
+				setVNCShareEnabled(cargs.vnc, false);
 				streamstdin=!cargs.disableStdinMessaging;
 			}
 			if(streamstdin)
@@ -365,14 +363,14 @@ public class Client implements IVideocomCallback {
 		}
 	}
 
-	public void setVNCShareEnabled(boolean selected) {
+	public void setVNCShareEnabled(boolean selected, boolean control) {
 		try {
 			if(selected&&vnc==null)
 			{
 				vnc=new StreamSourceVnc();
 				try
 				{
-					vnc.start(this, userName+"screen");
+					vnc.start(this, userName+"screen", control);
 				}catch(Exception e)
 				{
 					l.error("Launch VNC", e);
@@ -418,7 +416,7 @@ public class Client implements IVideocomCallback {
 		{
 			setAudioStreamingEnabled(false);
 			setVideoStreamingEnabled(null);
-			setVNCShareEnabled(false);
+			setVNCShareEnabled(false, false);
 			String s=conn.enterRoom(room);
 			l.roomEntered(this, s);
 		}else
