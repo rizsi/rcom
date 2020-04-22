@@ -8,8 +8,7 @@ Require-Bundle: hu.qgears.coolrmi;bundle-version="6.7.0",
  hu.qgears.commons;bundle-version="6.7.0";visibility:=reexport,
  joptsimple;bundle-version="1.2.0",
  hu.qgears.rtemplate.runtime;bundle-version="3.1.0",
- org.apache.log4j;bundle-version="1.2.15",
- flexdock
+ org.apache.log4j;bundle-version="1.2.15"
 Export-Package: com.rizsi.rcom,
  com.rizsi.rcom.audio,
  com.rizsi.rcom.cli,

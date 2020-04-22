@@ -45,6 +45,7 @@ public class StreamSourceVnc implements AutoCloseable {
 			//command.addcs("-clip", "200x200+50+50");
 			// command.add("-localhost");
 			command.addcs("-rfbportv6", "-1"); // See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=672449
+			command.add("-noremote"); // Remote control is disabled
 			System.out.println("Command: "+UtilString.concat(command, " "));
 			new ProcessBuilder(command).redirectError(Redirect.INHERIT)
 					.redirectOutput(Redirect.INHERIT)

@@ -2,7 +2,6 @@ package com.rizsi.rcom;
 
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -10,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.rizsi.rcom.util.ChainList;
+import com.rizsi.rcom.vnc.VncForwardingPorts;
 
 import hu.qgears.commons.ConnectStreams;
 import hu.qgears.commons.UtilProcess;
@@ -33,8 +33,8 @@ public class StreamShareVNC extends StreamShare {
 			super();
 		}
 		public void connect(VideoConnection videoConnection, int clientChannel) throws UnknownHostException, IOException {
-			waitUntilServerportisAccessible(port);
-			s=new Socket("localhost", port);
+			waitUntilServerportisAccessible(ports.getRfbport());
+			s=new Socket("localhost", ports.getRfbport());
 			this.clientChannel=clientChannel;
 			this.cos=new OutputStreamSender(videoConnection.getConnection(), bufferSize, true);
 			isr=new InputStreamReceiver(bufferSize, true);
@@ -78,23 +78,22 @@ public class StreamShareVNC extends StreamShare {
 	private List<Reg> clients=new ArrayList<>();
 	private OutputStreamSender back;
 	private Socket s;
-	private int port=9998;
+	private VncForwardingPorts ports;
 	private SignalFutureWrapper<Integer> processresult;
 	private InputStreamReceiver isr;
 	private Process p;
 	public StreamShareVNC(VideoConnection videoConnection, int channel, StreamParameters params) {
 		super(videoConnection, params);
+		ports=videoConnection.getServer().getVncPortsManager().allocateVNCPorts();
 		back=new OutputStreamSender(videoConnection.getConnection(), bufferSize, true);
 		isr=new InputStreamReceiver(bufferSize, true);
-		int n=5;
-		int localport=5900+n;
 		try {
 			ServerSocket ss=new ServerSocket();
 			try
 			{
-				ss.bind(new InetSocketAddress("localhost", localport));
+				ports.bindLocalPort(ss);
 				ChainList<String> command=new ChainList<>(videoConnection.getArgs().program_x11vnc).addcall(
-						UtilString.split("-reflect localhost:"+n+" -forever -rfbport "+port+" -localhost", " "));
+						UtilString.split("-reflect localhost:"+ports.getN()+" -forever -rfbport "+ports.allocateRfbport()+" -localhost", " "));
 				command.addcs("-rfbportv6", "-1"); // See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=672449
 				command.addcs("-noipv6"); // See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=672449
 				System.out.println("VNC server command: "+UtilString.concat(command, " "));
@@ -110,7 +109,6 @@ public class StreamShareVNC extends StreamShare {
 				s=ss.accept();
 				System.out.println("X11vnc connected to local VNC server endpoint as reflect client.");
 				UtilProcess.streamErrorOfProcess(s.getInputStream(), back.os);
-//				waitUntilServerportisAccessible(port);
 			}finally
 			{
 				ss.close();
@@ -179,6 +177,16 @@ public class StreamShareVNC extends StreamShare {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			s=null;
+		}
+		if(ports!=null)
+		{
+			conn.getServer().submitTimeout(5000, new Runnable() {
+				@Override
+				public void run() {
+					if(ports!=null){ports.dispose(); ports=null;}
+				}
+			});
 		}
 	}
 

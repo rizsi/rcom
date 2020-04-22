@@ -8,9 +8,9 @@ See: https://github.com/rizsi/rcom
 
 == Download
 
-This README is for version: 0.0.5
+This README is for version: 0.0.6
 
-Binary build can be downloaded from: http://rizsi.com/programs/rcom/0.0.5
+Binary build can be downloaded from: http://rizsi.com/programs/rcom/0.0.6
 
 == Features
 
@@ -109,9 +109,7 @@ VNC transfers control too. The control messages are not yet filtered out from cl
 
 VNC opens localhost ports on the server.
 
-Currently only a single VNC session is supported (dynamic port allocation has to be implemented to support more).
-
-VNC transfers control too. The control messages are not yet filtered out from clients. The clients are launched in ViewOnly mode though.
+VNC does not transfer control. Control messages are disabled on the screen share side.
 
 == link:usage.asciidoc[Usage]
 
@@ -147,4 +145,12 @@ github.com/rcom/speexexample$ gcc -o speexcmd cmd-speexdsp.c -lspeexdsp
 
 The executable must be set up on the command line of the rcom.jar program so it is capable to launch it.
 
+
+== Changelog
+
+ * 0.0.6
+ ** Video draw is optimized to not allocate BufferedImage for each frame -> less GC
+ ** VNC server share auto port allocation is implemented: any number of VNC sesssions can work in parallel
+ ** VNC control is disabled on the share size
+ ** GUI is updated: video streams are auto-layoutted. flexdock dependency is removed.
 

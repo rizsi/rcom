@@ -4,14 +4,11 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
-import org.flexdock.view.View;
-
 import com.rizsi.rcom.util.VideoStreamProcessor;
 
 public class AnimatedGuiElement {
 	ScalablePane selfVideo;
 	IVideoStreamContainer source;
-	public View view;
 
 	public AnimatedGuiElement(IVideoStreamContainer source) {
 		this.source=source;

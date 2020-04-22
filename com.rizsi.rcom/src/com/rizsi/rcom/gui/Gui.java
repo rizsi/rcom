@@ -1,6 +1,7 @@
 package com.rizsi.rcom.gui;
 
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -10,23 +11,22 @@ import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import org.flexdock.docking.Dockable;
-import org.flexdock.docking.DockingManager;
-import org.flexdock.view.View;
-
 import com.rizsi.rcom.StreamParameters;
 import com.rizsi.rcom.StreamSink;
 import com.rizsi.rcom.cli.Client;
 import com.rizsi.rcom.cli.Client.IListener;
+import com.rizsi.rcom.cli.UtilCli;
 import com.rizsi.rcom.webcam.ListCams;
 import com.rizsi.rcom.webcam.WebCamParameter;
 
@@ -34,13 +34,28 @@ import hu.qgears.commons.CompatFunction;
 import hu.qgears.commons.UtilComma;
 import hu.qgears.commons.UtilString;
 
-/**
- * Main view is a dockable with main controls.
- */
-public class GuiMainView implements IListener {
+public class Gui extends JFrame implements IListener {
+	private static final long serialVersionUID = 1L;
 	Client client;
 	private List<AnimatedGuiElement> animated=new ArrayList<AnimatedGuiElement>();
-	private int idCounter=0;
+	public static void commandline(String[] args) throws Exception {
+		final GuiCliArgs a=new GuiCliArgs();
+		UtilCli.parse(a, args, true);
+		final Gui g = new Gui(a);
+		SwingUtilities.invokeAndWait(new Runnable() {
+			@Override
+			public void run() {
+				g.setTitle("RCOM 0.0.6 communication");
+				g.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				g.setSize(new Dimension(800, 800));
+				g.setVisible(true);
+				if(a.connectionString!=null)
+				{
+					g.launchClient();
+				}
+			}
+		});
+	}
 
 	protected void launchClient() {
 		connect.setEnabled(false);
@@ -52,7 +67,7 @@ public class GuiMainView implements IListener {
 		{
 			public void run() {
 				try {
-					client.run(a, GuiMainView.this);
+					client.run(a, Gui.this);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -62,6 +77,7 @@ public class GuiMainView implements IListener {
 		.start();
 	}
 
+	private JPanel right;
 	private JButton connect;
 	private JButton disconnect;
 	private JButton room;
@@ -71,17 +87,14 @@ public class GuiMainView implements IListener {
 	private JTextField message;
 	private List<AbstractButton> buttons=new ArrayList<>();
 	private GuiCliArgs a;
-	private Gui2 gui;
-	private View view;
-	public GuiMainView(GuiCliArgs a, Gui2 gui) {
+	public Gui(GuiCliArgs a) {
 		this.a=a;
-		this.gui=gui;
-		view=new View("Connection", "Connection", "Connection");
-		//view.addAction(View.CLOSE_ACTION);
-		//view.addAction(View.PIN_ACTION);
-
 		JPanel left = new JPanel();
-		view.setContentPane(left);
+		JScrollPane leftPane=new JScrollPane(left);
+		right = new JPanel();
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPane, right);
+		getContentPane().add(splitPane);
+		leftPane.setPreferredSize(new Dimension(400, 800));
 		
 		connect=new JButton("Connect...");
 		disconnect=new JButton("Disconnect");
@@ -94,17 +107,18 @@ public class GuiMainView implements IListener {
 				roomEnter();
 			}
 		});
+		int minWidth=11;
 		left.add(room);
 		left.add(new JLabel("users:"));
-		users=new JTextArea(25, 15);
+		users=new JTextArea(minWidth, 15);
 		users.setEditable(false);
 		left.add(users);
 		left.add(new JLabel("Shares:"));
-		shares=new JTextArea(25, 15);
+		shares=new JTextArea(minWidth, 15);
 		shares.setEditable(false);		
 		left.add(shares);
 		left.add(new JLabel("Chat:"));
-		chat=new JTextArea(25, 15);
+		chat=new JTextArea(minWidth, 15);
 		chat.setEditable(false);
 		JScrollPane sp=new JScrollPane(chat);
 		left.add(sp);
@@ -186,6 +200,7 @@ public class GuiMainView implements IListener {
 				}
 			});
 		}
+		right.setLayout(new VideoLayout());
 		int delay = 1000/20; // milliseconds
 		ActionListener taskPerformer = new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
@@ -196,13 +211,13 @@ public class GuiMainView implements IListener {
 		disableButtons();
 	}
 	protected void connect() {
-		String connectionstring = JOptionPane.showInputDialog(gui, "Server connection string", a.connectionString==null?"":a.connectionString);
+		String connectionstring = JOptionPane.showInputDialog(this, "Server connection string", a.connectionString==null?"":a.connectionString);
 		a.connectionString=connectionstring;
 		launchClient();
 	}
 
 	protected void roomEnter() {
-		String connectionstring = JOptionPane.showInputDialog(gui, "Enter room", a.room==null?"":a.room);
+		String connectionstring = JOptionPane.showInputDialog(this, "Enter room", a.room==null?"":a.room);
 		a.room=connectionstring;
 		
 		client.enterRoom(a.room);
@@ -221,7 +236,8 @@ public class GuiMainView implements IListener {
 		for(AnimatedGuiElement d: toDelete)
 		{
 			animated.remove(d);
-			DockingManager.undock((Dockable)d.view);
+			right.remove(d.selfVideo);
+			right.doLayout();
 		}
 		toDelete.clear();
 		long t=System.currentTimeMillis();
@@ -240,22 +256,19 @@ public class GuiMainView implements IListener {
 						{
 							AnimatedGuiElement g=new AnimatedGuiElement(vs);
 							vs.setGuiObject(g);
-							showWindow(g);
+							addVideoView(g);
 						}
 					}
 				}
 			}
 		}
 	}
-	private void showWindow(AnimatedGuiElement g) {
+	private void addVideoView(AnimatedGuiElement g) {
+		right.add(g.getUiComponent());
 		animated.add(g);
-		int index=idCounter++;
-		View v=new View("Video"+index, "Video"+index, "Video"+index);
-		// v.addAction(View.PIN_ACTION);
-		v.setContentPane(g.getUiComponent());
-		g.view=v;
-		gui.showView(v);
+		right.doLayout();
 	}
+
 	@Override
 	public void connected(final Client client) {
 		this.client=client;
@@ -266,7 +279,7 @@ public class GuiMainView implements IListener {
 				connect.setEnabled(false);
 				connect.setText("Connected");
 				AnimatedGuiElement anim=new AnimatedGuiElement(client.getSelfVideo());
-				showWindow(anim);
+				addVideoView(anim);
 				room.setEnabled(true);
 			}
 		});
@@ -369,13 +382,10 @@ public class GuiMainView implements IListener {
 			}
 		});
 	}
-	public View getView() {
-		return view;
-	}
+
 	@Override
 	public void error(String string, Exception e) {
 		System.err.println("Error in: "+string);
 		e.printStackTrace();
-		JOptionPane.showMessageDialog(gui, string+" error: "+e.getMessage());
 	}
 }

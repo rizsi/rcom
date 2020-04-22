@@ -215,4 +215,7 @@ public class VideoConnection implements IVideocomConnection
 			callback.currentUsers(users);
 		}		
 	}
+	public VideocomServer getServer() {
+		return server;
+	}
 }

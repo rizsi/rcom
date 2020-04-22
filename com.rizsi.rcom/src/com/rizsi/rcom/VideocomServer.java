@@ -2,8 +2,13 @@ package com.rizsi.rcom;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import org.apache.log4j.Logger;
 
 import com.rizsi.rcom.cli.ServerCliArgs;
+import com.rizsi.rcom.vnc.VncPortsManager;
 
 import hu.qgears.coolrmi.remoter.CoolRMIRemoter;
 import hu.qgears.coolrmi.remoter.GenericCoolRMIRemoter;
@@ -12,13 +17,21 @@ import nio.multiplexer.IMultiplexer;
 
 public class VideocomServer implements IVideocomServer
 {
+	private static final Logger LOG = Logger.getLogger(VideocomServer.class);
 	private ServerCliArgs args;
 	private int nClient;
 	private Map<String, Room> rooms=new HashMap<>();
 	private Map<String, VideoConnection> users=new HashMap<>();
+	private Timer timer;
+	private VncPortsManager vncPortsManager;
 
 	public VideocomServer(ServerCliArgs args) {
 		this.args=args;
+		timer=new Timer(true);
+		if(!args.disableVNC)
+		{
+			vncPortsManager=new VncPortsManager(args);
+		}
 	}
 
 	@Override
@@ -80,5 +93,23 @@ public class VideocomServer implements IVideocomServer
 		synchronized (this) {
 			users.remove(videoConnection.getUserName());
 		}
+	}
+
+	public void submitTimeout(long millis, final Runnable runnable) {
+		timer.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				try {
+					runnable.run();
+				} catch (Exception e) {
+					LOG.error(e);
+				}
+			}
+		}, millis);
+	}
+
+	public VncPortsManager getVncPortsManager() {
+		return vncPortsManager;
 	}
 }

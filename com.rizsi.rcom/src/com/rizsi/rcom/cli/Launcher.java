@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 import com.rizsi.rcom.DemuxedConnection;
-import com.rizsi.rcom.gui.Gui2;
+import com.rizsi.rcom.gui.Gui;
 
 import hu.qgears.commons.UtilFile;
 
@@ -35,7 +35,7 @@ public class Launcher {
 //				new Connect().main(subArgs);
 //				return;
 			} else if ("gui".equals(args[0])) {
-				Gui2.commandline(subArgs);
+				Gui.commandline(subArgs);
 				return;
 			} else if ("listaudio".equals(args[0])) {
 				ListAudio.commandline(subArgs);
