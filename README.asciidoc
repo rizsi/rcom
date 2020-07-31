@@ -42,7 +42,7 @@ Client:
  * *v4l2-ctl* - to list available webcams
  * *ffmpeg* - to stream webcam and to decode video streams
  * *x11vnc* - to share screen through VNC protocol
- * *xvnc4viewer* to show shared VNC screen
+ * *xtightvncviewer* to show shared VNC screen
  * *ssh* to connect the server through secured channel
  * speexcmd - part of the RCOM but you may have to rebuild it for your system.
 
@@ -52,7 +52,7 @@ Server:
 
 To install them all:
 
- $ sudo apt-get install xvnc4viewer x11vnc ffmpeg v4l-utils
+ $ sudo apt-get install xtightvncviewer x11vnc ffmpeg v4l-utils
 
 == Quickstart
 
@@ -148,6 +148,9 @@ The executable must be set up on the command line of the rcom.jar program so it 
 
 == Changelog
 
+ * 0.0.8
+ ** VNC client is xtightvncviewer (instead of xvnc4viewer of the previous versions) because this is available as package in Ubuntu 20.04
+ ** Built with Java 11
  * 0.0.7
  ** VNC remote control is possible by a GUI switch on the screen share side
  * 0.0.6

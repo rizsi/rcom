@@ -45,7 +45,7 @@ public class Gui extends JFrame implements IListener {
 		SwingUtilities.invokeAndWait(new Runnable() {
 			@Override
 			public void run() {
-				g.setTitle("RCOM 0.0.7 communication");
+				g.setTitle("RCOM 0.0.8 communication");
 				g.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				g.setSize(new Dimension(800, 800));
 				g.setVisible(true);

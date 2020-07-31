@@ -54,9 +54,10 @@ public class StreamSinkVNC extends StreamSink
 			ChainList<String> command=new ChainList<>(args.program_vncviewer);
 			if(!streamParametersVNC.isAllowControl())
 			{
-				command.add("-ViewOnly");
+				command.add("-viewonly");
 			}
-			command.add("localhost:"+n);
+			command.add("localhost::"+port);
+			System.out.println("Launch VNC client: "+command);
 			p=new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectOutput(Redirect.INHERIT).start();
 			s=ss.accept();
 		}
