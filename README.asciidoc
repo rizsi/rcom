@@ -8,9 +8,9 @@ See: https://github.com/rizsi/rcom
 
 == Download
 
-This README is for version: 0.0.7
+This README is for version: 0.0.8
 
-Binary build can be downloaded from: http://rizsi.com/programs/rcom/0.0.7
+Binary build can be downloaded from: http://rizsi.com/programs/rcom/0.0.8
 
 == Features
 
@@ -23,9 +23,8 @@ Binary build can be downloaded from: http://rizsi.com/programs/rcom/0.0.7
 
 == Dependencies
 
-=== Java 1.8
+=== Java 11
 
-The binary is compiled to Java 1.7 but 1.8 is better.
 
 === libspeexdsp
 
